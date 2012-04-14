@@ -26,8 +26,7 @@ def fetch(args):
     logins = files.read_logins()
     login = logins[nickname]
     data = io.get_accounts(login.fi, login.username, login.password)
-    with files.ofx_open(nickname + '-accounts-000.xml', 'wb') as f:
-        f.write(data)
+    files.ofx_create(nickname + '-accounts-DATE.xml', data)
     print 'Read', len(data), 'bytes'
 
 def status(args):

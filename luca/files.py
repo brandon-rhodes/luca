@@ -2,6 +2,7 @@
 
 import ConfigParser
 import os
+from datetime import datetime
 from .ofx import institutions
 
 class Login(object):
@@ -31,15 +32,38 @@ def read_logins():
             )
     return logins
 
-def ofx_listdir():
+def ofxdir():
     if not os.path.isdir('ofx'):
         os.mkdir('ofx')
-    return sorted(os.listdir('ofx'))
+    return 'ofx'
+
+def ofx_listdir():
+    return sorted(os.listdir(ofxdir()))
+
+def ofx_create(filename, data):
+    """Create a unique filename suffixed with the current date."""
+    before, after = filename.split('DATE', 1)
+    letter = 'a'
+    while True:
+        date = datetime.now().strftime('%Y-%m-%d')
+        filename = before + date + letter + after
+        pathname = os.path.join(ofxdir(), filename)
+        try:
+            fd = os.open(pathname, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0666)
+        except OSError:
+            letter = chr(ord(letter) + 1)
+        else:
+            break
+    with os.fdopen(fd, 'wb') as f:
+        f.write(data)
+
+        # Make the file read-only now that it contains data.
+        mask = os.umask(0)
+        os.umask(mask)
+        os.fchmod(fd, 0444 & ~mask)
 
 def ofx_open(filename, mode='rb'):
-    if not os.path.isdir('ofx'):
-        os.mkdir('ofx')
-    return open(os.path.join('ofx', filename), mode)
+    return open(os.path.join(ofxdir(), filename), mode)
 
 def get_most_recent_account_list(login):
     prefix = login.nickname + '-accounts-'
