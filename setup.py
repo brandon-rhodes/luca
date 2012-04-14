@@ -15,4 +15,5 @@ setup(name='luca',
         'License :: OSI Approved :: BSD License',
         ],
       packages=['luca'],
+      install_requires = ['lxml'],
       )
