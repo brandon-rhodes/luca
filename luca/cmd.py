@@ -2,7 +2,7 @@
 
 import argparse
 from . import files
-from .ofx import io
+from .ofx import io, types
 
 def main():
     parser = argparse.ArgumentParser(
@@ -12,7 +12,9 @@ def main():
 
     parser_f = subparsers.add_parser('fetch', help='fetch')
     parser_f.add_argument('nickname', metavar='institution',
-                          help='what to fetch')
+                          help='from which institution to fetch')
+    parser_f.add_argument('-a', action='store_true',
+                          help='refresh our account list for the institution')
     parser_f.set_defaults(func=fetch)
 
     parser_s = subparsers.add_parser('st', help='status')
@@ -25,16 +27,23 @@ def fetch(args):
     nickname = args.nickname
     logins = files.read_logins()
     login = logins[nickname]
-    data = io.get_accounts(login.fi, login.username, login.password)
-    files.ofx_create(nickname + '-accounts-DATE.xml', data)
-    print 'Read', len(data), 'bytes'
+    if False:
+        # If "-a" is specified, or if no account list exists yet, then:
+        data = io.get_accounts(login.fi, login.username, login.password)
+        files.ofx_create(nickname + '-accounts-DATE.xml', data)
+        print 'Read', len(data), 'bytes'
+    accounts = files.get_most_recent_account_list(login)
+    print accounts
+    #data = io.get_activity(login.fi, login.username, login.password, accounts)
 
 def status(args):
     logins = files.read_logins()
     for (nickname, login) in sorted(logins.items()):
-        print nickname, '-'
+        print nickname, '-',
         accounts = files.get_most_recent_account_list(login)
         if accounts is None:
-            print 'you have never run "luca fetch {}"'.format(nickname)
+            print 'you have never run "luca fetch -a {}"'.format(nickname)
         else:
-            pass
+            print
+            for account in accounts:
+                print '  {:20} {}'.format(account.id, account.type)

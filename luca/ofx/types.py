@@ -1,4 +1,4 @@
-"""Classes for representing OFX institutions and applications."""
+"""Classes representing OFX data."""
 
 class Application(object):
     def __init__(self, name, appid, appver):
@@ -12,3 +12,8 @@ class FinancialInstitution(object):
         self.url = url
         self.org = org
         self.fid = fid
+
+class Account(object):
+    def __init__(self, type, id):
+        self.type = type
+        self.id = id

@@ -5,6 +5,9 @@ import os
 from datetime import datetime
 from .ofx import institutions, parse
 
+class NotFound(Exception):
+    """File not found."""
+
 class Login(object):
     def __init__(self, nickname, fi, username, password):
         self.nickname = nickname
@@ -69,7 +72,7 @@ def get_most_recent_xml(prefix):
     """Parse the the most recent file starting with ``prefix``."""
     filenames = [ f for f in ofx_listdir() if f.startswith(prefix) ]
     if not filenames:
-        return None
+        raise NotFound(prefix + '*')
     filename = filenames[-1]
     with open(os.path.join('ofx', filename)) as f:
         contents = f.read()
@@ -82,8 +85,9 @@ def get_most_recent_xml(prefix):
 
 def get_most_recent_account_list(login):
     prefix = login.nickname + '-accounts-'
-    headers, ofx = get_most_recent_xml(prefix)
-    accounts = ofx.findall('.//BANKACCTINFO')
-    for a in accounts:
-        print ' ', a.find('.//ACCTTYPE').text, '-', a.find('.//ACCTID').text
-    return 'abc'
+    try:
+        headers, ofx = get_most_recent_xml(prefix)
+    except NotFound:
+        return None
+    else:
+        return parse.accounts(ofx)
