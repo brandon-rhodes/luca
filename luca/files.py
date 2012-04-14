@@ -3,7 +3,7 @@
 import ConfigParser
 import os
 from datetime import datetime
-from .ofx import institutions
+from .ofx import institutions, parse
 
 class Login(object):
     def __init__(self, nickname, fi, username, password):
@@ -72,4 +72,10 @@ def get_most_recent_account_list(login):
         return None
     filename = filenames[-1]
     with open(os.path.join('ofx', filename)) as f:
-        return f.read()
+        contents = f.read()
+    header, xml = contents.split('\r\n\r\n')
+    ofx = parse.fromstring(xml)
+    accounts = ofx.findall('.//BANKACCTINFO')
+    for a in accounts:
+        print ' ', a.find('.//ACCTTYPE').text, '-', a.find('.//ACCTID').text
+    return 'abc'

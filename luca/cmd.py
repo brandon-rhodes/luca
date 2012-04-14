@@ -32,9 +32,9 @@ def fetch(args):
 def status(args):
     logins = files.read_logins()
     for (nickname, login) in sorted(logins.items()):
+        print nickname, '-'
         accounts = files.get_most_recent_account_list(login)
-        print nickname, '-',
         if accounts is None:
             print 'you have never run "luca fetch {}"'.format(nickname)
         else:
-            print len(accounts), 'bytes'
+            pass
