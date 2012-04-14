@@ -14,6 +14,7 @@ class FinancialInstitution(object):
         self.fid = fid
 
 class Account(object):
-    def __init__(self, type, id):
+    def __init__(self, type, id, bankacctfrom):
         self.type = type
         self.id = id
+        self.bankacctfrom = bankacctfrom

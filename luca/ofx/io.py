@@ -26,17 +26,11 @@ NEWFILEUID:NONE
 
 BLANKLINE = '\n'
 
-def get_accounts(institution, username, password):
+def _fetch(institution, username, password, messages):
 
     sonrq = build_sonrq(username, password, institution, Money2007)
 
-    ofx = E.OFX(
-        E.SIGNONMSGSRQV1(sonrq),
-        E.SIGNUPMSGSRQV1(build_acctreq()),
-        #E.BANKMSGSRQV1(streq),
-        #E.CREDITCARDMSGSETV1(streq),
-        #E.CREDITCARDMSGSRQV1(streq),
-        )
+    ofx = E.OFX(E.SIGNONMSGSRQV1(sonrq), *messages)
 
     data = GENERIC_103_HEADER + BLANKLINE + etree.tostring(ofx)
     data = data.replace('\n', '\r\n')
@@ -56,3 +50,14 @@ def get_accounts(institution, username, password):
     response = f.read()
     f.close()
     return response
+
+def fetch_accounts(institution, username, password):
+    return _fetch(institution, username, password, [
+            E.SIGNUPMSGSRQV1(build_acctreq()),
+            ])
+
+def fetch_activity(institution, username, password, accounts):
+    return _fetch(institution, username, password, [
+            E.BANKMSGSRQV1(build_stmttrnrq(account.bankacctfrom))
+            for account in accounts
+            ])

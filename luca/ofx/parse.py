@@ -11,5 +11,6 @@ def fromstring(data):
 def accounts(ofx):
     """Return the list of accounts in the XML tree `ofx`."""
     return [ types.Account(x.find('.//ACCTTYPE').text,
-                           x.find('.//ACCTID').text)
+                           x.find('.//ACCTID').text,
+                           x.find('.//BANKACCTFROM'))
              for x in ofx.findall('.//BANKACCTINFO') ]
