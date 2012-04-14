@@ -65,8 +65,8 @@ def ofx_create(filename, data):
 def ofx_open(filename, mode='rb'):
     return open(os.path.join(ofxdir(), filename), mode)
 
-def get_most_recent_account_list(login):
-    prefix = login.nickname + '-accounts-'
+def get_most_recent_xml(prefix):
+    """Parse the the most recent file starting with ``prefix``."""
     filenames = [ f for f in ofx_listdir() if f.startswith(prefix) ]
     if not filenames:
         return None
@@ -74,7 +74,15 @@ def get_most_recent_account_list(login):
     with open(os.path.join('ofx', filename)) as f:
         contents = f.read()
     header, xml = contents.split('\r\n\r\n')
+    headers = { key: value for key, value in (
+            line.split(':', 1) for line in header.split('\r\n')
+            )}
     ofx = parse.fromstring(xml)
+    return headers, ofx
+
+def get_most_recent_account_list(login):
+    prefix = login.nickname + '-accounts-'
+    headers, ofx = get_most_recent_xml(prefix)
     accounts = ofx.findall('.//BANKACCTINFO')
     for a in accounts:
         print ' ', a.find('.//ACCTTYPE').text, '-', a.find('.//ACCTID').text
