@@ -83,7 +83,7 @@ def get_most_recent_xml(prefix):
     ofx = parse.fromstring(xml)
     return headers, ofx
 
-def get_most_recent_account_list(login):
+def get_most_recent_accounts(login):
     prefix = login.nickname + '-accounts-'
     try:
         headers, ofx = get_most_recent_xml(prefix)
@@ -91,3 +91,12 @@ def get_most_recent_account_list(login):
         return None
     else:
         return parse.accounts(ofx)
+
+def get_most_recent_activity(login):
+    prefix = login.nickname + '-activity-'
+    try:
+        headers, ofx = get_most_recent_xml(prefix)
+    except NotFound:
+        return None
+    else:
+        return parse.activity(ofx)
