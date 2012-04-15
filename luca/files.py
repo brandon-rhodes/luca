@@ -80,8 +80,7 @@ def get_most_recent_xml(prefix):
     headers = { key: value for key, value in (
             line.split(':', 1) for line in header.split('\r\n')
             )}
-    ofx = parse.fromstring(xml)
-    return headers, ofx
+    return headers, xml
 
 def get_most_recent_accounts(login):
     prefix = login.nickname + '-accounts-'

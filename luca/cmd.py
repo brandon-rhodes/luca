@@ -41,19 +41,19 @@ def status(args):
     for (nickname, login) in sorted(logins.items()):
         print nickname, '-',
         accounts = files.get_most_recent_accounts(login)
-        activity = files.get_most_recent_activity(login)
+        balances = files.get_most_recent_activity(login)
         if accounts is None:
             print 'you have never run "luca fetch -a {}"'.format(nickname)
-        elif activity is None:
+        elif balances is None:
             print 'you have never run "luca fetch {}"'.format(nickname)
         else:
             print
         if accounts:
             for account in accounts:
-                print '  {:20} {:14}'.format(account.id, account.type),
-                if activity:
-                    if account.id in activity:
-                        balance = activity[account.id]
+                print '  {:20} {:14}'.format(account.acctid, account.accttype),
+                if balances:
+                    if account.key in balances:
+                        balance = balances[account.key]
                         print '{:>18}'.format(balance)
                     else:
                         print '(no balance information)'
