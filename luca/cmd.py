@@ -1,6 +1,7 @@
 """The `luca` command line."""
 
 import argparse
+from operator import attrgetter
 from . import files
 from .ofx import io, types
 
@@ -10,15 +11,18 @@ def main():
         )
     subparsers = parser.add_subparsers(help='sub-command help')
 
-    parser_f = subparsers.add_parser('fetch', help='fetch')
-    parser_f.add_argument('nickname', metavar='institution',
+    p = subparsers.add_parser('fetch', help='fetch')
+    p.add_argument('nickname', metavar='institution',
                           help='from which institution to fetch')
-    parser_f.add_argument('-a', action='store_true',
+    p.add_argument('-a', action='store_true',
                           help='refresh our account list for the institution')
-    parser_f.set_defaults(func=fetch)
+    p.set_defaults(func=fetch)
 
-    parser_s = subparsers.add_parser('st', help='status')
-    parser_s.set_defaults(func=status)
+    p = subparsers.add_parser('merge', help='merge')
+    p.set_defaults(func=merge)
+
+    p = subparsers.add_parser('st', help='status')
+    p.set_defaults(func=status)
 
     args = parser.parse_args()
     args.func(args)
@@ -35,6 +39,18 @@ def fetch(args):
     alist = files.get_most_recent_account_list(login)
     data = io.fetch_activity(login.fi, login.username, login.password, alist)
     files.ofx_create(nickname + '-activity-DATE.xml', data)
+
+def merge(args):
+    logins = files.read_logins()
+    transactions = []
+    for (nickname, login) in sorted(logins.items()):
+        #accounts = files.get_most_recent_accounts(login)
+        balances, more_transactions = files.get_most_recent_activity(login)
+        for tranlist in more_transactions.values():
+            transactions.extend(tranlist)
+    transactions.sort(key=attrgetter('dtposted'))
+    for t in transactions:
+        print t.fitid, t.dtposted, t.trntype, t.trnamt, t.name
 
 def status(args):
     logins = files.read_logins()

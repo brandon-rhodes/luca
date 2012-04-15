@@ -21,8 +21,9 @@ class Account(object):
         self.key = (bankid, acctid, accttype)
 
 class Transaction(object):
-    def __init__(self, fitid, dtposted, trntype, trnamt):
-        self.fitid = fitid
-        self.dtposted = dtposted
+    def __init__(self, trntype, dtposted, trnamt, fitid, name):
         self.trntype = trntype
+        self.dtposted = dtposted
         self.trnamt = trnamt
+        self.fitid = fitid
+        self.name = name
