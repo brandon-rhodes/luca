@@ -49,6 +49,7 @@ def activity(ofx):
                     values.pop('DTPOSTED'),
                     Decimal(values.pop('TRNAMT')),
                     values.pop('FITID'),
+                    values.pop('CHECKNUM', None),
                     values.pop('NAME', None),
                     )
                 tranlist.append(transaction)
