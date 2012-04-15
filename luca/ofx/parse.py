@@ -27,7 +27,9 @@ def accounts(ofx):
 def activity(ofx):
     """Return activity."""
     balances = {}
+    transactions = {}
     values = {}
+    tranlist = []
     for end, tag, text in tokenize(ofx):
         if end:
             if tag == 'BANKACCTFROM':
@@ -36,9 +38,19 @@ def activity(ofx):
                     values.pop('ACCTID'),
                     values.pop('ACCTTYPE'),
                     )
+            elif tag == 'STMTTRN':
+                transaction = types.Transaction(
+                    values.pop('FITID'),
+                    values.pop('DTPOSTED'),
+                    values.pop('TRNTYPE'),
+                    values.pop('TRNAMT'),
+                    )
+                tranlist.append(transaction)
             elif tag == 'STMTRS':
                 balances[key] = values.pop('BALAMT')
+                transactions[key] = tranlist
                 key = None
+                tranlist = []
         elif text:
             values[tag] = text
-    return balances
+    return balances, transactions
