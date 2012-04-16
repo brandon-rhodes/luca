@@ -13,7 +13,8 @@ class _Element(object):
         self.name = name
 
     def __call__(self, *args):
-        return '<{0}>{1}</{0}>'.format(self.name, ''.join(args))
+        jargs = ''.join(str(a) for a in args)
+        return '<{0}>{1}</{0}>'.format(self.name, jargs)
 
 E = _E()
 
