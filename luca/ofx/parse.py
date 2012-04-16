@@ -25,7 +25,7 @@ def tokenize(sgml):
 def accounts(ofx):
     """Return the list of accounts in the `ofx` text."""
     accounts = []
-    for sgml in tags(ofx, 'BANKACCTFROM'):
+    for sgml in tags(ofx, 'BANKACCTFROM') + tags(ofx, 'CCACCTFROM'):
         attrs = dict(texts(sgml))
         attrs['BANKACCTFROM'] = sgml  # save raw SGML too, for use in requests
         accounts.append(types.Account(attrs))

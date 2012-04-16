@@ -3,10 +3,12 @@
 from datetime import datetime
 
 class _E(object):
+    """Support `E()`: each attribute lookup creates a `_Tag`."""
     def __getattr__(self, name):
-        return _Tag(name)
+        return _Element(name)
 
-class _Tag(object):
+class _Element(object):
+    """An element: when called, returns arguments wrapped in <tag></tag>."""
     def __init__(self, name):
         self.name = name
 
@@ -50,19 +52,19 @@ def build_stmttrnrq(bankacctfrom):
         E.STMTRQ(
             bankacctfrom,
             E.INCTRAN(
+                #E.DTSTART('20090101'),
+                #E.DTEND('20100410'),
                 E.INCLUDE('Y')
                 ),
-            #E.INCTRANIMG('Y')
+            #E.INCTRANIMG('Y')  # TODO: support archiving check images
             ),
         )
 
-def build_ccstmtrq(acctid):
+def build_ccstmtrq(ccacctfrom):
     return E.CCSTMTTRNRQ(
         E.TRNUID('1'),
         E.CCSTMTRQ(
-            E.CCACCTFROM(
-                E.ACCTID(acctid),
-                ),
+            ccacctfrom,
             E.INCTRAN(
                 #E.DTSTART('20090101'),
                 #E.DTEND('20100410'),

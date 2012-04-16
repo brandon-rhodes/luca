@@ -3,7 +3,8 @@
 import urllib2
 
 from .applications import Money2007
-from .schema import E, build_acctreq, build_sonrq, build_stmttrnrq
+from .schema import (E, build_acctreq, build_ccstmtrq, build_sonrq,
+                     build_stmttrnrq)
 
 headers = {
     211: '''\
@@ -58,7 +59,14 @@ def fetch_accounts(institution, username, password):
             ])
 
 def fetch_activity(institution, username, password, accounts):
-    return _fetch(institution, username, password, [
-            E.BANKMSGSRQV1(build_stmttrnrq(account.BANKACCTFROM))
-            for account in accounts
-            ])
+
+    def wrap(account):
+        b = account.BANKACCTFROM
+        if b.startswith('<BANKACCTFROM'):
+            return E.BANKMSGSRQV1(build_stmttrnrq(b))
+        elif b.startswith('<CCACCTFROM'):
+            return E.CREDITCARDMSGSRQV1(build_ccstmtrq(b))
+        else:
+            raise ValueError('no idea how to wrap:', b)
+
+    return _fetch(institution, username, password, [wrap(a) for a in accounts])

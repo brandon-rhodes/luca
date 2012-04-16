@@ -23,7 +23,9 @@ class FinancialInstitution(object):
 class Account(Mass):
     def __init__(self, attrs):
         super(Account, self).__init__(attrs)
-        self.key = (self.BANKID, self.ACCTID, self.ACCTTYPE)
+        self.key = (attrs.get('BANKID'),
+                    attrs.get('ACCTID'),
+                    attrs.get('ACCTTYPE'))
 
 class Transaction(object):
     def __init__(self, trntype, dtposted, trnamt, fitid, checknum, name):
