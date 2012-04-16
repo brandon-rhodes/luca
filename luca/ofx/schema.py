@@ -72,3 +72,22 @@ def build_ccstmtrq(ccacctfrom):
                 ),
             ),
         )
+
+def build_invstmttrnrq(invacctfrom):
+    return E.INVSTMTTRNRQ(
+        E.TRNUID('1'),
+        E.INVSTMTRQ(
+            invacctfrom,
+            E.INCTRAN(
+                #E.DTSTART('20090101'),
+                #E.DTEND('20100410'),
+                E.INCLUDE('Y'),
+                ),
+            E.INCOO('N'),
+            E.INCPOS(
+                #E.DTASOF(...),
+                E.INCLUDE('Y'),
+                ),
+            E.INCBAL('Y'),
+            ),
+        )

@@ -11,7 +11,7 @@ def unescape(text):
 
 def tags(sgml, tag):
     """Return contiguous blocks of text from <tag> to </tag> in `text`."""
-    return re.findall('<{0}>.*?</{0}>'.format(tag), sgml)
+    return re.findall('(?s)<{0}>.*?</{0}>'.format(tag), sgml)
 
 def texts(sgml):
     """Return tags and the text inside of them in `sgml`."""
@@ -25,9 +25,11 @@ def tokenize(sgml):
 def accounts(ofx):
     """Return the list of accounts in the `ofx` text."""
     accounts = []
-    for sgml in tags(ofx, 'BANKACCTFROM') + tags(ofx, 'CCACCTFROM'):
+    for sgml in (tags(ofx, 'BANKACCTFROM') +
+                 tags(ofx, 'CCACCTFROM') +
+                 tags(ofx, 'INVACCTFROM')):
         attrs = dict(texts(sgml))
-        attrs['BANKACCTFROM'] = sgml  # save raw SGML too, for use in requests
+        attrs['FROM'] = sgml  # save raw SGML too, for use in requests
         accounts.append(types.Account(attrs))
     return accounts
 
