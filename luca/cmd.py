@@ -31,12 +31,13 @@ def fetch(args):
     nickname = args.nickname
     logins = files.read_logins()
     login = logins[nickname]
-    if False:
-        # If "-a" is specified, or if no account list exists yet, then:
+    if args.a:  # or if no account list exists yet, then:
         data = io.fetch_accounts(login.fi, login.username, login.password)
         files.ofx_create(nickname + '-accounts-DATE.xml', data)
         print 'Read', len(data), 'bytes'
-    alist = files.get_most_recent_account_list(login)
+        if args.a:
+            return
+    alist = files.get_most_recent_accounts(login)
     data = io.fetch_activity(login.fi, login.username, login.password, alist)
     files.ofx_create(nickname + '-activity-DATE.xml', data)
 

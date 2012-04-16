@@ -7,11 +7,12 @@ class Application(object):
         self.appver = appver
 
 class FinancialInstitution(object):
-    def __init__(self, name, url, org, fid):
+    def __init__(self, name, url, org, fid, version):
         self.name = name
         self.url = url
         self.org = org
         self.fid = fid
+        self.version = version
 
 class Account(object):
     def __init__(self, bankid, acctid, accttype):
