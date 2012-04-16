@@ -75,11 +75,15 @@ def get_most_recent_xml(prefix):
         raise NotFound(prefix + '*')
     filename = filenames[-1]
     with open(os.path.join('ofx', filename)) as f:
-        contents = f.read()
-    header, xml = contents.split('\r\n\r\n')
-    headers = { key: value for key, value in (
-            line.split(':', 1) for line in header.split('\r\n')
-            )}
+        data = f.read()
+    if data.startswith('<?xml'):
+        headers = {}  # TODO: pull attributes from <?OFX> tag
+        xml = data
+    else:
+        heading, xml = data.split('\r\n\r\n')
+        headers = { key: value for key, value in (
+                line.split(':', 1) for line in heading.split('\r\n')
+                )}
     return headers, xml
 
 def get_most_recent_accounts(login):
