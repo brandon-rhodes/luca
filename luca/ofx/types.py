@@ -1,5 +1,11 @@
 """Classes representing OFX data."""
 
+class Mass(object):
+    """Objects whose attributes are mass-assigned during initialization."""
+
+    def __init__(self, attrs):
+        self.__dict__.update(attrs)
+
 class Application(object):
     def __init__(self, name, appid, appver):
         self.name = name
@@ -14,12 +20,10 @@ class FinancialInstitution(object):
         self.fid = fid
         self.version = version
 
-class Account(object):
-    def __init__(self, bankid, acctid, accttype):
-        self.bankid = bankid
-        self.acctid = acctid
-        self.accttype = accttype
-        self.key = (bankid, acctid, accttype)
+class Account(Mass):
+    def __init__(self, attrs):
+        super(Account, self).__init__(attrs)
+        self.key = (self.BANKID, self.ACCTID, self.ACCTTYPE)
 
 class Transaction(object):
     def __init__(self, trntype, dtposted, trnamt, fitid, checknum, name):

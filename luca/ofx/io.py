@@ -1,11 +1,9 @@
 """Build an OFX XML request."""
 
 import urllib2
-from lxml import etree
-from lxml.builder import E
 
 from .applications import Money2007
-from .schema import build_acctreq, build_sonrq, build_stmttrnrq
+from .schema import E, build_acctreq, build_sonrq, build_stmttrnrq
 
 headers = {
     211: '''\
@@ -35,7 +33,7 @@ def _fetch(institution, username, password, messages):
 
     ofx = E.OFX(E.SIGNONMSGSRQV1(sonrq), *messages)
 
-    data = headers[institution.version] + etree.tostring(ofx)
+    data = headers[institution.version] + ofx
     data = data.replace('\n', '\r\n')
 
     r = urllib2.Request(institution.url, data)
@@ -61,6 +59,6 @@ def fetch_accounts(institution, username, password):
 
 def fetch_activity(institution, username, password, accounts):
     return _fetch(institution, username, password, [
-            E.BANKMSGSRQV1(build_stmttrnrq(account.bankacctfrom))
+            E.BANKMSGSRQV1(build_stmttrnrq(account.BANKACCTFROM))
             for account in accounts
             ])

@@ -1,7 +1,19 @@
 """Build an OFX XML request."""
 
 from datetime import datetime
-from lxml.builder import E
+
+class _E(object):
+    def __getattr__(self, name):
+        return _Tag(name)
+
+class _Tag(object):
+    def __init__(self, name):
+        self.name = name
+
+    def __call__(self, *args):
+        return '<{0}>{1}</{0}>'.format(self.name, ''.join(args))
+
+E = _E()
 
 def build_sonrq(userid, userpass, fi, app, language='ENG'):
     return E.SONRQ(

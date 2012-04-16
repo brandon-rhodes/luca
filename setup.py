@@ -15,7 +15,6 @@ setup(name='luca',
         'License :: OSI Approved :: BSD License',
         ],
       packages=['luca'],
-      install_requires = ['lxml'],
       entry_points={'console_scripts': [
             'luca = luca.cmd:main',
             ]}
