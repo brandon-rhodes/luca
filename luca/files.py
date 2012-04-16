@@ -46,7 +46,7 @@ def ofx_listdir():
 def ofx_create(filename, data):
     """Create a unique filename suffixed with the current date."""
     before, after = filename.split('DATE', 1)
-    letter = 'a'
+    letter = ''
     while True:
         date = datetime.now().strftime('%Y-%m-%d')
         filename = before + date + letter + after
@@ -54,7 +54,7 @@ def ofx_create(filename, data):
         try:
             fd = os.open(pathname, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0666)
         except OSError:
-            letter = chr(ord(letter) + 1)
+            letter = chr(ord(letter or 'a') + 1)
         else:
             break
     with os.fdopen(fd, 'wb') as f:
