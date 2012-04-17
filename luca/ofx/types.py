@@ -1,5 +1,7 @@
 """Classes representing OFX data."""
 
+from decimal import Decimal
+
 class Mass(object):
     """Objects whose attributes are mass-assigned during initialization."""
 
@@ -23,15 +25,14 @@ class FinancialInstitution(object):
 class Account(Mass):
     def __init__(self, attrs):
         super(Account, self).__init__(attrs)
-        self.key = (attrs.get('BANKID'),
-                    attrs.get('ACCTID'),
-                    attrs.get('ACCTTYPE'))
+        if self.type == 'bank':
+            self.key = (self.bankid, self.acctid, self.accttype)
+        elif self.type == 'cc':
+            self.key = (self.acctid,)
+        elif self.type == 'inv':
+            self.key = (self.brokerid, self.acctid)
 
-class Transaction(object):
-    def __init__(self, trntype, dtposted, trnamt, fitid, checknum, name):
-        self.trntype = trntype
-        self.dtposted = dtposted
-        self.trnamt = trnamt
-        self.fitid = fitid
-        self.checknum = checknum
-        self.name = name
+class Transaction(Mass):
+    def __init__(self, attrs):
+        super(Transaction, self).__init__(attrs)
+        self.trnamt = Decimal(self.trnamt)

@@ -60,6 +60,7 @@ def merge(args):
 
 def status(args):
     logins = files.read_logins()
+    emptylist = []
     for (nickname, login) in sorted(logins.items()):
         print nickname, '-',
         accounts = files.get_most_recent_accounts(login)
@@ -72,14 +73,17 @@ def status(args):
             print
         if accounts:
             for account in accounts:
-                print '  {:20} {:14}'.format(account.acctid, account.accttype),
+                print '  {:20} {:14}'.format(
+                    account.acctid,
+                    getattr(account, 'accttype', ''),
+                    ),
                 if balances:
                     if account.key in balances:
                         balance = balances[account.key]
                         print '{:>12}'.format(balance),
                     else:
                         print '(no balance information)',
-                tlist = transactions[account.key]
+                tlist = transactions.get(account.key, emptylist)
                 if tlist:
                     print '{:>5} new transactions'.format(len(tlist))
                 else:

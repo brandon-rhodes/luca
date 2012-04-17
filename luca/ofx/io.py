@@ -61,7 +61,7 @@ def fetch_accounts(institution, username, password):
 def fetch_activity(institution, username, password, accounts):
 
     def wrap(account):
-        f = account.FROM
+        f = account.from_element
         if f.startswith('<BANKACCTFROM'):
             return E.BANKMSGSRQV1(build_stmttrnrq(f))
         elif f.startswith('<CCACCTFROM'):
