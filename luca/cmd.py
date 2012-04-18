@@ -3,7 +3,7 @@
 import argparse
 from operator import attrgetter
 from . import files
-from .ofx import io, types
+from .ofx import io
 
 def main():
     parser = argparse.ArgumentParser(
