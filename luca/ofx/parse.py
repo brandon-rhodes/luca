@@ -38,10 +38,10 @@ def activity(ofx):
         if 'BANKACCTFROM' not in stmtrs:
             continue
 
-        atexts = dict(texts(tags(ofx, 'BANKACCTFROM')[0]))
+        atexts = dict(texts(tags(stmtrs, 'BANKACCTFROM')[0]))
         key = (atexts['BANKID'], atexts['ACCTID'], atexts['ACCTTYPE'])
 
-        balance_texts = texts(tags(ofx, 'LEDGERBAL')[0])
+        balance_texts = texts(tags(stmtrs, 'LEDGERBAL')[0])
         balances[key] = Decimal(dict(balance_texts)['BALAMT'])
         transactions[key] = transaction_list = []
 
