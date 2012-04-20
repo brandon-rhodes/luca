@@ -24,13 +24,18 @@ class FinancialInstitution(object):
 
 class Account(Mass):
     def __init__(self, attrs):
-        super(Account, self).__init__(attrs)
-        if self.type == 'bank':
-            self.key = (self.bankid, self.acctid, self.accttype)
-        elif self.type == 'cc':
-            self.key = (self.acctid,)
-        elif self.type == 'inv':
-            self.key = (self.brokerid, self.acctid)
+        super(Account, self).__init__({
+                tag.lower(): text for tag, text in attrs.iteritems()
+                })
+        self.key = account_key(attrs)
+
+def account_key(attrs):
+    if 'BANKID' in attrs:
+        return (attrs['BANKID'], attrs['ACCTID'], attrs['ACCTTYPE'])
+    elif 'BROKERID' in attrs:
+        return (attrs['BROKERID'], attrs['ACCTID'])
+    else:
+        return (attrs['ACCTID'],)
 
 class Transaction(Mass):
     def __init__(self, attrs):

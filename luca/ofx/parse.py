@@ -23,7 +23,7 @@ def accounts(ofx):
     for account_type in 'bank', 'cc', 'inv':
         account_tag = '{}ACCTFROM'.format(account_type.upper())
         for sgml in tags(ofx, account_tag):
-            attrs = { tag.lower(): text for tag, text in texts(sgml) }
+            attrs = dict(texts(sgml))
             attrs['type'] = account_type
             attrs['from_element'] = sgml  # save raw SGML, for use in requests
             accounts.append(types.Account(attrs))
@@ -34,20 +34,19 @@ def activity(ofx):
     balances = {}
     transactions = {}
 
-    for stmtrs in tags(ofx, 'STMTRS'):
-        if 'BANKACCTFROM' not in stmtrs:
-            continue
+    for response, account_from in (('STMTRS', 'BANKACCTFROM'),
+                                   ('CCSTMTRS', 'CCACCTFROM')):
+        for stmtrs in tags(ofx, response):
+            atexts = dict(texts(tags(stmtrs, account_from)[0]))
+            key = types.account_key(atexts)
 
-        atexts = dict(texts(tags(stmtrs, 'BANKACCTFROM')[0]))
-        key = (atexts['BANKID'], atexts['ACCTID'], atexts['ACCTTYPE'])
+            balance_texts = texts(tags(stmtrs, 'LEDGERBAL')[0])
+            balances[key] = Decimal(dict(balance_texts)['BALAMT'])
+            transactions[key] = transaction_list = []
 
-        balance_texts = texts(tags(stmtrs, 'LEDGERBAL')[0])
-        balances[key] = Decimal(dict(balance_texts)['BALAMT'])
-        transactions[key] = transaction_list = []
-
-        for stmttrn in tags(stmtrs, 'STMTTRN'):
-            attrs = { tag.lower(): text for tag, text in texts(stmttrn) }
-            transaction = types.Transaction(attrs)
-            transaction_list.append(transaction)
+            for stmttrn in tags(stmtrs, 'STMTTRN'):
+                attrs = { tag.lower(): text for tag, text in texts(stmttrn) }
+                transaction = types.Transaction(attrs)
+                transaction_list.append(transaction)
 
     return balances, transactions
