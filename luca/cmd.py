@@ -80,7 +80,7 @@ def status(args):
                 if balances:
                     if account.key in balances:
                         balance = balances[account.key]
-                        print '{:>12}'.format(balance),
+                        print '{:>12}'.format(negparen(balance)),
                     else:
                         print '(no balance information)',
                 tlist = transactions.get(account.key, emptylist)
@@ -88,3 +88,8 @@ def status(args):
                     print '{:>5} new transactions'.format(len(tlist))
                 else:
                     print '      up-to-date'
+
+def negparen(amount):
+    if amount < 0:
+        return '({:.2f})'.format(-amount)
+    return '{:.2f} '.format(amount)
