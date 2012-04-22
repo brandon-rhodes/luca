@@ -100,6 +100,6 @@ def get_most_recent_activity(login):
     try:
         headers, ofx = get_most_recent_xml(prefix)
     except NotFound:
-        return None
+        return {}, {}
     else:
         return parse.activity(ofx)
