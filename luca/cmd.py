@@ -66,9 +66,11 @@ def status(args):
         accounts = files.get_most_recent_accounts(login)
         balances, transactions = files.get_most_recent_activity(login)
         if accounts is None:
-            print 'you have never run "luca fetch -a {}"'.format(nickname)
+            print
+            print '  you have never run "luca fetch -a {}"'.format(nickname)
         elif balances is None:
-            print 'you have never run "luca fetch {}"'.format(nickname)
+            print
+            print '  you have never run "luca fetch {}"'.format(nickname)
         else:
             print
         if accounts:
