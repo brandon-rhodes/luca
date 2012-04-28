@@ -51,7 +51,8 @@ def merge(args):
             transactions.extend(tranlist)
     transactions.sort(key=attrgetter('dtposted'))
     for t in transactions:
-        print t.fitid, t.dtposted, t.trntype, t.trnamt, t.checknum, t.name
+        print t.fitid, t.dtposted, t.trntype, t.trnamt, \
+            getattr(t, 'checknum', ''), t.name
         date = '-'.join((t.dtposted[0:4], t.dtposted[4:6], t.dtposted[6:8]))
         p0, p1 = '()' if t.trnamt < 0 else '  '
         print '   {}  {:>12}  {} {!r}'.format(
