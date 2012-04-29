@@ -2,7 +2,7 @@ import re
 from decimal import Decimal
 from . import types
 
-tag_with_text = re.compile(r'<([^/][^>]*)>\s*([^<\s]+)')  # TODO: space in val
+tag_with_text = re.compile(r'<([^/][^>]*)>\s*([^<]+)\s*')  # TODO: space in val
 
 def unescape(text):
     """Replace SGML character escapes in `text` with literal character."""

@@ -87,6 +87,14 @@ def status(args):
                     else:
                         print '(no balance information)',
                 tlist = transactions.get(account.key, emptylist)
+                print
+                if tlist:
+                    for t in tlist:
+                        print '{}-{}-{}'.format(t.dtposted[0:4],
+                                                t.dtposted[4:6],
+                                                t.dtposted[6:8]),
+                        print repr(t.name),
+                        print t.trnamt
                 if tlist:
                     print '{:>5} new transactions'.format(len(tlist))
                 else:
