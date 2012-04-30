@@ -18,6 +18,10 @@ def main():
                           help='refresh our account list for the institution')
     p.set_defaults(func=fetch)
 
+    p = subparsers.add_parser('import', help='import')
+    p.set_defaults(func=import_cmd)
+    p.add_argument('filename', nargs='+', help='GnuCash files to import')
+
     p = subparsers.add_parser('merge', help='merge')
     p.set_defaults(func=merge)
 
@@ -40,6 +44,11 @@ def fetch(args):
     alist = files.get_most_recent_accounts(login)
     data = io.fetch_activity(login.fi, login.username, login.password, alist)
     files.ofx_create(nickname + '-activity-DATE.xml', data)
+
+def import_cmd(args):
+    from .importer.gnucash import parse
+    for filename in args.filename:
+        parse(filename)
 
 def merge(args):
     logins = files.read_logins()
