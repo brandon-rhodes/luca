@@ -16,6 +16,10 @@ add('Delta Community Credit Union',
     'https://appweb.deltacommunitycu.com/ofxroot/directtocore.asp',
     103, 'decu.org', 3328, Q)
 
+add('First National Bank of Pandora',
+    'https://www20.onlinebank.com/OROFX16Listener',
+    103, 'orcc', 1824, Q)
+
 add('Scottrade', 'https://ofx.scottrade.com',
     103, 'Scottrade', 777, Q)
 
