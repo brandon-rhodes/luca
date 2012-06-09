@@ -80,7 +80,8 @@ def get_most_recent_xml(prefix):
         headers = {}  # TODO: pull attributes from <?OFX> tag
         xml = data
     else:
-        heading, xml = data.split('\r\n\r\n')
+        blankline = '\r\n\r\n' if '\r\n\r\n' in data else '\n\n'
+        heading, xml = data.split(blankline)
         headers = { key: value for key, value in (
                 line.split(':', 1) for line in heading.split('\r\n')
                 )}
