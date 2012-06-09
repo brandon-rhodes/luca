@@ -15,11 +15,12 @@ class Application(object):
         self.appver = appver
 
 class FinancialInstitution(object):
-    def __init__(self, name, url, org, fid, version):
+    def __init__(self, name, url, version, org, fid, app):
         self.name = name
         self.url = url
         self.org = org
         self.fid = fid
+        self.app = app
         self.version = version
 
 class Account(Mass):

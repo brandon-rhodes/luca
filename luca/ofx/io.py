@@ -2,7 +2,6 @@
 
 import urllib2
 
-from .applications import Money2007
 from .schema import (E, build_sonrq, build_acctreq, build_stmttrnrq,
                      build_ccstmtrq, build_invstmttrnrq)
 
@@ -30,7 +29,7 @@ blankline = '\n'
 
 def _fetch(institution, username, password, messages):
 
-    sonrq = build_sonrq(username, password, institution, Money2007)
+    sonrq = build_sonrq(username, password, institution, institution.app)
 
     ofx = E.OFX(E.SIGNONMSGSRQV1(sonrq), *messages)
 
