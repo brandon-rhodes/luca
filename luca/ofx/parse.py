@@ -19,14 +19,13 @@ def texts(sgml):
 
 def accounts(ofx):
     """Return the list of accounts in the `ofx` text."""
+    tagnames = [t + 'ACCTFROM' for t in ('BANK', 'CC', 'INV')]
+    elements = (sgml for tagname in tagnames for sgml in tags(ofx, tagname))
     accounts = []
-    for account_type in 'bank', 'cc', 'inv':
-        account_tag = '{}ACCTFROM'.format(account_type.upper())
-        for sgml in tags(ofx, account_tag):
-            attrs = dict(texts(sgml))
-            attrs['type'] = account_type
-            attrs['from_element'] = sgml  # save raw SGML, for use in requests
-            accounts.append(types.Account(attrs))
+    for sgml in sorted(set(elements)):  # set() removes duplicate accounts
+        attrs = dict(texts(sgml))
+        attrs['from_element'] = sgml  # save raw SGML, for use in requests
+        accounts.append(types.Account(attrs))
     return accounts
 
 def activity(ofx):
