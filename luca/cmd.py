@@ -41,9 +41,14 @@ def fetch(args):
         print 'Read', len(data), 'bytes'
         if args.a:
             return
-    alist = files.get_most_recent_accounts(login)
-    data = io.fetch_activity(login.fi, login.username, login.password, alist)
-    files.ofx_create(nickname + '-activity-DATE.xml', data)
+    account_list = files.get_most_recent_accounts(login)
+    if login.fi.supports_multiple_requests:
+        operations = [account_list]  # single request listing every account
+    else:
+        operations = [[account] for account in account_list]
+    for op in operations:
+        data = io.fetch_activity(login.fi, login.username, login.password, op)
+        files.ofx_create(nickname + '-activity-DATE.xml', data)
 
 def import_cmd(args):
     from .importer.gnucash import parse

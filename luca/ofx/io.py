@@ -1,9 +1,10 @@
 """Build an OFX XML request."""
 
+import re
 import urllib2
 
-from .schema import (E, build_sonrq, build_acctreq, build_stmttrnrq,
-                     build_ccstmtrq, build_invstmttrnrq)
+from .schema import (ElementMaker, build_sonrq, build_acctreq,
+                     build_stmttrnrq, build_ccstmtrq, build_invstmttrnrq)
 
 headers = {
     211: '''\
@@ -27,47 +28,62 @@ NEWFILEUID:NONE
 
 blankline = '\n'
 
+def element_maker_for(institution):
+    use_sgml = institution.version < 200
+    return ElementMaker(use_sgml)
+
 def _fetch(institution, username, password, messages):
 
-    sonrq = build_sonrq(username, password, institution, institution.app)
+    E = element_maker_for(institution)
+    sonrq = build_sonrq(E, username, password, institution, institution.app)
 
     ofx = E.OFX(E.SIGNONMSGSRQV1(sonrq), *messages)
 
     data = headers[institution.version] + ofx
     data = data.replace('\n', '\r\n')
-
     r = urllib2.Request(institution.url, data)
     r.add_header('Content-Type', 'application/x-ofx')
 
     try:
-        f = urllib2.urlopen(r)
-    except Exception, e:
+        u = urllib2.urlopen(r)
+    except urllib2.HTTPError as e:
         print e
+        print e.headers
         print '-----------'
         print e.read()
         print '-----------'
         exit(1)
 
-    response = f.read()
-    f.close()
-    return response
+    try:
+        return u.read()
+    finally:
+        u.close()
 
 def fetch_accounts(institution, username, password):
+    E = element_maker_for(institution)
     return _fetch(institution, username, password, [
-            E.SIGNUPMSGSRQV1(build_acctreq()),
+            E.SIGNUPMSGSRQV1(build_acctreq(E)),
             ])
 
 def fetch_activity(institution, username, password, accounts):
 
-    def wrap(account):
+    def make_request(account):
         f = account.from_element
+
+        # The First National Bank of Pandora includes an extra element
+        # in its account description that it cannot then digest when the
+        # BANKACCTFROM is re-submitted.
+        f = re.sub(r'<ORCC.NICKNAME>[^<]*', '', f)
+
         if f.startswith('<BANKACCTFROM'):
-            return E.BANKMSGSRQV1(build_stmttrnrq(f))
+            return E.BANKMSGSRQV1(build_stmttrnrq(E, f))
         elif f.startswith('<CCACCTFROM'):
-            return E.CREDITCARDMSGSRQV1(build_ccstmtrq(f))
+            return E.CREDITCARDMSGSRQV1(build_ccstmtrq(E, f))
         elif f.startswith('<INVACCTFROM'):
-            return E.INVSTMTMSGSRQV1(build_invstmttrnrq(f))
+            return E.INVSTMTMSGSRQV1(build_invstmttrnrq(E, f))
         else:
             raise ValueError('no idea how to wrap:', f)
 
-    return _fetch(institution, username, password, [wrap(a) for a in accounts])
+    E = element_maker_for(institution)
+    requests = [make_request(a) for a in accounts]
+    return _fetch(institution, username, password, requests)

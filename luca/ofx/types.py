@@ -15,13 +15,15 @@ class Application(object):
         self.appver = appver
 
 class FinancialInstitution(object):
-    def __init__(self, name, url, version, org, fid, app):
+    def __init__(self, name, url, version, org, fid, app,
+                 supports_multiple_requests=True):
         self.name = name
         self.url = url
         self.org = org
         self.fid = fid
         self.app = app
         self.version = version
+        self.supports_multiple_requests = supports_multiple_requests
 
 class Account(Mass):
     def __init__(self, attrs):

@@ -2,23 +2,53 @@
 
 from datetime import datetime
 
-class _E(object):
-    """Support `E()`: each attribute lookup creates a `_Tag`."""
+class ElementMaker(object):
+    """Each attribute lookup creates an `_Element`.
+
+    >>> E = ElementMaker(False)
+    >>> E.bold('Thomas Paine')
+    '<b>Thomas Paine</b>
+
+    """
+    def __init__(self, use_sgml):
+        self.use_sgml = use_sgml
+
     def __getattr__(self, name):
-        return _Element(name)
+        return _Element(name, self.use_sgml)
 
 class _Element(object):
-    """An element: when called, returns arguments wrapped in <tag></tag>."""
-    def __init__(self, name):
+    """An element: when called, returns arguments wrapped in <tag></tag>.
+
+    Normally `_Element` instances are not created manually, but by an
+    instance of the `_E` convenience factory.  If `use_sgml` is false,
+    then both the beginning and end tags are always added.
+
+    >>> _Element('date', False)('2012')
+    '<date>2012</date>'
+    >>> _Element('date', False)('<year>2012</year>')
+    '<date><year>2012</year></date>'
+
+    But if `use_sgml` is true, then simple strings which do not
+    themselves contain elements will lack a closing tag.
+
+    >>> _Element('date', False)('2012')
+    '<date>2012'
+    >>> _Element('date', False)('<year>2012</year>')
+    '<date><year>2012</year></date>'
+
+    """
+    def __init__(self, name, use_sgml):
         self.name = name
+        self.use_sgml = use_sgml
 
     def __call__(self, *args):
-        jargs = ''.join(str(a) for a in args)
-        return '<{0}>{1}</{0}>'.format(self.name, jargs)
+        text = ''.join(str(a) for a in args)
+        if self.use_sgml and not text.startswith('<'):
+            return '<{0}>{1}'.format(self.name, text)
+        else:
+            return '<{0}>{1}</{0}>'.format(self.name, text)
 
-E = _E()
-
-def build_sonrq(userid, userpass, fi, app, language='ENG'):
+def build_sonrq(E, userid, userpass, fi, app, language='ENG'):
     return E.SONRQ(
         E.DTCLIENT(datetime.now().strftime('%Y%m%d%H%M%S')),
         E.USERID(userid),
@@ -32,7 +62,7 @@ def build_sonrq(userid, userpass, fi, app, language='ENG'):
         E.APPVER(app.appver),
         )
 
-def build_acctreq(dtacctup='19700101000000'):
+def build_acctreq(E, dtacctup='19700101000000'):
     return E.ACCTINFOTRNRQ(
         E.TRNUID('1'),
         E.ACCTINFORQ(
@@ -40,14 +70,14 @@ def build_acctreq(dtacctup='19700101000000'):
             )
         )
 
-def build_bankacctfrom(bankid, acctid, accttype):
+def build_bankacctfrom(E, bankid, acctid, accttype):
     return E.BANKACCTFROM(
         E.BANKID(bankid), # Routing transit or other FI
         E.ACCTID(acctid),
         E.ACCTTYPE(accttype),
         )
 
-def build_stmttrnrq(bankacctfrom):
+def build_stmttrnrq(E, bankacctfrom):
     return E.STMTTRNRQ(
         E.TRNUID('1'),
         E.STMTRQ(
@@ -61,7 +91,7 @@ def build_stmttrnrq(bankacctfrom):
             ),
         )
 
-def build_ccstmtrq(ccacctfrom):
+def build_ccstmtrq(E, ccacctfrom):
     return E.CCSTMTTRNRQ(
         E.TRNUID('1'),
         E.CCSTMTRQ(
@@ -74,7 +104,7 @@ def build_ccstmtrq(ccacctfrom):
             ),
         )
 
-def build_invstmttrnrq(invacctfrom):
+def build_invstmttrnrq(E, invacctfrom):
     return E.INVSTMTTRNRQ(
         E.TRNUID('1'),
         E.INVSTMTRQ(

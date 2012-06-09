@@ -1,12 +1,12 @@
 """OFX institution FID codes."""
 
 from .types import FinancialInstitution
-from .applications import Quicken2011 as Q, Money2007 as M
+from .applications import Quicken2011 as Q #, Money2007 as M
 
 db = {}
 
-def add(*args):
-    fi = FinancialInstitution(*args)
+def add(*args, **kw):
+    fi = FinancialInstitution(*args, **kw)
     db[fi.name] = fi
 
 add('Chase Credit Cards', 'https://ofx.chase.com',
@@ -18,7 +18,7 @@ add('Delta Community Credit Union',
 
 add('First National Bank of Pandora',
     'https://www20.onlinebank.com/OROFX16Listener',
-    103, 'orcc', 1824, Q)
+    103, 'orcc', 1824, Q, supports_multiple_requests=False)
 
 add('Scottrade', 'https://ofx.scottrade.com',
     103, 'Scottrade', 777, Q)
