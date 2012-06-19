@@ -25,8 +25,9 @@ def main():
     p = subparsers.add_parser('merge', help='merge')
     p.set_defaults(func=merge)
 
-    p = subparsers.add_parser('st', help='status')
-    p.set_defaults(func=status)
+    for name in 'st', 'status':
+        p = subparsers.add_parser(name, help='status')
+        p.set_defaults(func=status)
 
     args = parser.parse_args()
     args.func(args)
