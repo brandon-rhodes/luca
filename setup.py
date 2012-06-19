@@ -16,6 +16,6 @@ setup(name='luca',
         ],
       packages=['luca'],
       entry_points={'console_scripts': [
-            'luca = luca.cmd:main',
+            'luca = luca.commandline:main',
             ]}
       )
