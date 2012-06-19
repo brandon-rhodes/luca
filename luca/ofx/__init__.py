@@ -1,1 +1,1 @@
-"""Open Financial Exchange (OFX) fetching and parsing."""
+"""Open Financial Exchange (OFX) download and parsing."""

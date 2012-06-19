@@ -11,12 +11,12 @@ def main():
         )
     subparsers = parser.add_subparsers(help='sub-command help')
 
-    p = subparsers.add_parser('fetch', help='fetch')
+    p = subparsers.add_parser('download', help='download')
     p.add_argument('nickname', metavar='institution',
-                          help='from which institution to fetch')
+                          help='from which institution to download')
     p.add_argument('-a', action='store_true',
                           help='refresh our account list for the institution')
-    p.set_defaults(func=fetch)
+    p.set_defaults(func=download)
 
     p = subparsers.add_parser('import', help='import')
     p.set_defaults(func=import_cmd)
@@ -32,12 +32,12 @@ def main():
     args = parser.parse_args()
     args.func(args)
 
-def fetch(args):
+def download(args):
     nickname = args.nickname
     logins = files.read_logins()
     login = logins[nickname]
     if args.a:  # or if no account list exists yet, then:
-        data = io.fetch_accounts(login.fi, login.username, login.password)
+        data = io.download_accounts(login.fi, login.username, login.password)
         files.ofx_create(nickname + '-accounts-DATE.xml', data)
         print 'Read', len(data), 'bytes'
         if args.a:
@@ -48,7 +48,7 @@ def fetch(args):
     else:
         operations = [[account] for account in account_list]
     for op in operations:
-        data = io.fetch_activity(login.fi, login.username, login.password, op)
+        data = io.download_activity(login.fi, login.username, login.password, op)
         files.ofx_create(nickname + '-activity-DATE.xml', data)
 
 def import_cmd(args):
@@ -83,10 +83,10 @@ def status(args):
         balances, transactions = files.get_most_recent_activity(login)
         if accounts is None:
             print
-            print '  you have never run "luca fetch -a {}"'.format(nickname)
+            print '  you have never run "luca download -a {}"'.format(nickname)
         elif balances is None:
             print
-            print '  you have never run "luca fetch {}"'.format(nickname)
+            print '  you have never run "luca download {}"'.format(nickname)
         else:
             print
         if accounts:

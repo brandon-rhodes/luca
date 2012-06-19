@@ -32,7 +32,7 @@ def element_maker_for(institution):
     use_sgml = institution.version < 200
     return ElementMaker(use_sgml)
 
-def _fetch(institution, username, password, messages):
+def _download(institution, username, password, messages):
 
     E = element_maker_for(institution)
     sonrq = build_sonrq(E, username, password, institution, institution.app)
@@ -59,13 +59,13 @@ def _fetch(institution, username, password, messages):
     finally:
         u.close()
 
-def fetch_accounts(institution, username, password):
+def download_accounts(institution, username, password):
     E = element_maker_for(institution)
-    return _fetch(institution, username, password, [
+    return _download(institution, username, password, [
             E.SIGNUPMSGSRQV1(build_acctreq(E)),
             ])
 
-def fetch_activity(institution, username, password, accounts):
+def download_activity(institution, username, password, accounts):
 
     def make_request(account):
         f = account.from_element
@@ -86,4 +86,4 @@ def fetch_activity(institution, username, password, accounts):
 
     E = element_maker_for(institution)
     requests = [make_request(a) for a in accounts]
-    return _fetch(institution, username, password, requests)
+    return _download(institution, username, password, requests)
