@@ -18,10 +18,6 @@ def main():
                           help='refresh our account list for the institution')
     p.set_defaults(func=download)
 
-    p = subparsers.add_parser('import', help='import')
-    p.set_defaults(func=import_command)
-    p.add_argument('filename', nargs='+', help='GnuCash files to import')
-
     p = subparsers.add_parser('merge', help='merge')
     p.set_defaults(func=merge)
 
@@ -50,11 +46,6 @@ def download(args):
     for op in operations:
         data = io.download_activity(login.fi, login.username, login.password, op)
         files.ofx_create(nickname + '-activity-DATE.xml', data)
-
-def import_command(args):
-    from .importer.gnucash import parse
-    for filename in args.filename:
-        parse(filename)
 
 def merge(args):
     logins = files.read_logins()
