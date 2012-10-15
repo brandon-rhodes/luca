@@ -9,7 +9,7 @@ from .schema import (ElementMaker, build_sonrq, build_acctreq,
 headers = {
     211: '''\
 <?xml version="1.0"?>
-<?OFX OFXHEADER="200" VERSION="211" SECURITY="NONE"
+<?OFX OFXHEADER="200" VERSION="211" SECURITY="NONE"\
  OLDFILEUID="NONE" NEWFILEUID="NONE"?>
 ''',
     103: '''\
@@ -47,9 +47,14 @@ def _download(institution, username, password, messages):
     try:
         u = urllib2.urlopen(r)
     except urllib2.HTTPError as e:
+        print '-----------'
+        for key, value in r.header_items():
+            print '{}: {}'.format(key, value)
+        print
+        print r.get_data()
+        print '-----------'
         print e
         print e.headers
-        print '-----------'
         print e.read()
         print '-----------'
         exit(1)

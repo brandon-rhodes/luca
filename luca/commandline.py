@@ -57,13 +57,20 @@ def merge(args):
             transactions.extend(tranlist)
     transactions.sort(key=attrgetter('dtposted'))
     for t in transactions:
-        print t.fitid, t.dtposted, t.trntype, t.trnamt, \
-            getattr(t, 'checknum', ''), t.name
-        date = '-'.join((t.dtposted[0:4], t.dtposted[4:6], t.dtposted[6:8]))
+        # print t.fitid
+        date = '/'.join((t.dtposted[0:4], t.dtposted[4:6], t.dtposted[6:8]))
         p0, p1 = '()' if t.trnamt < 0 else '  '
-        print '   {}  {:>12}  {} {!r}'.format(
-            date, p0 + str(abs(t.trnamt)) + p1, t.trntype.lower(), t.name,
+
+        print 'a', t.trntype, t.trnamt
+        print 'b', '   {} {!r}'.format(
+            p0 + str(abs(t.trnamt)) + p1, t.name,
             )
+
+        print date,
+        if hasattr(t, 'checknum'):
+            print '({})'.format(t.checknum.strip('0'))
+        print
+        print
 
 def status(args):
     logins = files.read_logins()
