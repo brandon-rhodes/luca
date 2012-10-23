@@ -31,7 +31,8 @@ def read_logins():
             nickname=nickname,
             fi=institutions.db[iname],
             username=config.get(nickname, 'username'),
-            password=config.get(nickname, 'password'),
+            password=config.get(nickname, 'password') if
+              config.has_option(nickname, 'password') else None,
             )
     return logins
 
