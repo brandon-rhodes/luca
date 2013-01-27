@@ -54,15 +54,20 @@ def parse(filename):
         for m in range(len(dates) - 1):
             i, j = dates[m], dates[m+1]
             trans = section[i:j]
+
             for k in range(len(trans)):
                 if amount_re.match(trans[k]) and amount_re.match(trans[k+1]):
                     break
+            amount = trans[k]
+            if amount.endswith('-'):
+                amount = '-' + amount[:-1]
+
             month, day = [ int(s) for s in trans[0].split('/') ]
             t = Transaction(
                 account_name=account_name,
                 date=date(year, month, day),
                 description=' '.join(trans[1:k-1]),
-                amount=trans[k],
+                amount=amount,
                 # at k+1 is the new balance
                 comments=[' '.join(trans[k+2:])],
                 )
