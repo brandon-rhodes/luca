@@ -7,10 +7,11 @@ from luca.utils import moneyfmt
 
 class Transaction(object):
 
-    def __init__(self, account_name, date, description, amount, comments,
-                 is_posted=True):
+    def __init__(self, account_name, posted_date, effective_date,
+                 description, amount, comments, is_posted=True):
         self.account_name = account_name
-        self.date = date
+        self.posted_date = posted_date
+        self.effective_date = effective_date
         self.description = description
         self.amount = Decimal(amount)
         self.comments = comments
@@ -26,8 +27,12 @@ class Transaction(object):
             amount = -amount
             account_name, category = category, account_name
 
-        date = self.date
-        print '{}/{}'.format(date.month, date.day),
+        pdate = self.posted_date
+        datestr = '{}/{}'.format(pdate.month, pdate.day)
+        edate = self.effective_date
+        if edate is not None:
+            datestr += '={}/{}'.format(edate.month, edate.day)
+        print datestr,
         if self.is_posted == 'posted':
             print '*',
         print '{}'.format(self.description)

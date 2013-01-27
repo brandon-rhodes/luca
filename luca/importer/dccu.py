@@ -7,8 +7,10 @@ from datetime import date
 from luca.model import Transaction
 
 
+debug = False
 date_re = re.compile(r'\d\d/\d\d$')
 amount_re = re.compile(r'[\d,]+\.\d\d-?$')
+
 
 def matches(content):
     return True  # TODO: put real check here
@@ -41,32 +43,66 @@ def parse(filename):
             n -= 1
         account_name = ' '.join(words[n+1:start])
 
-        end = section.index('Ending') + 3
+        end = 0
+        while True:
+            if section[end] == 'Ending' and section[end+1] == 'Balance':
+                end += 3
+                break
+            if section[end] == 'Closed' and section[end+1] == 'THIS':
+                break
+            end += 1
+
         del section[end:]
+        if debug:
+            print 'SECTION {}:\n{}'.format(account_name, section)
 
         # The `section` word list is now established.
 
         year = 2012
 
-        dates = [ i for i in range(len(section))
-                  if date_re.match(section[i]) ]
+        dates = [ i for i in range(len(section) - 1)
+                  if date_re.match(section[i])
+                  and not (i > 0 and date_re.match(section[i-1])) ]
 
         for m in range(len(dates) - 1):
             i, j = dates[m], dates[m+1]
             trans = section[i:j]
+            if debug:
+                print 'TRANSACTION:\n', trans
 
-            for k in range(len(trans)):
-                if amount_re.match(trans[k]) and amount_re.match(trans[k+1]):
-                    break
+            amount_indexes = [
+                k for k in range(len(trans) - 1)
+                if amount_re.match(trans[k]) and amount_re.match(trans[k+1])
+                ]
+
+            if len(amount_indexes) == 0 and trans[1] == 'INQ':
+                continue
+
+            if not amount_indexes:
+                # TODO: billpayer check
+                continue
+
+            k = amount_indexes[0]
+
+            description_words = trans[1:k]
+            if date_re.match(description_words[0]):
+                effective_date = date(year, *[
+                    int(word) for word in description_words.pop(0).split('/')
+                    ])
+            else:
+                effective_date = None
+
             amount = trans[k]
             if amount.endswith('-'):
                 amount = '-' + amount[:-1]
 
             month, day = [ int(s) for s in trans[0].split('/') ]
+
             t = Transaction(
                 account_name=account_name,
-                date=date(year, month, day),
-                description=' '.join(trans[1:k-1]),
+                posted_date=date(year, month, day),
+                effective_date=effective_date,
+                description=' '.join(description_words),
                 amount=amount,
                 # at k+1 is the new balance
                 comments=[' '.join(trans[k+2:])],
@@ -74,7 +110,10 @@ def parse(filename):
             t.format_for_ledger()
 
         i = dates[-1]
-        assert section[i+1] == 'Ending'
-        assert section[i+2] == 'Balance'
+        if section[i+1] == 'ID':
+            pass # Closed
+        else:
+            assert section[i+1] == 'Ending'
+            assert section[i+2] == 'Balance'
 
         # print 'end', section[i], section[i+3]

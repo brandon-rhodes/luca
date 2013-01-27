@@ -1,6 +1,9 @@
 """The `luca` command line."""
 
 import argparse
+import os
+import sys
+
 import luca.importer.dccu
 import luca.importer.yodlee
 from operator import attrgetter
@@ -22,7 +25,8 @@ def main():
 
     p = subparsers.add_parser('import', help='import')
     p.set_defaults(func=import_subcommand)
-    p.add_argument('path', help='file from which to import transactions')
+    p.add_argument('path', help='file from which to import transactions',
+                   nargs='*')
 
     p = subparsers.add_parser('merge', help='merge')
     p.set_defaults(func=merge)
@@ -79,9 +83,17 @@ def merge(args):
         print
 
 def import_subcommand(args):
-    luca.importer.dccu.parse(args.path)
+    for path in args.path:
+        import_action(path)
+
+def import_action(path):
+    if not os.path.exists(path):
+        print >>sys.stderr, 'No such path:', path
+        exit(1)
+
+    luca.importer.dccu.parse(path)
     return
-    with open(args.path) as f:
+    with open(path) as f:
         content = f.read()
     assert luca.importer.yodlee.matches(content)
     luca.importer.yodlee.parse(content)
