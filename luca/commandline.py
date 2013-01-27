@@ -1,6 +1,7 @@
 """The `luca` command line."""
 
 import argparse
+import luca.importer.dccu
 import luca.importer.yodlee
 from operator import attrgetter
 from . import files
@@ -78,6 +79,8 @@ def merge(args):
         print
 
 def import_subcommand(args):
+    luca.importer.dccu.parse(args.path)
+    return
     with open(args.path) as f:
         content = f.read()
     assert luca.importer.yodlee.matches(content)

@@ -6,6 +6,8 @@ Open question:
 
 """
 import csv
+import os
+from ConfigParser import RawConfigParser
 from cStringIO import StringIO
 
 indent = '   '
@@ -18,6 +20,17 @@ def matches(content):
     return content.startswith(standard_heading)
 
 def parse(content):
+    if os.path.exists('luca.ini'):
+        parser = RawConfigParser()
+        parser.read(['luca.ini'])
+        if parser.has_option('import', 'replace'):
+            for line in parser.get('import', 'replace').splitlines():
+                line = line.strip()
+                if not line:
+                    continue
+                pattern, replacement = line.split('|')
+                content = content.replace(pattern, replacement)
+
     rows = list(csv.DictReader(StringIO(content)))
     split_dates(rows)
     rows.sort(key=lambda row: row['Date'])
@@ -52,7 +65,8 @@ def parse(content):
         else:
             raise ValueError('unrecognized Status %r' % row['Status'])
         print '{}'.format(description)
-        print indent, row['Category'], ' ', '$' + row['Amount']
+        print indent, '{:40}  {:>14}'.format(
+            row['Category'], '$' + row['Amount'])
         print indent, account_name
         print
 
