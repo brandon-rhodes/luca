@@ -1,6 +1,7 @@
 """The `luca` command line."""
 
 import argparse
+import luca.importer.yodlee
 from operator import attrgetter
 from . import files
 from .ofx import io
@@ -17,6 +18,10 @@ def main():
     p.add_argument('-a', action='store_true',
                           help='refresh our account list for the institution')
     p.set_defaults(func=download)
+
+    p = subparsers.add_parser('import', help='import')
+    p.set_defaults(func=import_subcommand)
+    p.add_argument('path', help='file from which to import transactions')
 
     p = subparsers.add_parser('merge', help='merge')
     p.set_defaults(func=merge)
@@ -71,6 +76,12 @@ def merge(args):
             print '({})'.format(t.checknum.strip('0'))
         print
         print
+
+def import_subcommand(args):
+    with open(args.path) as f:
+        content = f.read()
+    assert luca.importer.yodlee.matches(content)
+    luca.importer.yodlee.parse(content)
 
 def status(args):
     logins = files.read_logins()
