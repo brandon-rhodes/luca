@@ -4,7 +4,7 @@ import re
 import subprocess
 import luca.files
 from datetime import date
-from luca.model import Transaction
+from luca.model import BlankLine, Comment, Transaction
 
 
 debug = False
@@ -20,6 +20,9 @@ def parse(filename):
 
     command = ['pdftotext', '-layout', filename, '-']
     content = subprocess.check_output(command)
+
+    if 'Credit Card Statement' in content:
+        return parse_statement(content)
 
     config = luca.files.parse_ini()
 
@@ -121,3 +124,55 @@ def parse(filename):
         # print 'end', section[i], section[i+3]
 
     return transactions
+
+
+def parse_statement(content):
+    lines = iter(content.splitlines())
+    items = []
+    for line in lines:
+        if 'Description of Transaction or Credit' in line:
+            parse_transaction_table(lines, items)
+    return items
+
+
+def parse_transaction_table(lines, items):
+    for line in lines:
+        if 'transactions continued on next page' in line:
+            break
+        fields = line.split()
+        if fields == ['FEES']:
+            break
+
+        if not fields:
+            if items and not isinstance(items[-1], BlankLine):
+                items.append(BlankLine())
+
+        elif '$' in fields[-1]:
+            while '/' not in fields[0]:
+                fields.pop(0)
+            year = 2012
+            month, day = [ int(s) for s in fields[1].split('/') ]
+
+            if fields[-1].startswith('('):
+                amount = fields[-1][1:-1]
+            else:
+                amount = fields[-1]
+
+            description = ' '.join(fields[2:-1])
+            if fields[0] != fields[1]:
+                description += ' on {}'.format(fields[0])
+
+            items.append(Transaction(
+                account_name='Liabilities:Visa',
+                posted_date=date(year, month, day),
+                effective_date=None,
+                description=description,
+                amount=amount,
+                comments=[],
+                ))
+
+        elif fields[0] == 'Card':
+            continue
+
+        else:
+            items.append(Comment(' '.join(fields)))

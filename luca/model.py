@@ -5,6 +5,19 @@ from decimal import Decimal
 from luca.utils import moneyfmt
 
 
+class BlankLine(object):
+    def format_for_ledger(self):
+        print
+
+
+class Comment(object):
+    def __init__(self, line):
+        self.line = line.strip()
+
+    def format_for_ledger(self):
+        print ';', self.line
+
+
 class Transaction(object):
 
     def __init__(self, account_name, posted_date, effective_date,
@@ -13,7 +26,7 @@ class Transaction(object):
         self.posted_date = posted_date
         self.effective_date = effective_date
         self.description = description
-        self.amount = Decimal(amount)
+        self.amount = Decimal(amount.strip('$'))
         self.comments = comments
         self.category = 'Undecided'
         self.is_posted = is_posted
