@@ -149,7 +149,7 @@ def parse_transaction_table(lines, items):
 
         if not fields:
             if items and not isinstance(items[-1], BlankLine):
-                items.append(BlankLine())
+                pass  # items.append(BlankLine())
 
         elif '$' in fields[-1]:
             while '/' not in fields[0]:
@@ -172,11 +172,12 @@ def parse_transaction_table(lines, items):
                 effective_date=None,
                 description=description,
                 amount=amount,
-                comments=[],
+                comments=(),
                 ))
+            items[-1].amount = - items[-1].amount
 
         elif fields[0] == 'Card':
             continue
 
         else:
-            items.append(Comment(' '.join(fields)))
+            pass  # items.append(Comment(' '.join(fields)))

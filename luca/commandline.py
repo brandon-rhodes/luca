@@ -90,7 +90,7 @@ def import_subcommand(args):
         more = import_action(path)
         transactions.extend(more)
 
-    # transactions.sort(key=Transaction.key)
+    transactions.sort(key=Transaction.key)
     for t in transactions:
         t.format_for_ledger()
 

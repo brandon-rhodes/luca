@@ -53,7 +53,9 @@ class Transaction(object):
             account_name, moneyfmt(amount, curr='$'))
         print '    {}'.format(category)
         for comment in self.comments:
-            print ';', comment.strip()
+            comment = comment.strip()
+            if comment:
+                print ';', comment
         print
 
     def key(self):
