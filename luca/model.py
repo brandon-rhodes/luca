@@ -42,3 +42,6 @@ class Transaction(object):
         for comment in self.comments:
             print ';', comment.strip()
         print
+
+    def key(self):
+        return self.posted_date

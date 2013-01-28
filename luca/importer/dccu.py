@@ -35,6 +35,8 @@ def parse(filename):
     starts = [ i for i in range(len(words) - 1)
                if words[i] == 'Balance' and words[i+1] == 'Forward' ]
 
+    transactions = []
+
     for start in starts:
         section = words[start:]
 
@@ -107,7 +109,7 @@ def parse(filename):
                 # at k+1 is the new balance
                 comments=[' '.join(trans[k+2:])],
                 )
-            t.format_for_ledger()
+            transactions.append(t)
 
         i = dates[-1]
         if section[i+1] == 'ID':
@@ -117,3 +119,5 @@ def parse(filename):
             assert section[i+2] == 'Balance'
 
         # print 'end', section[i], section[i+3]
+
+    return transactions

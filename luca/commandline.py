@@ -8,6 +8,7 @@ import luca.importer.dccu
 import luca.importer.yodlee
 from operator import attrgetter
 from . import files
+from .model import Transaction
 from .ofx import io
 
 def main():
@@ -82,21 +83,29 @@ def merge(args):
         print
         print
 
+
 def import_subcommand(args):
+    transactions = []
     for path in args.path:
-        import_action(path)
+        more = import_action(path)
+        transactions.extend(more)
+
+    transactions.sort(key=Transaction.key)
+    for t in transactions:
+        t.format_for_ledger()
 
 def import_action(path):
     if not os.path.exists(path):
         print >>sys.stderr, 'No such path:', path
         exit(1)
 
-    luca.importer.dccu.parse(path)
-    return
+    return luca.importer.dccu.parse(path)
+
     with open(path) as f:
         content = f.read()
     assert luca.importer.yodlee.matches(content)
     luca.importer.yodlee.parse(content)
+
 
 def status(args):
     logins = files.read_logins()
