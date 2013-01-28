@@ -139,6 +139,10 @@ def parse_transaction_table(lines, items):
     for line in lines:
         if 'transactions continued on next page' in line:
             break
+        if 'Totals Year-to-Date' in line:
+            break
+        if 'TOTAL FEES FOR THIS PERIOD' in line:
+            break
         fields = line.split()
         if fields == ['FEES']:
             break

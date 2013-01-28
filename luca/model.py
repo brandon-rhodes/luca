@@ -26,7 +26,7 @@ class Transaction(object):
         self.posted_date = posted_date
         self.effective_date = effective_date
         self.description = description
-        self.amount = Decimal(amount.strip('$'))
+        self.amount = Decimal(amount.strip('$').replace(',', ''))
         self.comments = comments
         self.category = 'Undecided'
         self.is_posted = is_posted
