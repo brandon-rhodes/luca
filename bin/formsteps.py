@@ -17,9 +17,18 @@ class Form(object):
     pass
 
 if __name__ == '__main__':
-  if True:
 
-    with open('taxforms/2012-us-Form-940.json') as f:
+    if False:
+        jsonpath = 'taxforms/2012-us-Form-940.json'
+        pdfpath = '/home/brandon/Downloads/f940.pdf'
+        form_module = form_940
+
+    else:
+        jsonpath = 'taxforms/2013-01-US-Form-941.json'
+        pdfpath = '/home/brandon/Downloads/f941.pdf'
+        form_module = form_941
+
+    with open(jsonpath) as f:
         data = json.loads(f.read())
 
     form = Form()
@@ -29,45 +38,12 @@ if __name__ == '__main__':
                 value = Decimal('{:.2f}'.format(value))
             setattr(form, key, value)
 
-    form_940.compute(form)
+    form_module.compute(form)
 
-    pdfpath = '/home/brandon/Downloads/f940.pdf'
     original_form = PdfFileReader(file(pdfpath, 'rb'))
 
     canvas = Canvas('fields.pdf')
-    form_940.draw(form, canvas)
-    overlays = PdfFileReader(StringIO(canvas.getpdfdata()))
-
-    output = PdfFileWriter()
-
-    for i in range(overlays.numPages):
-        page = original_form.getPage(i)
-        overlay = overlays.getPage(i)
-        page.mergePage(overlay)
-        output.addPage(page)
-
-    with open('output.pdf', 'w') as f:
-        output.write(f)
-
-  if False:
-
-    with open('taxforms/2013-01-US-Form-941.json') as f:
-        data = json.loads(f.read())
-
-    form = Form()
-    for section, keyvalues in data.items():
-        for key, value in keyvalues.items():
-            if isinstance(value, float):
-                value = Decimal('{:.2f}'.format(value))
-            setattr(form, key, value)
-
-    form_941.compute(form)
-
-    pdfpath = '/home/brandon/Downloads/f941.pdf'
-    original_form = PdfFileReader(file(pdfpath, 'rb'))
-
-    canvas = Canvas('fields.pdf')
-    form_941.draw(form, canvas)
+    form_module.draw(form, canvas)
     overlays = PdfFileReader(StringIO(canvas.getpdfdata()))
 
     output = PdfFileWriter()
