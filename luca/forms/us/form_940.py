@@ -77,9 +77,12 @@ def compute(form):
         f.line14 = ''
         f.line15 = f.line13 - f.line12
 
-    f.line17 = f.line16a + f.line16b + f.line16c + f.line16d
-
-    assert f.line12 == f.line17
+    if f.line12 > Decimal('500.00'):
+        f.line17 = f.line16a + f.line16b + f.line16c + f.line16d
+        assert f.line12 == f.line17
+    else:
+        f.line16a = f.line16b = f.line16c = f.line16d = ''
+        f.line17 = ''
 
 
 def draw(form, canvas):
@@ -112,24 +115,24 @@ def draw(form, canvas):
 
     stride = 24
 
-    put(552, 472, f.line3)
+    put(551, 472, f.line3)
     #line4?
     put(406, 400, f.line5),
-    put(552, 286 + 4 * stride, f.line6)
-    put(552, 286 + 3 * stride, f.line7)
-    put(552, 288 + 2 * stride, f.line8)
+    put(551, 286 + 4 * stride, f.line6)
+    put(551, 286 + 3 * stride, f.line7)
+    put(551, 288 + 2 * stride, f.line8)
 
     if f.line9:
-        put(552, 293, f.line9)
+        put(551, 293, f.line9)
 
     # TODO: line10
     # TODO: line11
 
-    put(552, 205, f.line12)
-    put(552, 205 - stride, f.line13)
+    put(551, 205, f.line12)
+    put(551, 205 - stride, f.line13)
 
-    put(552, 142, f.line14)
-    put(552, 142 - stride, f.line15)
+    put(551, 142, f.line14)
+    put(551, 142 - stride, f.line15)
 
     canvas.showPage()
 
