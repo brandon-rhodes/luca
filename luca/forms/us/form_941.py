@@ -1,14 +1,24 @@
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 filename = 'f941.pdf'
+
+cent = Decimal('.01')
+
+def cents(decimal_value):
+    return decimal_value.quantize(cent, rounding=ROUND_HALF_UP)
+
+Decimal('7.325').quantize
 
 def compute(form):
     f = form
     f.line5a1 = f.line2
-    f.line5a3 = f.line2
-    f.line5d = f.line5a2 + f.line5c2 # + f.line5b2
-    f.line6 = f.line3 + f.line5d #+ f.line5e
-    f.line10 = f.line6
-    f.line14 = f.line10 # - f.line13
+    f.line5c1 = f.line2
+    f.line5a2 = cents(f.line5a1 * Decimal(0.104))
+    f.line5b2 = cents(f.line5b1 * Decimal(0.104))
+    f.line5c2 = cents(f.line5c1 * Decimal(0.029))
+    f.line5d = cents(f.line5a2 + f.line5c2) # + f.line5b2
+    f.line6 = cents(f.line3 + f.line5d) #+ f.line5e
+    f.line10 = cents(f.line6)
+    f.line14 = cents(f.line10) # - f.line13
 
 def draw(form, canvas):
     f = form
@@ -20,6 +30,7 @@ def draw(form, canvas):
             canvas.drawString(x - 6 - canvas.stringWidth(dollars), y, dollars)
             canvas.drawString(x + 4, y, cents)
         else:
+            value = unicode(value)
             canvas.drawString(x, y, value)
 
     put(140, 688, f.name)
@@ -35,8 +46,10 @@ def draw(form, canvas):
     put(282, 614, f.state)
     put(320, 614, f.zip)
 
-    put(418.5, 683.25, f.q1)
-    put(418.5, 648.75, f.q3)
+    step = (683.25 - 648.75) / 2
+    origin = 683.25 + step
+    for i in range(1, 5):
+        put(418.5, origin - i * step, 'X' if f.quarter == i else '')
 
     stride = 18
 

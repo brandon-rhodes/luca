@@ -15,6 +15,10 @@ setup(name='luca',
         'License :: OSI Approved :: BSD License',
         ],
       packages=['luca'],
+      install_requires=[
+        'reportlab',
+        'pyPdf',
+        ],
       entry_points={'console_scripts': [
             'luca = luca.commandline:main',
             ]}
