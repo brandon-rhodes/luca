@@ -77,6 +77,10 @@ def compute(form):
         f.line14 = ''
         f.line15 = f.line13 - f.line12
 
+    f.line17 = f.line16a + f.line16b + f.line16c + f.line16d
+
+    assert f.line12 == f.line17
+
 
 def draw(form, canvas):
     f = form
@@ -126,3 +130,22 @@ def draw(form, canvas):
 
     put(552, 142, f.line14)
     put(552, 142 - stride, f.line15)
+
+    canvas.showPage()
+
+    put(36, 725, f.name)
+    put(400, 725, f.ein)
+
+    put(442, 659, f.line16a)
+    put(442, 659 - 1 * stride, f.line16b)
+    put(442, 659 - 2 * stride, f.line16c)
+    put(442, 659 - 3 * stride, f.line16d)
+    put(442, 659 - 4 * stride, f.line17)
+
+    put(58.5, 451.5, f.part6_no)
+
+    put(386, 365, f.sign_name)
+    put(386, 365 - 1 * stride, f.sign_title)
+    put(428, 365 - 2 * stride, f.sign_phone)
+
+    canvas.showPage()
