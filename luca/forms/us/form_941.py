@@ -1,10 +1,7 @@
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import Decimal
+from luca.kit import cents
+
 filename = 'f941.pdf'
-
-cent = Decimal('.01')
-
-def cents(decimal_value):
-    return decimal_value.quantize(cent, rounding=ROUND_HALF_UP)
 
 Decimal('7.325').quantize
 

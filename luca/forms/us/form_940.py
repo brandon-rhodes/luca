@@ -1,7 +1,7 @@
 from decimal import Decimal
 from itertools import groupby
 
-from publican.engine.kit import Date, cents, years_range, zero
+from luca.kit import cents
 
 sevenk = Decimal('7000.00')
 eighthpercent = Decimal('.008')
@@ -57,36 +57,72 @@ def tally(company, period, filing):
     return filing
 
 
-grids = {
- 1: """
-  ein-
-  name-
-  x x line3
-  x line5
-  x x line6
-  x x line7a
-  x line7b line7c
-  x line7d line7e
-  x x line8
-  x x line11
-  x x line12
-  x x line14
-  """,
- }
+def compute(form):
+    f = form
+    f.line6 = f.line5
+    f.line7 = f.line3 - f.line6
+    f.line8 = cents(f.line7 * Decimal('0.006'))
 
-stride = 24
+    if f.all_wages_excluded_from_state_unemployment_tax:
+        f.line9 = cents(f.line7 * Decimal('.054'))
+    else:
+        f.line9 = Decimal('0.00')
 
-pdf_fields = [
- (140,688, 'name'),
- (156,713, 'ein', 24),
- (552,472, 'line3'),
- (406,400, 'line5'),
- (552,288 + 4 * stride, 'line6'),
- (552,288 + 3 * stride, 'line7a'),
- (364,288 + 2 * stride, 'line7b'), (552,288 + 2 * stride, 'line7c'),
- (364,288 + stride, 'line7d'), (552,288 + stride, 'line7e'),
- (552,288, 'line8'),
- (552,192, 'line11'),
- (552,156, 'line12'),
- (552,92, 'line14'),
- ]
+    f.line12 = f.line8 + f.line9 + f.line10 + f.line11
+
+    if f.line12 > f.line13:
+        f.line14 = f.line12 - f.line13
+        f.line15 = ''
+    else:
+        f.line14 = ''
+        f.line15 = f.line13 - f.line12
+
+
+def draw(form, canvas):
+    f = form
+    canvas.setFont('Helvetica', 12)
+
+    def put(x, y, value):
+        if isinstance(value, Decimal):
+            dollars, cents = str(value).split('.')
+            canvas.drawString(x - 6 - canvas.stringWidth(dollars), y, dollars)
+            canvas.drawString(x + 4, y, cents)
+        else:
+            value = unicode(value)
+            canvas.drawString(x, y, value)
+
+    digits = [ c for c in f.ein if c.isdigit() ]
+    for i, digit in enumerate(digits[:2]):
+        put(158 + 26.5 * i, 713, digit)
+    for i, digit in enumerate(digits[2:]):
+        put(223 + 25.5 * i, 713, digit)
+
+    put(140, 688, f.name)
+    put(82, 641, f.address)
+    put(82, 614, f.city)
+    put(282, 614, f.state)
+    put(320, 614, f.zip)
+
+    put(460, 557, f.line1a[0])
+    put(496, 557, f.line1a[1])
+
+    stride = 24
+
+    put(552, 472, f.line3)
+    #line4?
+    put(406, 400, f.line5),
+    put(552, 286 + 4 * stride, f.line6)
+    put(552, 286 + 3 * stride, f.line7)
+    put(552, 288 + 2 * stride, f.line8)
+
+    if f.line9:
+        put(552, 293, f.line9)
+
+    # TODO: line10
+    # TODO: line11
+
+    put(552, 205, f.line12)
+    put(552, 205 - stride, f.line13)
+
+    put(552, 142, f.line14)
+    put(552, 142 - stride, f.line15)
