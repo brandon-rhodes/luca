@@ -46,7 +46,7 @@ class Transaction(object):
         if edate is not None:
             datestr += '={}/{}'.format(edate.month, edate.day)
         print datestr,
-        if self.is_posted == 'posted':
+        if self.is_posted:
             print '*',
         print '{}'.format(self.description)
         print '    {:40}  {:>14}'.format(
