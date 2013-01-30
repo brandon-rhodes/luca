@@ -4,6 +4,7 @@ import argparse
 import os
 import sys
 
+import luca.forms.actions
 import luca.importer.dccu
 import luca.importer.yodlee
 from operator import attrgetter
@@ -16,6 +17,13 @@ def main():
         description='Fra Luca double entry bookkeeping.',
         )
     subparsers = parser.add_subparsers(help='sub-command help')
+
+    p = subparsers.add_parser('complete', help='complete a tax form')
+    p.add_argument('json_path', metavar='json-path',
+                   help='Path to the JSON file containing the form')
+    p.add_argument('pdf_path', metavar='pdf-path', nargs='?',
+                   help='Path to the blank PDF form to fill in')
+    p.set_defaults(func=complete)
 
     p = subparsers.add_parser('download', help='download')
     p.add_argument('nickname', metavar='institution',
@@ -38,6 +46,9 @@ def main():
 
     args = parser.parse_args()
     args.func(args)
+
+def complete(args):
+    luca.forms.actions.complete(args.json_path, args.pdf_path)
 
 def download(args):
     nickname = args.nickname

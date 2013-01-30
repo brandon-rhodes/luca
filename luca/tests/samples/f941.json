@@ -1,6 +1,6 @@
 {
  "inputs": {
-  "form": "us-irs-941",
+  "form": "us.irs941",
   "ein": "00-0000000",
   "name": "My Company, Inc.",
   "address": "123 Main Street",
@@ -18,5 +18,16 @@
   "sign_name": "Mister Businessman",
   "sign_title": "President",
   "sign_phone": "867-5309"
+ },
+ "outputs": {
+  "line5a1": "4500.00",
+  "line5c1": "4500.00",
+  "line5a2": "468.00",
+  "line5b2": "0.00",
+  "line5c2": "130.50",
+  "line5d": "598.50",
+  "line6": "1348.50",
+  "line10": "1348.50",
+  "line14": "1348.50"
  }
 }
