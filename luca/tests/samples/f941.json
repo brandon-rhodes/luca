@@ -1,0 +1,22 @@
+{
+ "inputs": {
+  "form": "us-irs-941",
+  "ein": "00-0000000",
+  "name": "My Company, Inc.",
+  "address": "123 Main Street",
+  "city": "Small Town",
+  "state": "MA",
+  "zip": "01810",
+  "quarter": 4,
+  "line1": 1,
+  "line2": "4500.00",
+  "line3": "750.00",
+  "line5b1": "0.00",
+  "line5e": "",
+  "line16a": "X",
+  "part4_no": "X",
+  "sign_name": "Mister Businessman",
+  "sign_title": "President",
+  "sign_phone": "867-5309"
+ }
+}
