@@ -90,6 +90,8 @@ def draw(form, canvas):
     canvas.setFont('Helvetica', 12)
 
     def put(x, y, value):
+        # Font per http://www.irs.gov/instructions/i940/ch01.html
+        canvas.setFont('Courier', 12)
         if isinstance(value, Decimal):
             dollars, cents = str(value).split('.')
             canvas.drawString(x - 6 - canvas.stringWidth(dollars), y, dollars)
@@ -104,7 +106,7 @@ def draw(form, canvas):
     for i, digit in enumerate(digits[2:]):
         put(223 + 25.5 * i, 713, digit)
 
-    put(140, 688, f.name)
+    put(140, 689, f.name)
     put(82, 641, f.address)
     put(82, 614, f.city)
     put(282, 614, f.state)

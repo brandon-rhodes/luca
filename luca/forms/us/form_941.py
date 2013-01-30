@@ -19,9 +19,11 @@ def compute(form):
 
 def draw(form, canvas):
     f = form
-    canvas.setFont('Helvetica', 12)
+
 
     def put(x, y, value):
+        # Font per http://www.irs.gov/instructions/i941/ch01.html
+        canvas.setFont('Courier', 10)
         if isinstance(value, Decimal):
             dollars, cents = str(value).split('.')
             canvas.drawString(x - 6 - canvas.stringWidth(dollars), y, dollars)
@@ -30,23 +32,23 @@ def draw(form, canvas):
             value = unicode(value)
             canvas.drawString(x, y, value)
 
-    put(140, 688, f.name)
 
     digits = [ c for c in f.ein if c.isdigit() ]
     for i, digit in enumerate(digits[:2]):
-        put(158 + 26.5 * i, 713, digit)
+        put(158 + 26.5 * i, 714, digit)
     for i, digit in enumerate(digits[2:]):
-        put(223 + 25.5 * i, 713, digit)
+        put(223 + 25.5 * i, 714, digit)
 
-    put(82, 641, f.address)
-    put(82, 614, f.city)
-    put(282, 614, f.state)
-    put(320, 614, f.zip)
+    put(140, 690, f.name)
+    put(82, 642, f.address)
+    put(82, 615, f.city)
+    put(282, 615, f.state)
+    put(320, 615, f.zip)
 
     step = (683.25 - 648.75) / 2
-    origin = 683.25 + step
+    origin = 685 + step
     for i in range(1, 5):
-        put(418.5, origin - i * step, 'X' if f.quarter == i else '')
+        put(420, origin - i * step, 'X' if f.quarter == i else '')
 
     stride = 18
 
@@ -70,12 +72,12 @@ def draw(form, canvas):
     put(36, 725, f.name)
     put(400, 725, f.ein)
 
-    put(117.5, 662, f.line18a)
+    put(118, 662.5, f.line16a)
 
-    put(65.75, 317.25, f.part4_no)
+    put(66.5, 318.5, f.part4_no)
 
-    put(434, 251, f.sign_name)
-    put(434, 227, f.sign_title)
-    put(464, 196, f.sign_phone)
+    put(434, 252, f.sign_name)
+    put(434, 228, f.sign_title)
+    put(464, 197.5, f.sign_phone)
 
     canvas.showPage()
