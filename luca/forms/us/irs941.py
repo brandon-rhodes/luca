@@ -5,6 +5,7 @@ filename = 'f941.pdf'
 
 Decimal('7.325').quantize
 
+
 def compute(form):
     f = form
     f.line5a1 = f.line2
@@ -17,9 +18,9 @@ def compute(form):
     f.line10 = cents(f.line6)
     f.line14 = cents(f.line10) # - f.line13
 
+
 def draw(form, canvas):
     f = form
-
 
     def put(x, y, value):
         # Font per http://www.irs.gov/instructions/i941/ch01.html

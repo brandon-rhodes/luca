@@ -64,7 +64,6 @@ def complete(jsonpath, pdfpath, outputpath='completed-form.pdf'):
                 value = Decimal('{:.2f}'.format(value))
             setattr(form, key, value)
 
-    print form_module
     form_module.compute(form)
 
     data['outputs'] = OrderedDict(
@@ -73,8 +72,9 @@ def complete(jsonpath, pdfpath, outputpath='completed-form.pdf'):
         )
 
     json_string = form_encoder.encode(data)
+    print('Updating {}'.format(jsonpath))
     with open(jsonpath, 'w') as f:
-        f.write(json_string)
+        f.write(json_string + '\n')
 
     if not pdfpath:
         return
@@ -93,5 +93,6 @@ def complete(jsonpath, pdfpath, outputpath='completed-form.pdf'):
         page.mergePage(overlay)
         output.addPage(page)
 
+    print('Writing {}'.format(outputpath))
     with open(outputpath, 'w') as f:
         output.write(f)
