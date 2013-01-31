@@ -147,7 +147,7 @@ def draw(form, canvas):
     put(442, 659 - 3 * stride, f.line16d)
     put(442, 659 - 4 * stride, f.line17)
 
-    put(58.5, 451.5, f.part6_no)
+    put(59, 452, f.part6_no)
 
     put(386, 365, f.sign_name)
     put(386, 365 - 1 * stride, f.sign_title)
