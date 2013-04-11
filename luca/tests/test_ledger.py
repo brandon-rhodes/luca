@@ -7,7 +7,7 @@ class LedgerTests(unittest.TestCase):
         ledger = Ledger()
         ledger.parse(sample_data)
         self.assertEqual(ledger.accounts,
-                         ['Expenses:Books', 'Liabilities:Visa'])
+                         set(['Expenses:Books', 'Liabilities:Visa']))
 
 sample_data = """
 
