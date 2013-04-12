@@ -3,11 +3,14 @@
 import re
 import importlib
 import json
+import subprocess
 from collections import OrderedDict
 from decimal import Decimal
+from StringIO import StringIO
+
+import fdfgen
 from pyPdf import PdfFileWriter, PdfFileReader
 from reportlab.pdfgen.canvas import Canvas
-from StringIO import StringIO
 
 integer_re = re.compile(r'\d+$')
 decimal_re = re.compile(r'\d+\.\d+$')
@@ -79,6 +82,26 @@ def complete(jsonpath, pdfpath, outputpath='completed-form.pdf'):
     if not pdfpath:
         return
 
+    if hasattr(form_module, 'draw'):
+        run_draw(form, form_module, pdfpath, outputpath)
+    else:
+        run_fill(form, form_module, pdfpath, outputpath)
+
+
+def run_fill(form, form_module, pdfpath, outputpath):
+    field_dict = form_module.fill(form)
+    fields = field_dict.items()
+
+    fdf = fdfgen.forge_fdf('', fields, [], [], [])
+    fdf_file = open('data.fdf', 'w')
+    fdf_file.write(fdf)
+    fdf_file.close()
+
+    subprocess.check_call(['pdftk', pdfpath, 'fill_form', 'data.fdf',
+                           'output', outputpath])
+
+
+def run_draw(form, form_module, pdfpath, outputpath):
     original_form = PdfFileReader(file(pdfpath, 'rb'))
 
     canvas = Canvas('fields.pdf')
