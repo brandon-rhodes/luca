@@ -1,5 +1,7 @@
 from decimal import Decimal
 from unittest import TestCase
+from textwrap import dedent
+
 from luca.kit import cents
 from luca.forms.form import Form, load_json, dump_json
 
@@ -110,6 +112,28 @@ class FormTests(TestCase):
             j = dump_json(f)
             print j
             assert j == json_out2
+
+    def test_rendering_form_with_a_subform_added_later(self):
+        f = load_json('{"inputs": {"A": {"a": 1}}}')
+        f._switch_from_input_to_output()
+        f.B = Form()
+        f.B._switch_from_input_to_output()
+        f.B.b = 2
+        j = dump_json(f)
+        assert j == dedent(u'''\
+            {
+             "inputs": {
+              "A": {
+               "a": 1
+              }
+             },
+             "outputs": {
+              "B": {
+               "b": 2
+              }
+             }
+            }
+            ''')
 
 
 json_in = u'''{

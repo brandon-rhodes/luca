@@ -100,7 +100,7 @@ def _gather_outputs(form):
     for name in form._outputs:
         value = getattr(form, name)
         if isinstance(value, Form):
-            value = _gather_inputs(value)
+            value = _gather_outputs(value)
         elif isinstance(value, Decimal):
             value = str(value)
         d[name] = value
