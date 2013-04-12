@@ -11,6 +11,6 @@ class Form(object):
         self._names = self._outputs
 
     def __setattr__(self, name, value):
-        if not name.startswith('_'):
+        if not name.startswith('_') and (name not in self.__dict__):
             self._names.append(name)
         super(Form, self).__setattr__(name, value)

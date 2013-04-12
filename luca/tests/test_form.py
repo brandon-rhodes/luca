@@ -27,6 +27,19 @@ class FormTests(TestCase):
         assert f._inputs == ['y', 'x']
         assert f._outputs == ['z']
 
+    def test_attributes_are_only_listed_once(self):
+        f = Form()
+        f.y = 3
+        f.x = 1
+        f.y = 7
+        f.switch_from_input_to_output()
+        f.z = 2
+        f.w = 4
+        f.w = 8
+        f.z = 1
+        assert f._inputs == ['y', 'x']
+        assert f._outputs == ['z', 'w']
+
 
 json1 = '''{
  "inputs": {
