@@ -16,6 +16,7 @@ setup(name='luca',
         ],
       packages=['luca'],
       install_requires=[
+        'fdfgen',
         'reportlab',
         'pyPdf',
         ],
