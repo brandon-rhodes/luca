@@ -71,7 +71,7 @@ class FormTests(TestCase):
             f.x = 4
 
     def test_building_from_json_reads_inputs(self):
-        for json in json_in, json_out1, json_out2:
+        for json in json_in, json_empty_output, json_filled_output:
             f = load_json(json)
             assert f._inputs == ['form', 'ssn', 'name', 'A', 'B']
             assert f.form == 'rental_income'
@@ -82,7 +82,7 @@ class FormTests(TestCase):
             self.assertIsInstance(f.B, Form)
 
     def test_building_from_json_discards_old_outputs(self):
-        for json in json_in, json_out1, json_out2:
+        for json in json_in, json_empty_output, json_filled_output:
             f = load_json(json)
             assert f._outputs == []
             with self.assertRaises(AttributeError):
@@ -91,7 +91,7 @@ class FormTests(TestCase):
                 f.total_rents
 
     def test_building_from_json_detects_decimals(self):
-        for json in json_in, json_out1, json_out2:
+        for json in json_in, json_empty_output, json_filled_output:
             f = load_json(json)
             self.assertIsInstance(f.A.rents, Decimal)
             self.assertIsInstance(f.B.expenses, Decimal)
@@ -99,19 +99,19 @@ class FormTests(TestCase):
             assert str(f.B.expenses) == '230.00'
 
     def test_rendering_form_inputs_as_json(self):
-        for json in json_in, json_out1, json_out2:
+        for json in json_in, json_empty_output, json_filled_output:
             f = load_json(json)
             j = dump_json(f)
-            assert j == json_out1
+            assert j == json_empty_output
 
     def test_rendering_form_inputs_and_outputs_as_json(self):
-        for json in json_in, json_out1, json_out2:
+        for json in json_in, json_empty_output, json_filled_output:
             f = load_json(json)
             f._switch_from_input_to_output()
             process_form(f)
             j = dump_json(f)
             print j
-            assert j == json_out2
+            assert j == json_filled_output
 
     def test_rendering_form_with_a_subform_added_later(self):
         f = load_json('{"inputs": {"A": {"a": 1}}}')
@@ -155,12 +155,12 @@ json_in = u'''{
 }
 '''
 
-json_out1 = json_in[:-3] + u''',
+json_empty_output = json_in[:-3] + u''',
  "outputs": {}
 }
 '''
 
-json_out2 = json_in[:-3] + u''',
+json_filled_output = json_in[:-3] + u''',
  "outputs": {
   "A": {
    "profit": "800.00",
