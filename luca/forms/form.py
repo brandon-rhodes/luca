@@ -1,7 +1,7 @@
 '''The Form class and its supporting materials.'''
 
 import json
-
+from collections import OrderedDict as odict
 
 class Form(object):
     '''A class whose instances remember the order in which attrs are set.'''
@@ -35,11 +35,32 @@ class Form(object):
 
 
 def load_json(text):
-    outer = json.loads(text, object_pairs_hook=form_from_pairs)
+    '''Parse JSON in the unicode string `text` and return a Form.'''
+    outer = json.loads(text, object_pairs_hook=_form_from_pairs)
     return outer.inputs
 
-def form_from_pairs(pairs):
+def _form_from_pairs(pairs):
     f = Form()
     for name, value in pairs:
         setattr(f, name, value)
     return f
+
+def dump_json(form):
+    '''Render the `form` as attractively formatted JSON.'''
+    j = json.dumps(form, ensure_ascii=False, indent=1,
+                   separators=(',', ': '), default=_encode_form)
+    return j + '\n'
+
+def _encode_form(form):
+    inputs = _gather_inputs(form)
+    outputs = {}
+    return odict([('inputs', inputs), ('outputs', outputs)])
+
+def _gather_inputs(form):
+    d = odict()
+    for name in form._inputs:
+        value = getattr(form, name)
+        if isinstance(value, Form):
+            value = _gather_inputs(value)
+        d[name] = value
+    return d

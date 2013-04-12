@@ -1,6 +1,6 @@
 from unittest import TestCase
 from luca.kit import cents
-from luca.forms.form import Form, load_json
+from luca.forms.form import Form, load_json, dump_json
 
 
 class FormTests(TestCase):
@@ -68,7 +68,7 @@ class FormTests(TestCase):
             f.x = 4
 
     def test_building_from_json_reads_inputs(self):
-        for json in json1, json2:
+        for json in json_in, json_out1, json_out2:
             f = load_json(json)
             assert f._inputs == ['form', 'ssn', 'name', 'A', 'B']
             assert f.form == 'rental_income'
@@ -79,7 +79,7 @@ class FormTests(TestCase):
             self.assertIsInstance(f.B, Form)
 
     def test_building_from_json_discards_old_outputs(self):
-        for json in json1, json2:
+        for json in json_in, json_out1, json_out2:
             f = load_json(json)
             assert f._outputs == []
             with self.assertRaises(AttributeError):
@@ -87,8 +87,15 @@ class FormTests(TestCase):
             with self.assertRaises(AttributeError):
                 f.total_rents
 
+    def test_rendering_form_inputs_as_json(self):
+        for json in json_in, json_out1, json_out2:
+            f = load_json(json)
+            j = dump_json(f)
+            assert j == json_out1
 
-json1 = u'''{
+
+
+json_in = u'''{
  "inputs": {
   "form": "rental_income",
   "ssn": "123-45-6789",
@@ -107,7 +114,12 @@ json1 = u'''{
 }
 '''
 
-json2 = json1[:-3] + u''',
+json_out1 = json_in[:-3] + u''',
+ "outputs": {}
+}
+'''
+
+json_out2 = json_in[:-3] + u''',
  "outputs": {
   "A": {
    "profit": "800.00",
