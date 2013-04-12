@@ -1,6 +1,5 @@
-'''Tests of the important Form class.'''
-
 from unittest import TestCase
+from luca.kit import cents
 from luca.forms.form import Form
 
 
@@ -22,7 +21,7 @@ class FormTests(TestCase):
         f = Form()
         f.y = 3
         f.x = 1
-        f.switch_from_input_to_output()
+        f._switch_from_input_to_output()
         f.z = 2
         assert f._inputs == ['y', 'x']
         assert f._outputs == ['z']
@@ -31,7 +30,7 @@ class FormTests(TestCase):
         f = Form()
         f.y = 3
         f.x = 1
-        f.switch_from_input_to_output()
+        f._switch_from_input_to_output()
         f.z = 2
         f.w = 4
         f.w = 8
@@ -50,10 +49,26 @@ class FormTests(TestCase):
         f = Form()
         f.y = 3
         f.x = 1
-        f.switch_from_input_to_output()
+        f._switch_from_input_to_output()
         f.z = 2
         with self.assertRaises(TypeError):
             f.x = 4
+
+    def test_input_attribute_list_can_be_cleared(self):
+        f = Form()
+        f.y = 0
+        f.x = 0
+        assert f._inputs == ['y', 'x']
+        f._clear()
+        assert f._inputs == []
+        f.x = 5
+        f.y = 7
+        assert f._inputs == ['x', 'y']
+        with self.assertRaises(TypeError):
+            f.x = 4
+
+    def test_form_building_from_json(self):
+        pass
 
 
 json1 = '''{
@@ -83,7 +98,18 @@ json1 = '''{
   },
   "total_rents": "1700.00",
   "total_expenses": "330.00",
+  "total_profit": "1370.00",
   "total_tax": "137.00"
  }
 }
 '''
+
+def process_form(f):
+    subs = (f.A, f.B)
+    for sub in subs:
+        sub.profit = sub.rents - sub.expenses
+        sub.tax = cents(sub.profit / 10)
+    f.total_rents = sum(sub.rents for sub in subs)
+    f.total_expenses = sum(sub.expenses for sub in subs)
+    f.total_profit = sum(sub.profit for sub in subs)
+    f.total_tax = sum(sub.tax for sub in subs)
