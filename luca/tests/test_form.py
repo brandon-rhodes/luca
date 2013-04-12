@@ -1,3 +1,4 @@
+from decimal import Decimal
 from unittest import TestCase
 from luca.kit import cents
 from luca.forms.form import Form, load_json, dump_json
@@ -87,12 +88,19 @@ class FormTests(TestCase):
             with self.assertRaises(AttributeError):
                 f.total_rents
 
+    def test_building_from_json_detects_decimals(self):
+        for json in json_in, json_out1, json_out2:
+            f = load_json(json)
+            self.assertIsInstance(f.A.rents, Decimal)
+            self.assertIsInstance(f.B.expenses, Decimal)
+            assert str(f.A.rents) == '900.00'
+            assert str(f.B.expenses) == '230.00'
+
     def test_rendering_form_inputs_as_json(self):
         for json in json_in, json_out1, json_out2:
             f = load_json(json)
             j = dump_json(f)
             assert j == json_out1
-
 
 
 json_in = u'''{

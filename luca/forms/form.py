@@ -1,7 +1,9 @@
 '''The Form class and its supporting materials.'''
 
 import json
+import re
 from collections import OrderedDict as odict
+from decimal import Decimal
 
 class Form(object):
     '''A class whose instances remember the order in which attrs are set.'''
@@ -39,9 +41,13 @@ def load_json(text):
     outer = json.loads(text, object_pairs_hook=_form_from_pairs)
     return outer.inputs
 
+_decimal_re = re.compile(ur'^\d+\.\d\d$')
+
 def _form_from_pairs(pairs):
     f = Form()
     for name, value in pairs:
+        if isinstance(value, unicode) and _decimal_re.match(value):
+            value = Decimal(value)
         setattr(f, name, value)
     return f
 
@@ -62,5 +68,7 @@ def _gather_inputs(form):
         value = getattr(form, name)
         if isinstance(value, Form):
             value = _gather_inputs(value)
+        elif isinstance(value, Decimal):
+            value = str(value)
         d[name] = value
     return d
