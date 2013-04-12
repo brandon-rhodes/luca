@@ -4,5 +4,7 @@ from decimal import Decimal, ROUND_HALF_UP
 
 cent = Decimal('0.01')
 
-def cents(decimal_value):
-    return decimal_value.quantize(cent, rounding=ROUND_HALF_UP)
+def cents(value):
+    if not isinstance(value, Decimal):
+        value = Decimal(value)
+    return value.quantize(cent, rounding=ROUND_HALF_UP)

@@ -1,6 +1,7 @@
 '''The Form class and its supporting materials.'''
 
 class Form(object):
+    '''A class whose instances remember the order in which attrs are set.'''
 
     def __init__(self):
         self._inputs = []
