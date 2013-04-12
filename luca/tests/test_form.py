@@ -14,8 +14,8 @@ class FormTests(TestCase):
         f.y = 3
         f.x = 1
         f.z = 2
-        assert f.y == 3
         assert f.x == 1
+        assert f.y == 3
         assert f.z == 2
 
     def test_attributes_remember_their_order(self):
@@ -31,7 +31,6 @@ class FormTests(TestCase):
         f = Form()
         f.y = 3
         f.x = 1
-        f.y = 7
         f.switch_from_input_to_output()
         f.z = 2
         f.w = 4
@@ -39,6 +38,22 @@ class FormTests(TestCase):
         f.z = 1
         assert f._inputs == ['y', 'x']
         assert f._outputs == ['z', 'w']
+
+    def test_input_attributes_cannot_be_set_twice(self):
+        f = Form()
+        f.y = 3
+        f.x = 1
+        with self.assertRaises(TypeError):
+            f.y = 5
+
+    def test_input_attributes_cannot_become_outputs(self):
+        f = Form()
+        f.y = 3
+        f.x = 1
+        f.switch_from_input_to_output()
+        f.z = 2
+        with self.assertRaises(TypeError):
+            f.x = 4
 
 
 json1 = '''{
