@@ -15,6 +15,18 @@ class Form(object):
         self._outputset = set()
         self._mode = 'input'
 
+    def _enter_default_mode(self):
+        """Switch this form, and any child forms, to default mode.
+
+        In default mode, an assignment statement only sets an attribute
+        if it does not already exist on the form.
+
+        """
+        self._mode = 'default'
+        for value in self.__dict__.values():
+            if isinstance(value, Form):
+                value._enter_default_mode()
+
     def _enter_output_mode(self):
         """Switch this form and all child forms to output mode.
 
@@ -32,12 +44,14 @@ class Form(object):
     def __setattr__(self, name, value):
         if not name.startswith('_'):
             if name in self._inputset:
+                if self._mode == 'default':
+                    return
                 raise TypeError('an input attribute like %s can only be'
                                 ' set once' % name)
             if self._mode == 'input':
                 self._inputs.append(name)
                 self._inputset.add(name)
-            else:
+            else: #if self._mode == 'output':
                 if name not in self._outputset:
                     self._outputs.append(name)
                     self._outputset.add(name)
