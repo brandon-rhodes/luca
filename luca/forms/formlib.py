@@ -9,31 +9,11 @@ class Form(object):
     """A class whose instances remember the order in which attrs are set."""
 
     def __init__(self):
-        self._clear()
+        self._inputs = []
+        self._inputset = set()
         self._outputs = []
         self._outputset = set()
         self._mode = 'input'
-
-    def _clear(self):
-        """Forget the names of the inputs that have been set so far.
-
-        This has two consequences.  First, all attributes already set
-        may be set one more time without raising an exception.  Second,
-        the attributes set so far will not appear when the form is
-        rendered as JSON unless they are set a second time.
-
-        This is useful if a tax form wants to set up default values
-        (like a zero for each of the input amounts) that can then be
-        overwritten by the user's actual form values, but that will not
-        clutter up the "input" section when we re-save the form as JSON.
-
-        Tax form logic never calls this method directly, but instead
-        relies on Luca to make the call after a form's setup() function
-        has finished but before the form's input data is then read in.
-
-        """
-        self._inputs = []
-        self._inputset = set()
 
     def _switch_from_input_to_output(self):
         """Switch this form and all child forms to output mode.

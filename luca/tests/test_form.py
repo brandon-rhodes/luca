@@ -57,19 +57,6 @@ class FormTests(TestCase):
         with self.assertRaises(TypeError):
             f.x = 4
 
-    def test_input_attribute_list_can_be_cleared(self):
-        f = Form()
-        f.y = 0
-        f.x = 0
-        assert f._inputs == ['y', 'x']
-        f._clear()
-        assert f._inputs == []
-        f.x = 5
-        f.y = 7
-        assert f._inputs == ['x', 'y']
-        with self.assertRaises(TypeError):
-            f.x = 4
-
     def test_building_from_json_reads_inputs(self):
         for json in json_in, json_empty_output, json_filled_output:
             f = load_json(json)
