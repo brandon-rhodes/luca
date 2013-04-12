@@ -9,6 +9,15 @@ class FormTests(TestCase):
     def test_instantiation(self):
         Form()
 
+    def test_attributes_remember_their_values(self):
+        f = Form()
+        f.y = 3
+        f.x = 1
+        f.z = 2
+        assert f.y == 3
+        assert f.x == 1
+        assert f.z == 2
+
 
 json1 = '''{
  "inputs": {
