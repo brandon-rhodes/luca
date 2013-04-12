@@ -73,24 +73,36 @@ def run_fill(form, form_module, pdfpath, outputpath):
 class Fields(object):
     """Object that lets you fill in the fields in a PDF."""
 
-    def __init__(self, names):
+    def __init__(self, names, items=None):
         self.names = names
-        self.items = []
+        self.items = [] if (items is None) else items
+
+    def __getitem__(self, pattern):
+        if isinstance(pattern, slice):
+            names = self.names[pattern]
+        elif isinstance(pattern, int):
+            names = self.names[pattern : pattern + 1]
+        else:
+            names = [ name for name in self.names if pattern in name ]
+        return Fields(names, self.items)
 
     def __setitem__(self, pattern, value_or_values):
+        fields = self[pattern]
+        fields.set(value_or_values)
+
+    def set(self, value_or_values):
+        names = self.names
         if isinstance(value_or_values, (tuple, list)):
             values = value_or_values
         else:
             values = [value_or_values]
-        matching_names = [name for name in self.names if pattern in name]
-        if len(matching_names) != len(values):
+        if len(names) != len(values):
             raise ValueError('there are %d matching names but %d values'
                              '\n\nNames:\n\n%s\n\nValues:\n\n%s'
-                             % (len(matching_names), len(values),
-                                '\n'.join(matching_names),
+                             % (len(names), len(values),
+                                '\n'.join(names),
                                 '\n'.join(str(v) for v in values)))
-        for name, value in zip(matching_names, values):
-            tup = (name, value)
+        for tup in zip(names, values):
             self.items.append(tup)
 
 
