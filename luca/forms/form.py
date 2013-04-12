@@ -1,5 +1,8 @@
 '''The Form class and its supporting materials.'''
 
+import json
+
+
 class Form(object):
     '''A class whose instances remember the order in which attrs are set.'''
 
@@ -29,3 +32,14 @@ class Form(object):
                     self._outputs.append(name)
                     self._outputset.add(name)
         super(Form, self).__setattr__(name, value)
+
+
+def from_json(text):
+    outer = json.loads(text, object_pairs_hook=from_pairs)
+    return outer.inputs
+
+def from_pairs(pairs):
+    f = Form()
+    for name, value in pairs:
+        setattr(f, name, value)
+    return f

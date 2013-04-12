@@ -1,6 +1,6 @@
 from unittest import TestCase
 from luca.kit import cents
-from luca.forms.form import Form
+from luca.forms.form import Form, from_json
 
 
 class FormTests(TestCase):
@@ -67,11 +67,19 @@ class FormTests(TestCase):
         with self.assertRaises(TypeError):
             f.x = 4
 
-    def test_form_building_from_json(self):
-        pass
+    def test_building_form_from_json(self):
+        for json in json1, json2:
+            f = from_json(json)
+            assert f._inputs == ['form', 'ssn', 'name', 'A', 'B']
+            assert f.form == 'rental_income'
+            assert f.ssn == '123-45-6789'
+            assert f.name == 'Lynn Smith'
+            self.assertIsInstance(f.A, Form)
+            assert f.A.address == '123 Main St, Ohio'
+            self.assertIsInstance(f.B, Form)
 
 
-json1 = '''{
+json1 = u'''{
  "inputs": {
   "form": "rental_income",
   "ssn": "123-45-6789",
@@ -79,21 +87,25 @@ json1 = '''{
   "A": {
    "address": "123 Main St, Ohio",
    "rents": "900.00",
-   "expenses": "100.00",
+   "expenses": "100.00"
   },
   "B": {
    "address": "456 Elm St, Georgia",
    "rents": "800.00",
-   "expenses": "230.00",
+   "expenses": "230.00"
   }
- },
+ }
+}
+'''
+
+json2 = json1[:-3] + u''',
  "outputs": {
   "A": {
    "profit": "800.00",
    "tax": "80.00"
   },
   "B": {
-   "profit": "570.00"
+   "profit": "570.00",
    "tax": "57.00"
   },
   "total_rents": "1700.00",
