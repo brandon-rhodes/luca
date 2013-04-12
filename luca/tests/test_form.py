@@ -1,6 +1,6 @@
 from unittest import TestCase
 from luca.kit import cents
-from luca.forms.form import Form, from_json
+from luca.forms.form import Form, load_json
 
 
 class FormTests(TestCase):
@@ -67,9 +67,9 @@ class FormTests(TestCase):
         with self.assertRaises(TypeError):
             f.x = 4
 
-    def test_building_form_from_json(self):
+    def test_building_from_json_reads_inputs(self):
         for json in json1, json2:
-            f = from_json(json)
+            f = load_json(json)
             assert f._inputs == ['form', 'ssn', 'name', 'A', 'B']
             assert f.form == 'rental_income'
             assert f.ssn == '123-45-6789'
@@ -77,6 +77,15 @@ class FormTests(TestCase):
             self.assertIsInstance(f.A, Form)
             assert f.A.address == '123 Main St, Ohio'
             self.assertIsInstance(f.B, Form)
+
+    def test_building_from_json_discards_old_outputs(self):
+        for json in json1, json2:
+            f = load_json(json)
+            assert f._outputs == []
+            with self.assertRaises(AttributeError):
+                f.A.profit
+            with self.assertRaises(AttributeError):
+                f.total_rents
 
 
 json1 = u'''{

@@ -34,11 +34,11 @@ class Form(object):
         super(Form, self).__setattr__(name, value)
 
 
-def from_json(text):
-    outer = json.loads(text, object_pairs_hook=from_pairs)
+def load_json(text):
+    outer = json.loads(text, object_pairs_hook=form_from_pairs)
     return outer.inputs
 
-def from_pairs(pairs):
+def form_from_pairs(pairs):
     f = Form()
     for name, value in pairs:
         setattr(f, name, value)
