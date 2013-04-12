@@ -3,7 +3,7 @@ from unittest import TestCase
 from textwrap import dedent
 
 from luca.kit import cents
-from luca.forms.form import Form, load_json, dump_json
+from luca.forms.formlib import Form, load_json, dump_json
 
 
 class FormTests(TestCase):
