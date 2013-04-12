@@ -86,13 +86,13 @@ class FormTests(TestCase):
     def test_building_from_json_reads_inputs(self):
         for json in json_in, json_empty_output, json_filled_output:
             f = load_json(json)
-            assert f._inputs == ['form', 'ssn', 'name', 'A', 'B']
+            assert f._inputs == ['form', 'ssn', 'name', 'Part_I']
             assert f.form == 'rental_income'
             assert f.ssn == '123-45-6789'
             assert f.name == 'Lynn Smith'
-            self.assertIsInstance(f.A, Form)
-            assert f.A.address == '123 Main St, Ohio'
-            self.assertIsInstance(f.B, Form)
+            self.assertIsInstance(f.Part_I, Form)
+            assert f.Part_I.A.address == '123 Main St, Ohio'
+            self.assertIsInstance(f.Part_I.B, Form)
 
     def test_building_from_json_discards_old_outputs(self):
         for json in json_in, json_empty_output, json_filled_output:
@@ -106,10 +106,10 @@ class FormTests(TestCase):
     def test_building_from_json_detects_decimals(self):
         for json in json_in, json_empty_output, json_filled_output:
             f = load_json(json)
-            self.assertIsInstance(f.A.rents, Decimal)
-            self.assertIsInstance(f.B.expenses, Decimal)
-            assert str(f.A.rents) == '900.00'
-            assert str(f.B.expenses) == '230.00'
+            self.assertIsInstance(f.Part_I.A.rents, Decimal)
+            self.assertIsInstance(f.Part_I.B.expenses, Decimal)
+            assert str(f.Part_I.A.rents) == '900.00'
+            assert str(f.Part_I.B.expenses) == '230.00'
 
     def test_rendering_form_inputs_as_json(self):
         for json in json_in, json_empty_output, json_filled_output:
@@ -153,15 +153,17 @@ json_in = u'''{
   "form": "rental_income",
   "ssn": "123-45-6789",
   "name": "Lynn Smith",
-  "A": {
-   "address": "123 Main St, Ohio",
-   "rents": "900.00",
-   "expenses": "100.00"
-  },
-  "B": {
-   "address": "456 Elm St, Georgia",
-   "rents": "800.00",
-   "expenses": "230.00"
+  "Part_I": {
+   "A": {
+    "address": "123 Main St, Ohio",
+    "rents": "900.00",
+    "expenses": "100.00"
+   },
+   "B": {
+    "address": "456 Elm St, Georgia",
+    "rents": "800.00",
+    "expenses": "230.00"
+   }
   }
  }
 }
@@ -174,13 +176,15 @@ json_empty_output = json_in[:-3] + u''',
 
 json_filled_output = json_in[:-3] + u''',
  "outputs": {
-  "A": {
-   "profit": "800.00",
-   "tax": "80.00"
-  },
-  "B": {
-   "profit": "570.00",
-   "tax": "57.00"
+  "Part_I": {
+   "A": {
+    "profit": "800.00",
+    "tax": "80.00"
+   },
+   "B": {
+    "profit": "570.00",
+    "tax": "57.00"
+   }
   },
   "total_rents": "1700.00",
   "total_expenses": "330.00",
@@ -191,7 +195,7 @@ json_filled_output = json_in[:-3] + u''',
 '''
 
 def process_form(f):
-    subs = (f.A, f.B)
+    subs = (f.Part_I.A, f.Part_I.B)
     for sub in subs:
         sub.profit = sub.rents - sub.expenses
         sub.tax = cents(sub.profit / 10)

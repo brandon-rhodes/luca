@@ -99,7 +99,7 @@ def _gather_outputs(form):
     d = odict()
     for name in form._inputs:
         value = getattr(form, name)
-        if isinstance(value, Form) and value._outputs:
+        if isinstance(value, Form) and _has_outputs(value):
             value = _gather_outputs(value)
             d[name] = value
     for name in form._outputs:
@@ -110,3 +110,11 @@ def _gather_outputs(form):
             value = str(value)
         d[name] = value
     return d
+
+def _has_outputs(form):
+    if form._outputs:
+        return True
+    for value in form.__dict__.values():
+        if isinstance(value, Form) and _has_outputs(value):
+            return True
+    return False
