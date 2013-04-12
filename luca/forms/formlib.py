@@ -15,7 +15,7 @@ class Form(object):
         self._outputset = set()
         self._mode = 'input'
 
-    def _switch_from_input_to_output(self):
+    def _enter_output_mode(self):
         """Switch this form and all child forms to output mode.
 
         This never needs to be called from tax form logic, because Luca
@@ -27,7 +27,7 @@ class Form(object):
         self._mode = 'output'
         for value in self.__dict__.values():
             if isinstance(value, Form):
-                value._switch_from_input_to_output()
+                value._enter_output_mode()
 
     def __setattr__(self, name, value):
         if not name.startswith('_'):

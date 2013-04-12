@@ -24,7 +24,7 @@ class FormTests(TestCase):
         f = Form()
         f.y = 3
         f.x = 1
-        f._switch_from_input_to_output()
+        f._enter_output_mode()
         f.z = 2
         assert f._inputs == ['y', 'x']
         assert f._outputs == ['z']
@@ -33,7 +33,7 @@ class FormTests(TestCase):
         f = Form()
         f.y = 3
         f.x = 1
-        f._switch_from_input_to_output()
+        f._enter_output_mode()
         f.z = 2
         f.w = 4
         f.w = 8
@@ -52,7 +52,7 @@ class FormTests(TestCase):
         f = Form()
         f.y = 3
         f.x = 1
-        f._switch_from_input_to_output()
+        f._enter_output_mode()
         f.z = 2
         with self.assertRaises(TypeError):
             f.x = 4
@@ -94,16 +94,16 @@ class FormTests(TestCase):
     def test_rendering_form_inputs_and_outputs_as_json(self):
         for json in json_in, json_empty_output, json_filled_output:
             f = load_json(json)
-            f._switch_from_input_to_output()
+            f._enter_output_mode()
             process_form(f)
             j = dump_json(f)
             assert j == json_filled_output
 
     def test_rendering_form_with_a_subform_added_later(self):
         f = load_json('{"inputs": {"A": {"a": 1}}}')
-        f._switch_from_input_to_output()
+        f._enter_output_mode()
         f.B = Form()
-        f.B._switch_from_input_to_output()
+        f.B._enter_output_mode()
         f.B.b = 2
         j = dump_json(f)
         assert j == dedent(u'''\
