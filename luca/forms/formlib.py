@@ -51,7 +51,7 @@ class Form(object):
             if self._mode == 'input':
                 self._inputs.append(name)
                 self._inputset.add(name)
-            else: #if self._mode == 'output':
+            elif self._mode == 'output':
                 if name not in self._outputset:
                     self._outputs.append(name)
                     self._outputset.add(name)

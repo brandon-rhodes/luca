@@ -72,6 +72,17 @@ class FormTests(TestCase):
         assert f.A.x == -3
         assert f.A.y == 2
 
+    def test_default_attributes_disappear_from_output(self):
+        f = Form()
+        f.x = 1
+        f._enter_default_mode()
+        f.x = -1
+        f.y = -2
+        f._enter_output_mode()
+        f.z = -3
+        assert f._inputs == ['x']
+        assert f._outputs == ['z']
+
     def test_building_from_json_reads_inputs(self):
         for json in json_in, json_empty_output, json_filled_output:
             f = load_json(json)
