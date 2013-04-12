@@ -27,12 +27,23 @@ class Form(object):
         overwritten by the user's actual form values, but that will not
         clutter up the "input" section when we re-save the form as JSON.
 
+        Tax form logic never calls this method directly, but instead
+        relies on Luca to make the call after a form's setup() function
+        has finished but before the form's input data is then read in.
+
         """
         self._inputs = []
         self._inputset = set()
 
     def _switch_from_input_to_output(self):
-        """Switch this form and all child forms to output mode."""
+        """Switch this form and all child forms to output mode.
+
+        This never needs to be called from tax form logic, because Luca
+        calls this method automatically after a tax form has been read
+        in from persistent storage, but before the tax form's compute()
+        function is invoked so that computed values become output.
+
+        """
         self._mode = 'output'
         for value in self.__dict__.values():
             if isinstance(value, Form):
