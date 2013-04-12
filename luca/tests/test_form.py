@@ -102,6 +102,15 @@ class FormTests(TestCase):
             j = dump_json(f)
             assert j == json_out1
 
+    def test_rendering_form_inputs_and_outputs_as_json(self):
+        for json in json_in, json_out1, json_out2:
+            f = load_json(json)
+            f._switch_from_input_to_output()
+            process_form(f)
+            j = dump_json(f)
+            print j
+            assert j == json_out2
+
 
 json_in = u'''{
  "inputs": {
