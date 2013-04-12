@@ -110,7 +110,6 @@ class FormTests(TestCase):
             f._switch_from_input_to_output()
             process_form(f)
             j = dump_json(f)
-            print j
             assert j == json_filled_output
 
     def test_rendering_form_with_a_subform_added_later(self):
