@@ -53,8 +53,13 @@ def complete(jsonpath, pdfpath, outputpath='completed-form.pdf'):
 
 
 def run_fill(form, form_module, pdfpath, outputpath):
-    field_dict = form_module.fill(form)
-    fields = field_dict.items()
+    out = subprocess.check_output(['pdftk', pdfpath, 'dump_data_fields'])
+    lines = [ line.split(None, 1) for line in out.splitlines() ]
+    names = [ fields[1] for fields in lines if fields[0] == 'FieldName:' ]
+
+    fields = Fields(names)
+    form_module.fill(form, fields)
+    fields = fields.items
 
     fdf = fdfgen.forge_fdf('', fields, [], [], [])
     fdf_file = open('data.fdf', 'w')
@@ -63,6 +68,30 @@ def run_fill(form, form_module, pdfpath, outputpath):
 
     subprocess.check_call(['pdftk', pdfpath, 'fill_form', 'data.fdf',
                            'output', outputpath])
+
+
+class Fields(object):
+    """Object that lets you fill in the fields in a PDF."""
+
+    def __init__(self, names):
+        self.names = names
+        self.items = []
+
+    def __setitem__(self, pattern, value_or_values):
+        if isinstance(value_or_values, (tuple, list)):
+            values = value_or_values
+        else:
+            values = [value_or_values]
+        matching_names = [name for name in self.names if pattern in name]
+        if len(matching_names) != len(values):
+            raise ValueError('there are %d matching names but %d values'
+                             '\n\nNames:\n\n%s\n\nValues:\n\n%s'
+                             % (len(matching_names), len(values),
+                                '\n'.join(matching_names),
+                                '\n'.join(str(v) for v in values)))
+        for name, value in zip(matching_names, values):
+            tup = (name, value)
+            self.items.append(tup)
 
 
 def run_draw(form, form_module, pdfpath, outputpath):
