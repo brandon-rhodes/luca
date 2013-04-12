@@ -18,6 +18,15 @@ class FormTests(TestCase):
         assert f.x == 1
         assert f.z == 2
 
+    def test_attributes_remember_their_order(self):
+        f = Form()
+        f.y = 3
+        f.x = 1
+        f.switch_from_input_to_output()
+        f.z = 2
+        assert f._inputs == ['y', 'x']
+        assert f._outputs == ['z']
+
 
 json1 = '''{
  "inputs": {
