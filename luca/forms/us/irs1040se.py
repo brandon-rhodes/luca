@@ -34,9 +34,17 @@ def defaults(form):
         sub.is_foreign = False
         sub.ein = ''
         sub.any_not_at_risk = False
+        for col in 'fghij':
+            setattr(sub, col, zero)
+
+    f.line40 = zero
+    f.line42 = zero
+    f.line43 = zero
 
 def compute(form):
     f = form
+
+    # Part I: Income or Loss From Rental Real Estate and Royalties
 
     subforms = [ getattr(f.Part_I, letter) for letter in 'ABC' ]
 
@@ -58,6 +66,33 @@ def compute(form):
     f.line24 = sum(max(sub.line21, zero) for sub in subforms)
     f.line25 = sum(min(sub.line21, zero) for sub in subforms)
     f.line26 = f.line24 + f.line25
+
+    # Part II: Income or Loss From Partnerships and S Corporations
+
+    subforms = [ getattr(f.Part_II, letter) for letter in 'ABCD' ]
+
+    f.line29ag = sum(sub.g for sub in subforms)
+    f.line29aj = sum(sub.j for sub in subforms)
+
+    f.line29bf = sum(sub.f for sub in subforms)
+    f.line29bh = sum(sub.h for sub in subforms)
+    f.line29bi = sum(sub.i for sub in subforms)
+
+    f.line30 = f.line29ag + f.line29aj
+    f.line31 = f.line29bf + f.line29bh + f.line29bi
+    f.line32 = f.line30 - f.line31
+
+    # TODO: Part III
+
+    f.line37 = zero
+
+    # TODO: Part IV
+
+    f.line39 = zero
+
+    # Part V: Summary
+
+    f.line41 = f.line26 + f.line32 + f.line37 + f.line39 + f.line40
 
 def fill(form, fields):
     f = form
@@ -109,6 +144,36 @@ def fill(form, fields):
         row[2] = '1' if sub.is_foreign else 'Off'
         row[3] = sub.ein
         row[4] = '1' if sub.any_not_at_risk else 'Off'
+
+    table = fields['Line28TableF-J']
+
+    for i, letter in enumerate('ABCD'):
+        row = table[10*i : 10*(i+1)]
+        sub = getattr(f.Part_II, letter)
+        row[0:2] = zz(sub.f)
+        row[2:4] = zz(sub.g)
+        row[4:6] = zz(sub.h)
+        row[6:8] = zz(sub.i)
+        row[8:10] = zz(sub.j)
+
+    fields['.p2-t57['], fields['.p2-t58['] = zz(f.line29ag)
+    fields['.p2-t59['], fields['.p2-t60['] = zz(f.line29aj)
+
+    fields['.p2-t61['], fields['.p2-t62['] = zz(f.line29bf)
+    fields['.p2-t63['], fields['.p2-t64['] = zz(f.line29bh)
+    fields['.p2-t65['], fields['.p2-t66['] = zz(f.line29bi)
+
+    fields['.p2-t67['], fields['.p2-t68['] = zz(f.line30)
+    fields['.p2-t69['], fields['.p2-t70['] = zz(f.line31)
+    fields['.p2-t71['], fields['.p2-t72['] = zz(f.line32)
+
+    # TODO: Part III
+    # TODO: Part IV
+
+    fields['.p2-t117['], fields['.p2-t118['] = zz(f.line40)
+    fields['.p2-t119['], fields['.p2-t120['] = zz(f.line41)
+    fields['.p2-t121['], fields['.p2-t122['] = zz(f.line42)
+    fields['.p2-t123['], fields['.p2-t124['] = zz(f.line43)
 
 # General-purpose functions that will probably be factored out of here:
 
