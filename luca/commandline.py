@@ -25,6 +25,12 @@ def main():
                    help='Path to the blank PDF form to fill in')
     p.set_defaults(func=complete)
 
+    p = subparsers.add_parser('defaults', help='print the default JSON'
+                              ' data for a tax form')
+    p.add_argument('form_name', metavar='form-name',
+                   help='Name of the form, like us.irs1040sa')
+    p.set_defaults(func=defaults)
+
     p = subparsers.add_parser('download', help='download')
     p.add_argument('nickname', metavar='institution',
                           help='from which institution to download')
@@ -49,6 +55,9 @@ def main():
 
 def complete(args):
     luca.forms.actions.complete(args.json_path, args.pdf_path)
+
+def defaults(args):
+    luca.forms.actions.print_defaults(args.form_name)
 
 def download(args):
     nickname = args.nickname

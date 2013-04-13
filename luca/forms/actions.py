@@ -15,6 +15,22 @@ integer_re = re.compile(r'\d+$')
 decimal_re = re.compile(r'\d+\.\d+$')
 
 
+def print_defaults(form_name):
+    form_module_name = 'luca.forms.' + form_name
+    try:
+        form_module = importlib.import_module(form_module_name)
+    except ImportError:
+        raise ValueError('cannot find a Luca form named {!r}'.format(
+                form_module_name))
+
+    form = formlib.load_json(u'{"inputs": {}}')
+
+    if hasattr(form_module, 'defaults'):
+        form_module.defaults(form)
+
+    print formlib.dump_json(form).encode('utf-8')
+
+
 def complete(jsonpath, pdfpath, outputpath='completed-form.pdf'):
 
     with open(jsonpath) as f:
