@@ -63,13 +63,13 @@ def load_json(text):
     outer = json.loads(text, object_pairs_hook=_form_from_pairs)
     return outer.inputs
 
-_decimal_re = re.compile(ur'^-?\d+\.\d\d$')
+_decimal_re = re.compile(ur'^-?[\d,]+\.\d\d$')
 
 def _form_from_pairs(pairs):
     f = Form()
     for name, value in pairs:
         if isinstance(value, unicode) and _decimal_re.match(value):
-            value = Decimal(value)
+            value = Decimal(value.replace(u',', u''))
         setattr(f, name, value)
     return f
 
