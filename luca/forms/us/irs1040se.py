@@ -12,9 +12,12 @@ def defaults(form):
     f.is_1099_required = False
     f.is_1099_filed = False
 
-    for c in 'ABC':
-        setattr(f, c, Form())
-        sub = getattr(f, c)
+    f.Part_I = Form()
+    f.Part_II = Form()
+
+    for letter in 'ABC':
+        setattr(f.Part_I, letter, Form())
+        sub = getattr(f.Part_I, letter)
         sub.address = ''
         sub.type = ''
         sub.fair_rental_days = 0
@@ -23,10 +26,19 @@ def defaults(form):
         for i in range(3, 20):
             setattr(sub, 'line%d' % i, zero)
 
+    for letter in 'ABCD':
+        setattr(f.Part_II, letter, Form())
+        sub = getattr(f.Part_II, letter)
+        sub.name = ''
+        sub.type = ''
+        sub.is_foreign = False
+        sub.ein = ''
+        sub.any_not_at_risk = False
+
 def compute(form):
     f = form
 
-    subforms = [ getattr(f, letter) for letter in 'ABC' ]
+    subforms = [ getattr(f.Part_I, letter) for letter in 'ABC' ]
 
     for sub in subforms:
         expenses = zero
@@ -56,8 +68,10 @@ def fill(form, fields):
     yesno(f.is_1099_required, fields['c1_01[0]'])
     yesno(f.is_1099_required, fields['c1_03[0]'])
 
+    # Part I: Income or Loss From Rental Real Estate and Royalties
+
     for i, subform_name in enumerate('ABC'):
-        sub = getattr(form, subform_name)
+        sub = getattr(form.Part_I, subform_name)
         cols = slice(2*i, 2*(i+1))
 
         fields['Pg1Table1a['][i] = sub.address
@@ -82,6 +96,19 @@ def fill(form, fields):
     fields['Page1[0].p1-t507['], fields['Page1[0].p1-t506['] = zz(f.line24)
     fields['Page1[0].p1-t178['], fields['Page1[0].p1-t179['] = zz(-f.line25)
     fields['Page1[0].p1-t180['], fields['Page1[0].p1-t181['] = zz(f.line26)
+
+    # Part II: Income or Loss From Partnerships and S Corporations
+
+    table = fields['Line28TableA-E']
+
+    for i, letter in enumerate('ABCD'):
+        row = table[5*i : 5*(i+1)]
+        sub = getattr(f.Part_II, letter)
+        row[0] = sub.name
+        row[1] = sub.type
+        row[2] = '1' if sub.is_foreign else 'Off'
+        row[3] = sub.ein
+        row[4] = '1' if sub.any_not_at_risk else 'Off'
 
 # General-purpose functions that will probably be factored out of here:
 
