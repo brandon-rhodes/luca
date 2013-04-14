@@ -1,7 +1,7 @@
 from luca.kit import Decimal, cents
 
 title = u'Schedule A (Form 1040): Itemized Deductions'
-filename = 'f1040sa--2012.pdf'
+pdfpath = 'us/f1040sa--2012.pdf'
 zero = cents(0)
 
 def defaults(form):

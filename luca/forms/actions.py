@@ -1,11 +1,13 @@
 """One-off program to generate tax forms until I learn the workflow."""
 
+import os
 import re
 import importlib
 import subprocess
 from StringIO import StringIO
 
 import fdfgen
+import requests
 from pyPdf import PdfFileWriter, PdfFileReader
 from reportlab.pdfgen.canvas import Canvas
 
@@ -31,7 +33,7 @@ def print_defaults(form_name):
     print formlib.dump_json(form).encode('utf-8')
 
 
-def complete(jsonpath, pdfpath, outputpath='completed-form.pdf'):
+def complete(jsonpath):
 
     with open(jsonpath) as f:
         form = formlib.load_json(f.read().decode('utf-8'))
@@ -46,6 +48,19 @@ def complete(jsonpath, pdfpath, outputpath='completed-form.pdf'):
         raise ValueError('cannot find a Luca form named {!r}'.format(
                 form_module_name))
 
+    if hasattr(form_module, 'pdfpath'):
+        pdfpath = form_module.pdfpath
+        fullpath = os.path.join('cache', pdfpath)
+        if not os.path.isdir('cache'):
+            os.mkdir('cache')
+        if not os.path.isfile(fullpath):
+            url = 'http://luca-forms.s3.amazonaws.com/' + pdfpath
+            data = requests.get(url).content
+            with open(fullpath, 'w') as f:
+                f.write(data)
+    else:
+        pdfpath = None
+
     if hasattr(form_module, 'defaults'):
         form._enter_default_mode()
         form_module.defaults(form)
@@ -58,14 +73,15 @@ def complete(jsonpath, pdfpath, outputpath='completed-form.pdf'):
     with open(jsonpath, 'w') as f:
         f.write(json_string)
 
-    if not pdfpath:
-        return
+    if not os.path.isdir('out'):
+        os.mkdir('out')
 
+    outputpath = os.path.join('out', os.path.basename(pdfpath))
     print 'Generating', outputpath
     if hasattr(form_module, 'draw'):
-        run_draw(form, form_module, pdfpath, outputpath)
+        run_draw(form, form_module, fullpath, outputpath)
     else:
-        run_fill(form, form_module, pdfpath, outputpath)
+        run_fill(form, form_module, fullpath, outputpath)
 
 
 def run_fill(form, form_module, pdfpath, outputpath):

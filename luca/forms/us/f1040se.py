@@ -2,7 +2,7 @@ from luca.forms.formlib import Form
 from luca.kit import Decimal, cents
 
 title = u"Supplemental Income and Loss"
-filename = 'f1040se--2012.pdf'
+pdfpath = 'us/f1040se--2012.pdf'
 zero = cents(0)
 
 def defaults(form):

@@ -6,7 +6,7 @@ eighthpercent = Decimal('.008')
 sixthpercent = Decimal('.006')
 
 title = u"Employer's Annual Federal Unemployment (FUTA) Tax Return"
-filename = 'f940--2011.pdf'
+pdfpath = 'us/f940--2011.pdf'
 
 
 def compute(form):

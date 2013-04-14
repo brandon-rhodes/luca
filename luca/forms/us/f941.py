@@ -1,7 +1,7 @@
 from decimal import Decimal
 from luca.kit import cents
 
-filename = 'f941.pdf'
+pdfpath = 'us/f941.pdf'
 
 Decimal('7.325').quantize
 

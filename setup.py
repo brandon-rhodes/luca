@@ -18,6 +18,7 @@ setup(name='luca',
       install_requires=[
         'fdfgen',
         'reportlab',
+        'requests',
         'pyPdf',
         ],
       entry_points={'console_scripts': [
