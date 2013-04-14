@@ -1,8 +1,6 @@
 from decimal import Decimal
 from luca.kit import cents
 
-pdfpath = 'us/f941.pdf'
-
 Decimal('7.325').quantize
 
 

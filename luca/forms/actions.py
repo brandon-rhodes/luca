@@ -48,18 +48,15 @@ def complete(jsonpath):
         raise ValueError('cannot find a Luca form named {!r}'.format(
                 form_module_name))
 
-    if hasattr(form_module, 'pdfpath'):
-        pdfpath = form_module.pdfpath
-        fullpath = os.path.join('cache', pdfpath)
-        if not os.path.isdir('cache'):
-            os.mkdir('cache')
-        if not os.path.isfile(fullpath):
-            url = 'http://luca-forms.s3.amazonaws.com/' + pdfpath
-            data = requests.get(url).content
-            with open(fullpath, 'w') as f:
-                f.write(data)
-    else:
-        pdfpath = None
+    pdfpath = form.form + '--2012.pdf'
+    fullpath = os.path.join('cache', pdfpath)
+    if not os.path.isdir('cache'):
+        os.mkdir('cache')
+    if not os.path.isfile(fullpath):
+        url = 'http://luca-forms.s3.amazonaws.com/' + pdfpath
+        data = requests.get(url).content
+        with open(fullpath, 'w') as f:
+            f.write(data)
 
     if hasattr(form_module, 'defaults'):
         form._enter_default_mode()

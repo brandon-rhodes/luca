@@ -1,7 +1,6 @@
 from luca.kit import Decimal, cents
 
 title = u'Schedule B (Form 1040): Interest and Ordinary Dividends'
-pdfpath = 'us/f1040sb--2012.pdf'
 zero = cents(0)
 
 def defaults(form):
