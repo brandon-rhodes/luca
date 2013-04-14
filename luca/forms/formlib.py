@@ -82,13 +82,17 @@ def _convert(value):
 def dump_json(form):
     """Render the `form` as attractively formatted JSON."""
     j = json.dumps(form, ensure_ascii=False, indent=1,
-                   separators=(',', ': '), default=_encode_form)
+                   separators=(',', ': '), default=_encode)
     return j + '\n'
 
-def _encode_form(form):
-    inputs = _gather_inputs(form)
-    outputs = _gather_outputs(form)
-    return odict([('inputs', inputs), ('outputs', outputs)])
+def _encode(value):
+    if isinstance(value, Decimal):
+        return unicode(value)
+    elif isinstance(value, Form):
+        form = value
+        inputs = _gather_inputs(form)
+        outputs = _gather_outputs(form)
+        return odict([('inputs', inputs), ('outputs', outputs)])
 
 def _gather_inputs(form):
     d = odict()

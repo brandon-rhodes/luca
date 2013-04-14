@@ -119,6 +119,28 @@ class FormTests(TestCase):
         assert f.line1 == [["First Bank", Decimal('1.23')],
                            ["Second Bank", Decimal('4.56')]]
 
+    def test_json_output_handles_decimals_in_lists(self):
+        f = Form()
+        f.line1 = [["First Bank", Decimal('1.23')],
+                   ["Second Bank", Decimal('4.56')]]
+        assert dump_json(f) == dedent(u'''\
+            {
+             "inputs": {
+              "line1": [
+               [
+                "First Bank",
+                "1.23"
+               ],
+               [
+                "Second Bank",
+                "4.56"
+               ]
+              ]
+             },
+             "outputs": {}
+            }
+            ''')
+
     def test_building_from_json_detects_negative_decimals(self):
         f = load_json(u'{"inputs": {"value": "-100.23"}}')
         self.assertIsInstance(f.value, Decimal)
