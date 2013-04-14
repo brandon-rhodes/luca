@@ -5,6 +5,7 @@ import re
 from collections import OrderedDict as odict
 from decimal import Decimal
 
+
 class Form(object):
     """A class whose instances remember the order in which attrs are set."""
 
@@ -68,10 +69,15 @@ _decimal_re = re.compile(ur'^-?[\d,]+\.\d\d$')
 def _form_from_pairs(pairs):
     f = Form()
     for name, value in pairs:
-        if isinstance(value, unicode) and _decimal_re.match(value):
-            value = Decimal(value.replace(u',', u''))
-        setattr(f, name, value)
+        setattr(f, name, _convert(value))
     return f
+
+def _convert(value):
+    if isinstance(value, unicode) and _decimal_re.match(value):
+        return Decimal(value.replace(u',', u''))
+    elif isinstance(value, list):
+        return [_convert(item) for item in value]
+    return value
 
 def dump_json(form):
     """Render the `form` as attractively formatted JSON."""

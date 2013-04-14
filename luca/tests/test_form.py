@@ -111,6 +111,14 @@ class FormTests(TestCase):
             assert str(f.Part_I.A.rents) == '900.00'
             assert str(f.Part_I.B.expenses) == '230.00'
 
+    def test_building_from_json_detects_decimals_in_lists(self):
+        f = load_json(u'{"inputs": {"line1": [["First Bank", "1.23"],'
+                      ' ["Second Bank", "4.56"]]}}')
+        assert isinstance(f.line1[0][1], Decimal)
+        assert isinstance(f.line1[1][1], Decimal)
+        assert f.line1 == [["First Bank", Decimal('1.23')],
+                           ["Second Bank", Decimal('4.56')]]
+
     def test_building_from_json_detects_negative_decimals(self):
         f = load_json(u'{"inputs": {"value": "-100.23"}}')
         self.assertIsInstance(f.value, Decimal)
