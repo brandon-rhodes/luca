@@ -16,6 +16,12 @@ class Form(object):
         self._outputset = set()
         self._mode = 'input'
 
+    def __repr__(self):
+        return u'<Form {}>'.format(' '.join(
+                '{}={!r}'.format(name, value) for name, value
+                in sorted(self.__dict__.items()) if not name.startswith('_')
+                ))
+
     def _enter_default_mode(self):
         """Switch this form, and any child forms, to default mode.
 
