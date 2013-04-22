@@ -146,13 +146,13 @@ class FormTests(TestCase):
         self.assertIsInstance(f.value, Decimal)
         assert str(f.value) == '-100.23'
 
-    def test_rendering_form_inputs_as_json(self):
+    def test_dumping_form_preserves_inputs(self):
         for json in json_in, json_empty_output, json_filled_output:
             f = load_json(json)
             j = dump_json(f)
             assert j == json_empty_output
 
-    def test_rendering_form_inputs_and_outputs_as_json(self):
+    def test_dumping_form_preserves_inputs_and_includes_new_outputs(self):
         for json in json_in, json_empty_output, json_filled_output:
             f = load_json(json)
             f._enter_output_mode()
@@ -160,7 +160,7 @@ class FormTests(TestCase):
             j = dump_json(f)
             assert j == json_filled_output
 
-    def test_rendering_form_with_a_subform_added_later(self):
+    def test_dumping_form_includes_output_subforms(self):
         f = load_json('{"inputs": {"A": {"a": 1}}}')
         f._enter_output_mode()
         f.B = Form()
@@ -178,6 +178,42 @@ class FormTests(TestCase):
               "B": {
                "b": 2
               }
+             }
+            }
+            ''')
+
+    def test_loading_list_of_subforms(self):
+        f = load_json('{"inputs": {"items": [{"n": 10}, {"m": 11}]}}')
+        assert len(f.items) == 2
+        assert f.items[0].n == 10
+        assert f.items[1].m == 11
+
+    def test_dumping_list_of_subforms(self):
+        f = load_json('{"inputs": {"items": [{"n": 10}, {"m": 11}]}}')
+        f._enter_output_mode()
+        f.items[0].x = 100
+        f.items[0].y = 101
+        j = dump_json(f)
+        assert j == dedent(u'''\
+            {
+             "inputs": {
+              "items": [
+               {
+                "n": 10
+               },
+               {
+                "m": 11
+               }
+              ]
+             },
+             "outputs": {
+              "items": [
+               {
+                "x": 100,
+                "y": 101
+               },
+               {}
+              ]
              }
             }
             ''')

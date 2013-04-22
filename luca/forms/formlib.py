@@ -33,6 +33,10 @@ class Form(object):
         for value in self.__dict__.values():
             if isinstance(value, Form):
                 value._enter_default_mode()
+            elif isinstance(value, list):
+                for item in value:
+                    if isinstance(item, Form):
+                        item._enter_default_mode()
 
     def _enter_output_mode(self):
         """Switch this form and all child forms to output mode.
@@ -47,6 +51,10 @@ class Form(object):
         for value in self.__dict__.values():
             if isinstance(value, Form):
                 value._enter_output_mode()
+            elif isinstance(value, list):
+                for item in value:
+                    if isinstance(item, Form):
+                        item._enter_output_mode()
 
     def __setattr__(self, name, value):
         if not name.startswith('_'):
@@ -85,6 +93,7 @@ def _convert(value):
         return [_convert(item) for item in value]
     return value
 
+
 def dump_json(form):
     """Render the `form` as attractively formatted JSON."""
     j = json.dumps(form, ensure_ascii=False, indent=1,
@@ -104,10 +113,14 @@ def _gather_inputs(form):
     d = odict()
     for name in form._inputs:
         value = getattr(form, name)
-        if isinstance(value, Form):
-            value = _gather_inputs(value)
-        elif isinstance(value, Decimal):
+        if isinstance(value, Decimal):
             value = str(value)
+        elif isinstance(value, Form):
+            value = _gather_inputs(value)
+        elif isinstance(value, list) and any(
+              isinstance(item, Form) for item in value
+              ):
+            value = [_gather_inputs(subform) for subform in value]
         d[name] = value
     return d
 
@@ -118,12 +131,20 @@ def _gather_outputs(form):
         if isinstance(value, Form) and _has_outputs(value):
             value = _gather_outputs(value)
             d[name] = value
+        elif isinstance(value, list) and any(
+              isinstance(item, Form) for item in value
+              ):
+            value = [_gather_outputs(item) for item in value]
+            if any(value):
+                d[name] = value
     for name in form._outputs:
         value = getattr(form, name)
-        if isinstance(value, Form):
-            value = _gather_outputs(value)
-        elif isinstance(value, Decimal):
+        if isinstance(value, Decimal):
             value = str(value)
+        elif isinstance(value, Form):
+            value = _gather_outputs(value)
+        elif isinstance(value, list):
+            value = [_gather_outputs(item) for item in value]
         d[name] = value
     return d
 
