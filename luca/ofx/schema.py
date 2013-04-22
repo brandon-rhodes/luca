@@ -7,7 +7,7 @@ class ElementMaker(object):
 
     >>> E = ElementMaker(False)
     >>> E.bold('Thomas Paine')
-    '<b>Thomas Paine</b>
+    '<bold>Thomas Paine</bold>'
 
     """
     def __init__(self, use_sgml):
@@ -29,12 +29,13 @@ class _Element(object):
     '<date><year>2012</year></date>'
 
     But if `use_sgml` is true, then simple strings which do not
-    themselves contain elements will lack a closing tag.
+    themselves contain elements will lack a closing tag, but larger
+    elements will continue to include a closing tag.
 
-    >>> _Element('date', False)('2012')
+    >>> _Element('date', True)('2012')
     '<date>2012'
-    >>> _Element('date', False)('<year>2012</year>')
-    '<date><year>2012</year></date>'
+    >>> _Element('date', True)('<year>2012')
+    '<date><year>2012</date>'
 
     """
     def __init__(self, name, use_sgml):
