@@ -185,6 +185,8 @@ class FormTests(TestCase):
     def test_loading_list_of_subforms(self):
         f = load_json('{"inputs": {"items": [{"n": 10}, {"m": 11}]}}')
         assert len(f.items) == 2
+        assert isinstance(f.items[0], Form)
+        assert isinstance(f.items[1], Form)
         assert f.items[0].n == 10
         assert f.items[1].m == 11
 
