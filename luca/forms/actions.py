@@ -54,6 +54,10 @@ def complete(jsonpath):
         os.mkdir('cache')
     if not os.path.isfile(fullpath):
         url = 'http://luca-forms.s3.amazonaws.com/' + pdfpath
+        response = requests.get(url)
+        if not response.ok:
+            print 'Error: could not download form from', url
+            return
         data = requests.get(url).content
         with open(fullpath, 'w') as f:
             f.write(data)
