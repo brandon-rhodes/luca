@@ -79,10 +79,12 @@ def complete(jsonpath):
 
     outputpath = os.path.join('out', os.path.basename(pdfpath))
     print 'Generating', outputpath
+    inputpath = fullpath
+    if hasattr(form_module, 'fill'):
+        run_fill(form, form_module, inputpath, outputpath)
+        inputpath = outputpath
     if hasattr(form_module, 'draw'):
-        run_draw(form, form_module, fullpath, outputpath)
-    else:
-        run_fill(form, form_module, fullpath, outputpath)
+        run_draw(form, form_module, inputpath, outputpath)
 
 
 def run_fill(form, form_module, pdfpath, outputpath):
@@ -109,6 +111,14 @@ class Fields(object):
     def __init__(self, names, items=None):
         self.names = names
         self.items = [] if (items is None) else items
+
+    @property
+    def all(self):
+        return list(self.items)
+
+    @all.setter
+    def all(self, value):
+        self[''] = [value] * len(self.names)
 
     def __getitem__(self, pattern):
         if isinstance(pattern, slice):
@@ -139,11 +149,13 @@ class Fields(object):
             self.items.append(tup)
 
 
-def run_draw(form, form_module, pdfpath, outputpath):
-    original_form = PdfFileReader(file(pdfpath, 'rb'))
+def run_draw(form, form_module, inputpath, outputpath):
+    with open(inputpath, 'rb') as f:
+        inputdata = f.read()
+    original_form = PdfFileReader(StringIO(inputdata))
 
     canvas = Canvas('fields.pdf')
-    form_module.draw(form, canvas)
+    page_numbers = form_module.draw(form, canvas)
     overlays = PdfFileReader(StringIO(canvas.getpdfdata()))
 
     output = PdfFileWriter()
@@ -152,7 +164,8 @@ def run_draw(form, form_module, pdfpath, outputpath):
         page = original_form.getPage(i)
         overlay = overlays.getPage(i)
         page.mergePage(overlay)
-        output.addPage(page)
+        if (page_numbers is None) or ((i + 1) in page_numbers):
+            output.addPage(page)
 
     print('Writing {}'.format(outputpath))
     with open(outputpath, 'w') as f:
