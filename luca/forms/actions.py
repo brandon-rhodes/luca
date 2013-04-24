@@ -48,20 +48,6 @@ def complete(jsonpath):
         raise ValueError('cannot find a Luca form named {!r}'.format(
                 form_module_name))
 
-    pdfpath = form.form + '--2012.pdf'
-    fullpath = os.path.join('cache', pdfpath)
-    if not os.path.isdir('cache'):
-        os.mkdir('cache')
-    if not os.path.isfile(fullpath):
-        url = 'http://luca-forms.s3.amazonaws.com/' + pdfpath
-        response = requests.get(url)
-        if not response.ok:
-            print 'Error: could not download form from', url
-            return
-        data = requests.get(url).content
-        with open(fullpath, 'w') as f:
-            f.write(data)
-
     if hasattr(form_module, 'defaults'):
         form._enter_default_mode()
         form_module.defaults(form)
@@ -76,6 +62,9 @@ def complete(jsonpath):
 
     if not os.path.isdir('out'):
         os.mkdir('out')
+
+    pdfpath = form.form + '--2012.pdf'
+    fullpath = download_pdf(pdfpath)
 
     outputpath = os.path.join('out', os.path.basename(pdfpath))
     print 'Generating', outputpath
@@ -103,6 +92,22 @@ def run_fill(form, form_module, pdfpath, outputpath):
 
     subprocess.check_call(['pdftk', pdfpath, 'fill_form', 'data.fdf',
                            'output', outputpath])
+
+
+def download_pdf(pdfpath):
+    fullpath = os.path.join('cache', pdfpath)
+    if not os.path.isdir('cache'):
+        os.mkdir('cache')
+    if not os.path.isfile(fullpath):
+        url = 'http://luca-forms.s3.amazonaws.com/' + pdfpath
+        response = requests.get(url)
+        if not response.ok:
+            print 'Error: could not download form from', url
+            return
+        data = requests.get(url).content
+        with open(fullpath, 'w') as f:
+            f.write(data)
+    return fullpath
 
 
 class Fields(object):
