@@ -1,5 +1,5 @@
 from decimal import Decimal
-from luca.kit import cents, zero, zzstr
+from luca.kit import cents, validate, zero, zzstr
 
 
 def defaults(form):
@@ -31,6 +31,8 @@ def defaults(form):
 
 def compute(form):
     f = form
+    validate.year(f.year)
+    validate.quarter(f.quarter)
     f.line4 = not (f.line5a1 or f.line5b1 or f.line5c1)
     f.line5a2 = cents(f.line5a1 * Decimal('0.104'))
     f.line5b2 = cents(f.line5b1 * Decimal('0.104'))
@@ -69,11 +71,10 @@ def fill(form, fields):
     fields[name(14)] = f.state
     fields[name(15)] = f.zip
 
-    Q = 4
-    fields['c1_1_0_[0]'] = 'Report1' if Q == 1 else 'Off'
-    fields['c1_1_0_[1]'] = 'Report2' if Q == 2 else 'Off'
-    fields['c1_1_0_[2]'] = 'Report3' if Q == 3 else 'Off'
-    fields['c1_1_0_[3]'] = 'Report4' if Q == 4 else 'Off'
+    fields['c1_1_0_[0]'] = 'Report1' if f.quarter == 1 else 'Off'
+    fields['c1_1_0_[1]'] = 'Report2' if f.quarter == 2 else 'Off'
+    fields['c1_1_0_[2]'] = 'Report3' if f.quarter == 3 else 'Off'
+    fields['c1_1_0_[3]'] = 'Report4' if f.quarter == 4 else 'Off'
 
     put(17, f.line2)
     put(19, f.line3)

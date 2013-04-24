@@ -1,6 +1,9 @@
 """A kit in the British sense: standard-equipment utilities that code needs."""
 
+import re
 from decimal import Decimal, ROUND_HALF_UP
+
+# Currency conveniences.
 
 zero = Decimal('0.00')
 cent = Decimal('0.01')
@@ -44,3 +47,19 @@ def zzstr(value):
 
     """
     return unicode(value).rsplit('.', 1) if value else [u'', u'']
+
+# Time periods.
+
+class validate(object):
+
+    @staticmethod
+    def year(y):
+        if not isinstance(y, int) or y < 1000 or y > 9999:
+            raise ValueError('please specify the year as a four-digit '
+                             'integer, not a value like {!r}'.format(y))
+
+    @staticmethod
+    def quarter(q):
+        if not isinstance(q, int) or q < 1 or q > 4:
+            raise ValueError('please specify the quarter as an integer '
+                             '1-4, not a value like {!r}'.format(q))
