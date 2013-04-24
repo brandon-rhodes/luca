@@ -5,6 +5,7 @@ import re
 import importlib
 import subprocess
 from StringIO import StringIO
+from subprocess import Popen, PIPE
 
 import fdfgen
 import requests
@@ -63,6 +64,16 @@ def complete(jsonpath):
     if not os.path.isdir('out'):
         os.mkdir('out')
 
+    if hasattr(form_module, 'fill_out'):
+        # Support new-style fill_out() pattern, to which all forms will
+        # soon be rewritten.
+        pdf = PDF()
+        form_module.fill_out(form, pdf)
+        basename, ext = os.path.splitext(os.path.basename(jsonpath))
+        outputpath = os.path.join('out', basename + '.pdf')
+        pdf.save(outputpath)
+        return
+
     pdfpath = form.form + '--2012.pdf'
     fullpath = download_pdf(pdfpath)
 
@@ -108,6 +119,46 @@ def download_pdf(pdfpath):
         with open(fullpath, 'w') as f:
             f.write(data)
     return fullpath
+
+
+class PDF(object):
+
+    def __init__(self):
+        self.field_tuples = []  # list of (field_name, value) tuples
+        self.pages = ['1-end']
+
+    def load(self, filename):
+        self.original_pdf_path = download_pdf(filename)
+        output = subprocess.check_output(
+            ['pdftk', self.original_pdf_path, 'dump_data_fields'])
+        lines = [ line.split(None, 1) for line in output.splitlines() ]
+        names = [ words[1] for words in lines if words[0] == 'FieldName:' ]
+        self.fields = Fields(names, self.field_tuples)
+
+    def save(self, path):
+        print 'Saving', path
+
+        fdf = fdfgen.forge_fdf('', self.field_tuples, [], [], [])
+        pages = [str(p) for p in self.pages]
+
+        p1 = Popen(
+            ['pdftk', self.original_pdf_path, 'fill_form', '-', 'output', '-'],
+            stdin=PIPE, stdout=PIPE,
+            )
+        p2 = Popen(
+            ['pdftk', '-', 'cat'] +  pages + ['output', path],
+            stdin=p1.stdout,
+            )
+        p1.stdout.close()
+        p1.stdin.write(fdf)
+        p1.stdin.close()
+        p2.wait()
+
+    def __getitem__(self, pattern):
+        return self.fields[pattern]
+
+    def __setitem__(self, pattern, value):
+        self.fields[pattern] = value
 
 
 class Fields(object):
