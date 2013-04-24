@@ -1,11 +1,16 @@
 from decimal import Decimal
-from luca.kit import cents, zero
+from luca.kit import cents, zero, zzstr
 
 
 def defaults(form):
     f = form
-    f.name = ''
-    f.ein = ''
+    f.name = u''
+    f.trade_name = u''
+    f.address = u''
+    f.city = u''
+    f.state = u''
+    f.zip = u''
+    f.ein = u''
     f.line1 = 0
     f.line2 = zero
     f.line3 = zero
@@ -17,12 +22,11 @@ def defaults(form):
     f.line11 = zero
     f.line12a = zero
     f.line12b = 0
-    f.line16 = 1
+    f.line16 = 'a'
     f.Part_4 = False
-    f.signer_name = ''
-    f.signer_title = ''
-    f.signer_phone = ''
-    f.signing_date = ''
+    f.signer_name = u''
+    f.signer_title = u''
+    f.signer_phone = u''
 
 
 def compute(form):
@@ -44,68 +48,78 @@ def compute(form):
     # TODO: refuse to let them check box 1 on line16 if they do not qualify
 
 
-def draw(form, canvas):
+def fill(form, fields):
     f = form
+    page = 1
 
-    def put(x, y, value):
-        # Font per http://www.irs.gov/instructions/i941/ch01.html
-        canvas.setFont('Courier', 10)
-        if isinstance(value, Decimal):
-            dollars, cents = str(value).split('.')
-            canvas.drawString(x - 6 - canvas.stringWidth(dollars), y, dollars)
-            canvas.drawString(x + 4, y, cents)
-        else:
-            value = unicode(value)
-            canvas.drawString(x, y, value)
+    def name(n):
+        return 'f{}_{:02}_0_[0]'.format(page, n)
+
+    def put(n, value):
+        fields[name(n)], fields[name(n + 1)] = zzstr(value)
+
+    for i in range(9):
+        fields[name(i + 1)] = f.ein.replace('-', '')[i : i+1]
+
+    fields[name(16)] = str(f.line1 or '')
+    fields[name(10)] = f.name
+    fields[name(11)] = f.trade_name
+    fields[name(12)] = f.address
+    fields[name(13)] = f.city
+    fields[name(14)] = f.state
+    fields[name(15)] = f.zip
+
+    Q = 4
+    fields['c1_1_0_[0]'] = 'Report1' if Q == 1 else 'Off'
+    fields['c1_1_0_[1]'] = 'Report2' if Q == 2 else 'Off'
+    fields['c1_1_0_[2]'] = 'Report3' if Q == 3 else 'Off'
+    fields['c1_1_0_[3]'] = 'Report4' if Q == 4 else 'Off'
+
+    put(17, f.line2)
+    put(19, f.line3)
+    fields['c1_5_0_[0]'] = '1' if f.line4 else 'Off'
+    put(21, f.line5a1)
+    put(23, f.line5a2)
+    put(25, f.line5b1)
+    put(27, f.line5b2)
+    put(29, f.line5c1)
+    put(31, f.line5c2)
+    put(33, f.line5d)
+    put(60, f.line5e)
+    dollars, cents = zzstr(f.line6)
+    fields[name(105)] = dollars
+    fields[name(36)] = cents
+    put(37, f.line7)
+    put(39, f.line8)
+    put(41, f.line9)
+    put(54, f.line10)
+    put(56, f.line11)
+    put(45, f.line12a)
+    fields[name(47)] = str(f.line12b or '')
+    put(43, f.line13)
+    put(58, f.line14)
+    put(64, f.line15)
+
+    page = 2
+
+    fields[name(75)] = f.name
+    fields[name(14)] = f.ein
+
+    fields['c2_01_0_[0]'] = 'Chck1' if f.line16 == 'a' else 'Off'
+
+    # TODO: allow other options for Part 2
+    # TODO: support Part 3
+    # TODO: allow "yes" and further information for Part 4
+
+    fields['c2_06_0_[0]'] = 'Yes' if f.Part_4 else 'Off'
+    fields['c2_06_0_[1]'] = 'Off' if f.Part_4 else 'No'
+
+    fields[name(44)] = f.signer_name
+    fields[name(66)] = f.signer_title
+    fields[name(48)] = f.signer_phone
 
 
-    digits = [ c for c in f.ein if c.isdigit() ]
-    for i, digit in enumerate(digits[:2]):
-        put(158 + 26.5 * i, 714, digit)
-    for i, digit in enumerate(digits[2:]):
-        put(223 + 25.5 * i, 714, digit)
-
-    put(140, 690, f.name)
-    put(82, 642, f.address)
-    put(82, 615, f.city)
-    put(282, 615, f.state)
-    put(320, 615, f.zip)
-
-    step = (683.25 - 648.75) / 2
-    origin = 685 + step
-    for i in range(1, 5):
-        put(420, origin - i * step, 'X' if f.quarter == i else '')
-
-    stride = 18
-
-    put(552, 552, f.line1)
-    put(552, 552 - stride, f.line2)
-    put(552, 552 - 2 * stride, f.line3)
-    put(272, 462, f.line5a1)
-    put(409, 462, f.line5a2)
-    put(272, 462 - stride, f.line5b1)
-    put(409, 462 - stride, f.line5b2)
-    put(272, 462 - 2 * stride, f.line5c1)
-    put(409, 462 - 2 * stride, f.line5c2)
-    put(552, 402, f.line5d)
-    put(552, 402 - stride, f.line5e)
-    put(552, 402 - 2 * stride, f.line6)
-    put(552, 402 - 6 * stride, f.line10)
-    put(552, 192, f.line14)
-
+def draw(form, canvas):
     canvas.showPage()
-
-    put(36, 725, f.name)
-    put(400, 725, f.ein)
-
-    put(118, 662.5, f.line16)
-
-    # TODO: support the checkboxes and fields in Part 3
-    # TODO: support paid-preparer fields in Part 4
-    put(66.5, 318.5, f.Part_4)
-
-    put(434, 252, f.signer_name)
-    put(434, 228, f.signer_title)
-    put(464, 197.5, f.signer_phone)
-
     canvas.showPage()
+    return 1, 2
