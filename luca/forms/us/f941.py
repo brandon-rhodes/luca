@@ -1,20 +1,47 @@
 from decimal import Decimal
-from luca.kit import cents
+from luca.kit import cents, zero
 
-Decimal('7.325').quantize
+
+def defaults(form):
+    f = form
+    f.name = ''
+    f.ein = ''
+    f.line1 = 0
+    f.line2 = zero
+    f.line3 = zero
+    f.line5a1 = f.line5b1 = f.line5c1 = zero
+    f.line5e = zero
+    f.line7 = zero
+    f.line8 = zero
+    f.line9 = zero
+    f.line11 = zero
+    f.line12a = zero
+    f.line12b = 0
+    f.line16 = 1
+    f.Part_4 = False
+    f.signer_name = ''
+    f.signer_title = ''
+    f.signer_phone = ''
+    f.signing_date = ''
 
 
 def compute(form):
     f = form
-    f.line5a1 = f.line2
-    f.line5c1 = f.line2
-    f.line5a2 = cents(f.line5a1 * Decimal(0.104))
-    f.line5b2 = cents(f.line5b1 * Decimal(0.104))
-    f.line5c2 = cents(f.line5c1 * Decimal(0.029))
-    f.line5d = cents(f.line5a2 + f.line5c2) # + f.line5b2
-    f.line6 = cents(f.line3 + f.line5d) #+ f.line5e
-    f.line10 = cents(f.line6)
-    f.line14 = cents(f.line10) # - f.line13
+    f.line4 = not (f.line5a1 or f.line5b1 or f.line5c1)
+    f.line5a2 = cents(f.line5a1 * Decimal('0.104'))
+    f.line5b2 = cents(f.line5b1 * Decimal('0.104'))
+    f.line5c2 = cents(f.line5c1 * Decimal('0.029'))
+    f.line5d = f.line5a2 + f.line5b2 + f.line5c2
+    f.line6 = f.line3 + f.line5d + f.line5e
+    f.line10 = f.line6 + f.line7 + f.line8 + f.line9
+    f.line13 = f.line11 + f.line12a
+    if f.line10 > f.line13:
+        f.line14 = f.line10 - f.line13
+        f.line15 = zero
+    else:
+        f.line14 = zero
+        f.line15 = f.line13 - f.line10
+    # TODO: refuse to let them check box 1 on line16 if they do not qualify
 
 
 def draw(form, canvas):
@@ -71,12 +98,14 @@ def draw(form, canvas):
     put(36, 725, f.name)
     put(400, 725, f.ein)
 
-    put(118, 662.5, f.line16a)
+    put(118, 662.5, f.line16)
 
-    put(66.5, 318.5, f.part4_no)
+    # TODO: support the checkboxes and fields in Part 3
+    # TODO: support paid-preparer fields in Part 4
+    put(66.5, 318.5, f.Part_4)
 
-    put(434, 252, f.sign_name)
-    put(434, 228, f.sign_title)
-    put(464, 197.5, f.sign_phone)
+    put(434, 252, f.signer_name)
+    put(434, 228, f.signer_title)
+    put(464, 197.5, f.signer_phone)
 
     canvas.showPage()
