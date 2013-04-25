@@ -26,7 +26,8 @@ def print_defaults(form_name):
         raise ValueError('cannot find a Luca form named {!r}'.format(
                 form_module_name))
 
-    form = formlib.load_json(u'{"inputs": {}}')
+    form = formlib.Form()
+    form.form = form_name
 
     if hasattr(form_module, 'defaults'):
         form_module.defaults(form)
