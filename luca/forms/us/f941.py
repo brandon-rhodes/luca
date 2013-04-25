@@ -34,9 +34,14 @@ def compute(form):
     validate.year(f.year)
     validate.quarter(f.quarter)
     f.line4 = not (f.line5a1 or f.line5b1 or f.line5c1)
-    f.line5a2 = cents(f.line5a1 * Decimal('0.104'))
-    f.line5b2 = cents(f.line5b1 * Decimal('0.104'))
-    f.line5c2 = cents(f.line5c1 * Decimal('0.029'))
+
+    social_security_rate = Decimal('0.104' if f.year < 2013 else '0.124')
+    medicare_rate = Decimal('0.029')
+
+    f.line5a2 = cents(f.line5a1 * social_security_rate)
+    f.line5b2 = cents(f.line5b1 * social_security_rate)
+    f.line5c2 = cents(f.line5c1 * medicare_rate)
+
     f.line5d = f.line5a2 + f.line5b2 + f.line5c2
     f.line6 = f.line3 + f.line5d + f.line5e
     f.line10 = f.line6 + f.line7 + f.line8 + f.line9
@@ -113,7 +118,7 @@ def fill_out(form, pdf):
 
     page = 2
 
-    pdf[name(75)] = f.name
+    pdf[name(75) if f.year < 2013 else 'd2_75_0_[0]'] = f.name
     pdf[name(14)] = f.ein
 
     pdf['c2_01_0_[0]'] = 'Chck1' if f.line16 == 'a' else 'Off'
