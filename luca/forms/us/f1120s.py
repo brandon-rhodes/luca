@@ -20,7 +20,7 @@ def defaults(form):
 
     f.line1a = f.line1b = f.line2 = f.line4 = f.line5 = zero
     for n in range(7, 20):
-        setattr(f, 'line{}'.format(n), zero)
+        f['line', n] = zero
     f.line22a = f.line22b = f.line23a = f.line23b = f.line23c = zero
     f.line24 = zero
     f.line27_credited = zero
@@ -63,17 +63,33 @@ def defaults(form):
     f.K.line13e_type = ''
     f.K.line13g_type = ''
     for i in range(ord('a'), ord('n') + 1):
-        setattr(f.K, 'line14' + chr(i), zero)
+        f.K['line14', chr(i)] = zero
     for i in range(ord('a'), ord('f') + 1):
-        setattr(f.K, 'line15' + chr(i), zero)
+        f.K['line15', chr(i)] = zero
     for i in range(ord('a'), ord('e') + 1):
-        setattr(f.K, 'line16' + chr(i), zero)
+        f.K['line16', chr(i)] = zero
     f.K.line17a = f.K.line17b = f.K.line17c = zero
     f.K.line18 = (
-        sum(getattr(f.K, 'line{}'.format(i)) for i in range(1, 10 + 1))
+        sum(f.K['line', i] for i in range(1, 10 + 1))
         - f.K.line11 - f.K.line12a - f.K.line12b - f.K.line12c
         - f.K.line12d - f.line14l
         )
+
+    # TODO: Schedule L
+    # TODO: Schedule M-1
+
+    f.M2 = Form()
+    f.M2.line1a = zero
+    f.M2.line3a = zero
+    f.M2.line5a = zero
+    f.M2.line7a = zero
+
+    f.M2.line1b = zero
+    f.M2.line3b = zero
+    f.M2.line5b = zero
+    f.M2.line7b = zero
+
+    f.M2.line1c = zero
 
 
 def compute(form):
@@ -84,7 +100,7 @@ def compute(form):
     f.line3 = f.line1c - f.line2
     f.line6 = f.line3 + f.line4 + f.line5
 
-    f.line21 = sum(getattr(f, 'line{}'.format(n)) for n in range(7, 20))
+    f.line21 = sum(f['line', n] for n in range(7, 20))
 
     f.line22c = f.line22a + f.line22b
     f.line23d = f.line23a + f.line23b + f.line23c
@@ -99,4 +115,14 @@ def compute(form):
         f.line27 = -owed - f.line27_credited
 
     f.K.line3c = f.K.line3a - f.K.line3b
-    
+
+    f.M2.line2a = abs(f.line21) if f.line21 > 0 else zero
+    f.M2.line4a = abs(f.line21) if f.line21 < 0 else zero
+    f.M2.line6a = sum(f.M2['line', n, 'a'] for n in range(1, 5+1))
+    f.M2.line8a = f.line6a - f.line7a
+
+    f.M2.line6b = f.M2.line1b + f.M2.line3b + f.M2.line5b
+    f.M2.line8b = f.line6b - f.line7b
+
+    f.M2.line6c = f.M2.line1c
+    f.M2.line8c = f.line6c - f.line7c
