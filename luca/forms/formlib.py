@@ -22,6 +22,27 @@ class Form(object):
                 in sorted(self.__dict__.items()) if not name.startswith('_')
                 ))
 
+    def __getitem__(self, name):
+        """Dynamic attribute lookup, to avoid setattr() and getattr().
+
+        >>> f = Form()
+        >>> f.line6 = 100
+        >>> f['line6']
+        100
+        >>> f['line', 6]
+        100
+
+        """
+        if not isinstance(name, str):
+            name = ''.join(str(item) for item in name)
+        return getattr(self, name)
+
+    def __setitem__(self, name, value):
+        """Dynamic attribute setting."""
+        if not isinstance(name, str):
+            name = ''.join(str(item) for item in name)
+        return setattr(self, name, value)
+
     def _enter_default_mode(self):
         """Switch this form, and any child forms, to default mode.
 

@@ -83,6 +83,19 @@ class FormTests(TestCase):
         assert f._inputs == ['x']
         assert f._outputs == ['z']
 
+    def test_getitem_gets_attributes(self):
+        f = Form()
+        f.x = 1
+        f.y20 = 'Two'
+        assert f['x'] == 1
+        assert f['y', 20] == 'Two'
+
+    def test_setitem_gets_attributes(self):
+        f = Form()
+        f['y', 20] = 'Two'
+        assert f['y', 20] == 'Two'
+        assert f.y20 == 'Two'
+
     def test_building_from_json_reads_inputs(self):
         for json in json_in, json_empty_output, json_filled_output:
             f = load_json(json)
