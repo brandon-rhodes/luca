@@ -1,6 +1,6 @@
 from decimal import Decimal
 from luca.forms.formlib import Form
-from luca.kit import cents, validate, zero, zzstr
+from luca.kit import cents, validate, zero, zstr, zzstr
 
 
 def defaults(form):
@@ -31,8 +31,8 @@ def defaults(form):
 
     f.B = Form()
     f.B.line1 = 'a'
-    f.B.line2a = ''
-    f.B.line2b = ''
+    f.B.line2_activity = ''
+    f.B.line2_service = ''
     f.B.line3 = False
     # TODO: tables beneath line 4a and line4b
     f.B.line4a = []
@@ -168,7 +168,7 @@ def fill_out(form, pdf):
     pair(17, f.line1b)
     pair(19, f.line1c)
     for i in range(2, 21+1):
-        pair(2 + 17, f['line', i])
+        pair(2*i + 17, f['line', i])
     pair(61, f.line22a)
     pair(63, f.line22b)
     pair(65, f.line22c)
@@ -184,3 +184,37 @@ def fill_out(form, pdf):
     pdf['p1_t85'] = f.signer_title
     pdf['c1_9_0_[0]'] = 'Yes' if f.discuss else 'Off'
     pdf['c1_9_0_[1]'] = 'Off' if f.discuss else 'No'
+
+    pdf['c2_01_0_[0]'] = 'A' if f.B.line1 == 'a' else 'Off'
+    pdf['c2_01_0_[1]'] = 'B' if f.B.line1 == 'b' else 'Off'
+    if f.B.line1 not in ('a', 'b'):
+        pdf['c2_01_0_[2]'] = 'C'
+        pdf['p2-t19['] = f.B.line1
+    pdf['p2-t20['] = f.B.line2_activity
+    pdf['p2-t21['] = f.B.line2_product
+    pdf['c2_04_0_[0]'] = 'Yes' if f.B.line3 else 'Off'
+    pdf['c2_04_0_[1]'] = 'Off' if f.B.line3 else 'No'
+    pdf['c2_06_0_[0]'] = 'Yes' if f.B.line4a else 'Off'
+    pdf['c2_06_0_[1]'] = 'Off' if f.B.line4a else 'No'
+    pdf['c2_08_0_[0]'] = 'Yes' if f.B.line4b else 'Off'
+    pdf['c2_08_0_[1]'] = 'Off' if f.B.line4b else 'No'
+    pdf['c2_10_0_[0]'] = 'Yes' if (f.B.line5ai or f.B.line5aii) else 'Off'
+    pdf['c2_10_0_[1]'] = 'Off' if (f.B.line5ai or f.B.line5aii) else 'No'
+    pdf['c2_112_0_[0]'] = 'Yes' if (f.B.line5bi or f.B.line5bii) else 'Off'
+    pdf['c2_112_0_[1]'] = 'Off' if (f.B.line5bi or f.B.line5bii) else 'No'
+    pdf['c2_15_0_[0]'] = 'Yes' if f.B.line6 else 'Off'
+    pdf['c2_15_0_[1]'] = 'Off' if f.B.line6 else 'No'
+    pdf['c2_11_0_[0]'] = 'Yes' if f.B.line7 else 'Off'
+    pdf['p2-t22[0]'] = zstr(f.B.line8)
+    pdf['p2-t23[0]'] = zstr(f.B.line9)
+    pdf['c2_100_0_[0]'] = 'Yes' if f.B.line10 else 'Off'
+    pdf['c2_101_0_[0]'] = 'Yes' if f.B.line11 else 'Off'
+    pdf['c2_101_0_[1]'] = 'Off' if f.B.line11 else 'No'
+    pdf['p2-t22[0]'] = zstr(f.B.line11)
+    pdf['c2_13_0_[0]'] = 'Yes' if f.B.line12 else 'Off'
+    pdf['c2_13_0_[1]'] = 'Off' if f.B.line12 else 'No'
+    pdf['c2_80_0_[0]'] = 'Yes' if f.B.line13a else 'Off'
+    pdf['c2_80_0_[1]'] = 'Off' if f.B.line13a else 'No'
+    pdf['c2_07_0_[0]'] = 'Yes' if f.B.line13b else 'Off'
+    pdf['c2_07_0_[1]'] = 'Off' if f.B.line13b else 'No'
+
