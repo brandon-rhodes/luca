@@ -14,29 +14,30 @@ def cents(value):
     return value.quantize(cent, rounding=ROUND_HALF_UP)
 
 def zstr(value):
-    """Return u'' if `value` is false, else the Unicode string for `value`.
+    """Return u'' for a false `value`, else format it with thousands commas.
 
     This is useful on tax forms such as those of the IRS where they
     would rather have you leave a field blank instead of writing an
-    explicit zero value like ``0.00``.
+    explicit zero value like ``0.00``.  Includes thousands commas.
 
-    >>> zstr(cent)
-    u'0.01'
+    >>> zstr(Decimal('1234567.89'))
+    u'1,234,567.89'
     >>> zstr(zero)
     u''
 
     """
-    return unicode(value) if value else u''
+    return u'{:,}'.format(value) if value else u''
 
 def zzstr(value):
     """Return Unicode strings ``(dollars, cents)`` for Decimal `value`.
 
     A zero `value` results in a pair of empty strings ``(u'', u'')``
     instead of ``(u'0', u'00')`` because tax forms typically would
-    rather have you leave a field blank if it is zero.
+    rather have you leave a field blank if it is zero.  A non-zero
+    value, if large enough, will include thousands commas.
 
-    >>> zzstr(cent)
-    [u'0', u'01']
+    >>> zzstr(Decimal('1234567.89'))
+    [u'1,234,567', u'89']
     >>> zzstr(zero)
     [u'', u'']
 
@@ -46,7 +47,7 @@ def zzstr(value):
         fields['t57'], fields['t58'] = zz(f.line29ag)
 
     """
-    return unicode(value).rsplit('.', 1) if value else [u'', u'']
+    return u'{:,}'.format(value).rsplit('.', 1) if value else [u'', u'']
 
 # Time periods.
 
