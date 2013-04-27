@@ -1,5 +1,5 @@
 from luca.forms.formlib import Form
-from luca.kit import validate, zero, zstr, zzstr
+from luca.kit import zero, zstr
 
 
 first_few_lines = '1 2 3 4 5a 5b 6 7 8a 8b 9'.split()
