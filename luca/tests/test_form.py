@@ -272,9 +272,9 @@ json_filled_output = json_in[:-3] + u''',
     "tax": "57.00"
    }
   },
-  "total_rents": "1700.00",
+  "total_rents": "1,700.00",
   "total_expenses": "330.00",
-  "total_profit": "1370.00",
+  "total_profit": "1,370.00",
   "total_tax": "137.00"
  }
 }

@@ -123,7 +123,7 @@ def dump_json(form):
 
 def _encode(value):
     if isinstance(value, Decimal):
-        return unicode(value)
+        return '{:,}'.format(value)
     elif isinstance(value, Form):
         form = value
         inputs = _gather_inputs(form)
@@ -135,7 +135,7 @@ def _gather_inputs(form):
     for name in form._inputs:
         value = getattr(form, name)
         if isinstance(value, Decimal):
-            value = str(value)
+            value = '{:,}'.format(value)
         elif isinstance(value, Form):
             value = _gather_inputs(value)
         elif isinstance(value, list) and any(
@@ -161,7 +161,7 @@ def _gather_outputs(form):
     for name in form._outputs:
         value = getattr(form, name)
         if isinstance(value, Decimal):
-            value = str(value)
+            value = '{:,}'.format(value)
         elif isinstance(value, Form):
             value = _gather_outputs(value)
         elif isinstance(value, list):
