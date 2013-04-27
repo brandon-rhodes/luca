@@ -36,27 +36,10 @@ def print_defaults(form_name):
 
 
 def complete(jsonpath):
-
     with open(jsonpath) as f:
-        form = formlib.load_json(f.read().decode('utf-8'))
+        json_data = f.read()
 
-    if not hasattr(form, 'form'):
-        raise ValueError('your JSON "input" object needs to specify a "form"')
-
-    form_module_name = 'luca.forms.' + form.form
-    try:
-        form_module = importlib.import_module(form_module_name)
-    except ImportError:
-        raise ValueError('cannot find a Luca form named {!r}'.format(
-                form_module_name))
-
-    if hasattr(form_module, 'defaults'):
-        form._enter_default_mode()
-        form_module.defaults(form)
-
-    form._enter_output_mode()
-    form_module.compute(form)
-
+    form, form_module = process(json_data)
     json_string = formlib.dump_json(form).encode('utf-8')
     print('Updating {}'.format(jsonpath))
     with open(jsonpath, 'w') as f:
@@ -86,6 +69,29 @@ def complete(jsonpath):
         inputpath = outputpath
     if hasattr(form_module, 'draw'):
         run_draw(form, form_module, inputpath, outputpath)
+
+
+def process(json_data):
+    form = formlib.load_json(json_data.decode('utf-8'))
+
+    if not hasattr(form, 'form'):
+        raise ValueError('your JSON "input" object needs to specify a "form"')
+
+    form_module_name = 'luca.forms.' + form.form
+    try:
+        form_module = importlib.import_module(form_module_name)
+    except ImportError:
+        raise ValueError('cannot find a Luca form named {!r}'.format(
+                form_module_name))
+
+    if hasattr(form_module, 'defaults'):
+        form._enter_default_mode()
+        form_module.defaults(form)
+
+    form._enter_output_mode()
+    form_module.compute(form)
+
+    return form, form_module
 
 
 def run_fill(form, form_module, pdfpath, outputpath):
