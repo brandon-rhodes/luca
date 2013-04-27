@@ -125,21 +125,50 @@ def download_pdf(pdfpath):
 class PDF(object):
 
     def __init__(self):
-        self.field_tuples = []  # list of (field_name, value) tuples
         self.pages = ['1-end']
+        self.format = '{}'
+        self.fdf_fields = []
+
+    # The beginning.
 
     def load(self, filename):
         self.original_pdf_path = download_pdf(filename)
         output = subprocess.check_output(
             ['pdftk', self.original_pdf_path, 'dump_data_fields'])
         lines = [ line.split(None, 1) for line in output.splitlines() ]
-        names = [ words[1] for words in lines if words[0] == 'FieldName:' ]
-        self.fields = Fields(names, self.field_tuples)
+        self.names = [ words[1] for words in lines
+                       if words[0] == 'FieldName:' ]
+
+    # Various tools for setting field values.
+
+    def __setitem__(self, argument, values):
+        substring = self.format.format(argument)
+        names = [name for name in self.names if substring in name]
+        if not isinstance(values, (tuple, list)):
+            values = [values]
+        if len(names) != len(values):
+            raise ValueError('{} names match {!r} but you supplied {} values'
+                             '\n\nNames:\n\n{}\n\nValues:\n\n{}'
+                             .format(len(names), substring, len(values),
+                                     '\n'.join(names),
+                                     '\n'.join(str(v) for v in values)))
+        for tup in zip(names, values):
+            self.fdf_fields.append(tup)
+
+    @property
+    def all(self):
+        raise NotImplemented('you can only set .all, not access it')
+
+    @all.setter
+    def all(self, value):
+        self.items.extend((name, value) for name in self.names)
+
+    # The finale.
 
     def save(self, path):
         print 'Saving', path
 
-        fdf = fdfgen.forge_fdf('', self.field_tuples, [], [], [])
+        fdf = fdfgen.forge_fdf('', self.fdf_fields, [], [], [])
         pages = [str(p) for p in self.pages]
 
         p1 = Popen(
@@ -154,56 +183,6 @@ class PDF(object):
         p1.stdin.write(fdf)
         p1.stdin.close()
         p2.wait()
-
-    def __getitem__(self, pattern):
-        return self.fields[pattern]
-
-    def __setitem__(self, pattern, value):
-        self.fields[pattern] = value
-
-
-class Fields(object):
-    """Object that lets you fill in the fields in a PDF."""
-
-    def __init__(self, names, items=None):
-        self.names = names
-        self.items = [] if (items is None) else items
-
-    @property
-    def all(self):
-        return list(self.items)
-
-    @all.setter
-    def all(self, value):
-        self[''] = [value] * len(self.names)
-
-    def __getitem__(self, pattern):
-        if isinstance(pattern, slice):
-            names = self.names[pattern]
-        elif isinstance(pattern, int):
-            names = self.names[pattern : pattern + 1]
-        else:
-            names = [ name for name in self.names if pattern in name ]
-        return Fields(names, self.items)
-
-    def __setitem__(self, pattern, value_or_values):
-        fields = self[pattern]
-        fields.set(value_or_values)
-
-    def set(self, value_or_values):
-        names = self.names
-        if isinstance(value_or_values, (tuple, list)):
-            values = value_or_values
-        else:
-            values = [value_or_values]
-        if len(names) != len(values):
-            raise ValueError('there are %d matching names but %d values'
-                             '\n\nNames:\n\n%s\n\nValues:\n\n%s'
-                             % (len(names), len(values),
-                                '\n'.join(names),
-                                '\n'.join(str(v) for v in values)))
-        for tup in zip(names, values):
-            self.items.append(tup)
 
 
 def run_draw(form, form_module, inputpath, outputpath):
