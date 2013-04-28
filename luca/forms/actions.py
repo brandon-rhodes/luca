@@ -148,14 +148,15 @@ class PDF(object):
     # Various tools for setting field values.
 
     def __setitem__(self, argument, values):
-        substring = self.format.format(argument)
-        names = [name for name in self.names if substring in name]
+        if not isinstance(argument, str):
+            argument = self.format.format(argument)
+        names = [name for name in self.names if argument in name]
         if not isinstance(values, (tuple, list)):
             values = [values]
         if len(names) != len(values):
             raise ValueError('{} names match {!r} but you supplied {} values'
                              '\n\nNames:\n\n{}\n\nValues:\n\n{}'
-                             .format(len(names), substring, len(values),
+                             .format(len(names), argument, len(values),
                                      '\n'.join(names),
                                      '\n'.join(str(v) for v in values)))
         for tup in zip(names, values):

@@ -1,3 +1,5 @@
+"""Form 1120S Schedule K-1: Shareholder's Share of Income, Deductions,\
+ Credits, etc."""
 from luca.forms.formlib import Form
 from luca.kit import zero, zstr
 
@@ -59,8 +61,6 @@ def fill_out(form, pdf):
         n += 1
 
     pdf[27] = zstr(f.line11)
-
-    pdf.format = '{}'
 
     def write_lines(line_number, n):
         lines = f['line', line_number]
