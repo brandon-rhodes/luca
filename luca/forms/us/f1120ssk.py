@@ -45,7 +45,7 @@ def fill_out(form, pdf):
     pdf['c1_01_0_[0]'] = 'Yes' if f.final else 'Off'
     pdf['c1_02_0_[0]'] = 'Yes' if f.amended else 'Off'
 
-    pdf.format = 'p1-t{}[0]'
+    pdf.pattern = 'p1-t{}[0]'
 
     pdf[1] = f.beginning_date
     pdf[2] = f.ending_date

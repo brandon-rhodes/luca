@@ -132,7 +132,7 @@ class PDF(object):
 
     def __init__(self):
         self.pages = ['1-end']
-        self.format = '{}'
+        self.pattern = '{}'
         self.fdf_fields = []
 
     # The beginning.
@@ -147,16 +147,16 @@ class PDF(object):
 
     # Various tools for setting field values.
 
-    def __setitem__(self, argument, values):
-        if not isinstance(argument, str):
-            argument = self.format.format(argument)
-        names = [name for name in self.names if argument in name]
+    def __setitem__(self, substring, values):
+        if not isinstance(substring, str):
+            substring = self.pattern.format(substring)
+        names = [name for name in self.names if substring in name]
         if not isinstance(values, (tuple, list)):
             values = [values]
         if len(names) != len(values):
             raise ValueError('{} names match {!r} but you supplied {} values'
                              '\n\nNames:\n\n{}\n\nValues:\n\n{}'
-                             .format(len(names), argument, len(values),
+                             .format(len(names), substring, len(values),
                                      '\n'.join(names),
                                      '\n'.join(str(v) for v in values)))
         for tup in zip(names, values):
