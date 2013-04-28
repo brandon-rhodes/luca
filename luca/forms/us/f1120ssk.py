@@ -2,16 +2,21 @@ from luca.forms.formlib import Form
 from luca.kit import zero, zstr
 
 
-first_few_lines = '1 2 3 4 5a 5b 6 7 8a 8b 9'.split()
+first_nine_lines = '1 2 3 4 5a 5b 6 7 8a 8b 9'.split()
 
 
 def defaults(form):
     f = form
     f.year = 2012
+    f.final = False
+    f.amended = False
+    f.beginning_date = ''
+    f.ending_date = ''
+    f.ending_year = ''
     f.A = f.B = f.C = f.D = f.E = ''
     f.F = 100
 
-    for number in first_few_lines:
+    for number in first_nine_lines:
         f['line', number] = zero
 
     def empty_line():
@@ -34,16 +39,22 @@ def compute(form):
 def fill_out(form, pdf):
     f = form
     pdf.load('us.f1120ssk--{}.pdf'.format(f.year))
+
+    pdf['c1_01_0_[0]'] = 'Yes' if f.final else 'Off'
+    pdf['c1_02_0_[0]'] = 'Yes' if f.amended else 'Off'
+
     pdf.format = 'p1-t{}[0]'
 
-    # TODO: fields for non-calendar accounting year
+    pdf[1] = f.beginning_date
+    pdf[2] = f.ending_date
+    pdf[3] = f.ending_year
 
     n = 4
     for letter in 'ABCDEF':
         pdf[n] = f[letter]
         n += 1
 
-    for number in first_few_lines:
+    for number in first_nine_lines:
         pdf[n] = zstr(f['line', number])
         n += 1
 
