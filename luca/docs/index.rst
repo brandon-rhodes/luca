@@ -13,11 +13,3 @@ Contents:
 
    completing-forms
    implementing-forms
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
