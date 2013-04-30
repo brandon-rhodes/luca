@@ -11,5 +11,6 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   s-corporation
    completing-forms
    implementing-forms
