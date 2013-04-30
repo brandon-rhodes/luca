@@ -145,7 +145,7 @@ class PDF(object):
         self.names = [ words[1] for words in lines
                        if words[0] == 'FieldName:' ]
 
-    # Various tools for setting field values.
+    # How form logic writes data into fields.
 
     def __setitem__(self, substring, values):
         if not isinstance(substring, str):
@@ -153,22 +153,10 @@ class PDF(object):
         names = [name for name in self.names if substring in name]
         if not isinstance(values, (tuple, list)):
             values = [values]
-        if len(names) != len(values):
-            raise ValueError('{} names match {!r} but you supplied {} values'
-                             '\n\nNames:\n\n{}\n\nValues:\n\n{}'
-                             .format(len(names), substring, len(values),
-                                     '\n'.join(names),
-                                     '\n'.join(str(v) for v in values)))
-        for tup in zip(names, values):
+        for i, name in enumerate(names):
+            value = values[i % len(values)]
+            tup = (name, value)
             self.fdf_fields.append(tup)
-
-    @property
-    def all(self):
-        raise NotImplemented('you can only set .all, not access it')
-
-    @all.setter
-    def all(self, value):
-        self.items.extend((name, value) for name in self.names)
 
     # The finale.
 
