@@ -1,0 +1,93 @@
+; Rule 1: This file only ever affects the "Forms" account
+; Rule 2: The "Forms" account always balances to zero
+; Rule 3: An individual form shall not balance until paid
+;
+;
+; Here are the three kinds of entry that this file is designed to support:
+;
+; 2012/7/31
+;     Forms:W-2: 1 Wages                $2500.00
+;     Forms:W-2: 2 Federal income tax   $-287.05
+;     Forms:W-2:16 State income tax      $-61.95
+;     Forms:W-2:19 Local income tax       $-9.75
+;     Forms:Due:Payroll
+;
+; 2012/10/31
+;     Expenses: 7:Payroll
+;     Assets:Checking                  $-2000.00
+;
+; 2012/10/31
+;     Expenses: 7:Form 941              $-600.00
+;     Expenses:12:Form 941
+;     Assets:Checking                   $-800.00
+;
+
+;
+; --------------------------------------
+; Step 1: Turn W-2 data into obligations
+;
+
+; Social Security and Medicare tax rates vary from year to year.
+; Through the end of 2012, Congress was offering employees a lower 4.2%
+; Social Security tax rate compared to the 6.2% paid by employers.
+
+= expr (account == "Forms:W-2: 1 Wages" & date < [2013/01/01])
+ Forms:W-2: 4 Social security                     (- 0.0420)
+ Forms:W-2: 6 Medicare                            (- 0.0145)
+ Forms:Due:Payroll                         (0.0420 + 0.0145)
+
+= expr (account == "Forms:W-2: 1 Wages" & date < [2013/01/01])
+ Forms:941: 5a Social Security             (0.0620 + 0.0420)
+ Forms:941: 5c Medicare                    (0.0145 + 0.0145)
+ Forms:Due:941:Payroll withheld          (- 0.0420 - 0.0145)
+ Forms:Due:941:Employer taxes            (- 0.0620 - 0.0145)
+
+; But with the beginning of 2013, the employee rate went back to 6.2%.
+
+= expr (account == "Forms:W-2: 1 Wages" & date >= [2013/01/01])
+ Forms:W-2: 4 Social security                     (- 0.0620)
+ Forms:W-2: 6 Medicare                            (- 0.0145)
+ Forms:Due:Payroll                         (0.0620 + 0.0145)
+
+= expr (account == "Forms:W-2: 1 Wages" & date >= [2013/01/01])
+ Forms:941: 5a Social Security             (0.0620 + 0.0620)
+ Forms:941: 5c Medicare                    (0.0145 + 0.0145)
+ Forms:Due:941:Payroll withheld          (- 0.0620 - 0.0145)
+ Forms:Due:941:Employer taxes            (- 0.0620 - 0.0145)
+
+; Form W-2 line 2 obligates us to pay the same amount on 941.
+
+= "Forms:W-2: 2 Federal income tax"
+ Forms:Due:941:Payroll withheld                            1
+ Forms:941: 3 Income tax withheld                         -1
+
+;
+; -----------------------------------------------------------------
+; Step 2: Detect when we have paid all of these various obligations
+;
+
+; Form 941
+
+;= "Expenses: 7:Form 941"
+= expr (account == "Expenses: 7:Form 941" & date > [2012/7/1])
+ Forms:Due:941:Payroll withheld                            1
+ Forms:941:Payroll withheld                               -1
+
+= "Expenses: 8:Form 941"
+ Forms:Due:941:Payroll withheld                            1
+ Forms:941:Payroll withheld                               -1
+
+;= "Expenses:12:Form 941"
+= expr (account == "Expenses:12:Form 941" & date > [2012/7/1])
+ Forms:Due:941:Employer taxes                              1
+ Forms:941:Taxes paid                                     -1
+
+; Payroll
+
+= "Expenses: 7:Payroll"
+ Forms:Due:Payroll                                         1
+ Forms:W-2:Payroll disbursed                              -1
+
+= "Expenses: 8:Payroll"
+ Forms:Due:Payroll                                         1
+ Forms:W-2:Payroll disbursed                              -1
