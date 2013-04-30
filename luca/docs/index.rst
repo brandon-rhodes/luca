@@ -6,7 +6,25 @@
 Welcome to Luca's documentation!
 ================================
 
-Contents:
+As an independent consultant,
+I sustain a very simple business structure:
+an S-Corporation of which I am the sole employee.
+In the ``luca`` command line tool,
+I am slowly collecting commands and scripts
+that help me automate the production
+of business tax forms and other obligations
+that my business must meet each quarter.
+
+Luca is prounounced “Lew-cha” and is named after Luca Pacioli,
+the Italian friend of Leonardo's who invented modern accounting.
+
+You can find the source code itself at:
+
+    `Luca project on GitHub <https://github.com/brandon-rhodes/luca>`_
+
+Installation instructions are also maintained there.
+
+Table of Contents:
 
 .. toctree::
    :maxdepth: 2
