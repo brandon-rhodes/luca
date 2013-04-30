@@ -23,4 +23,4 @@ but can be installed directly from GitHub:
 
 You can find its documentation at Read The Docs:
 
-    https://luca.readthedocs.org/en/latest/
+https://luca.readthedocs.org/en/latest/
