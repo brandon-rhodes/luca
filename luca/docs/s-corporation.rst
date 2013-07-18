@@ -93,8 +93,8 @@ The Master Diagram
    <td colspan=4 width="100%">
     <p>
      An S-Corporation receives income through the year
-     as customers buy its products or pay its invoices for services.
-     Here, I imagine a consultancy whose proceeds totalled $100,000.
+     as customers buy its products or pay invoices for its services.
+     Here, I imagine that my annual proceeds totalled $100,000.
      From 1120S invites me to subtract from the total income
      the money that it took to actually operate the corporation.
      My largest such expense is often my own salary,
@@ -246,14 +246,16 @@ The Master Diagram
   <tr>
    <td colspan=1 width="25%"></td>
    <td colspan=1 width="35%" class="tax">
-    6.20% Social Security<br>
-    1.45% Medicare<br>
-    All withheld income tax
+    Pays:<br>
+    $50,000 × 6.20%<br>
+    $50,000 × 1.45%<br>
+    Estimated income taxes
    </td>
    <td colspan=1 width="15%"></td>
    <td colspan=1 width="25%" class="tax">
-    6.20% S.S.<br>
-    1.45% Medicare
+    Pays:<br>
+    $50,000 × 6.20%<br>
+    $50,000 × 1.45%
    </td>
   </tr>
   <tr>
@@ -274,7 +276,7 @@ The Master Diagram
   </tr>
   <tr>
    <td colspan=1 width="25%" class="foo">
-    $25,000<br>Ordinary Business Income<br>(line 17 and Schedule E)
+    $25,000<br>Ordinary Business Income<br>(line 17 and Schedule E)
    </td>
    <td colspan=1 width="35%" class="foo">
     $35,000<br>Salary<br>(line 7)
