@@ -41,10 +41,10 @@ class Transaction(object):
             account_name, category = category, account_name
 
         pdate = self.posted_date
-        datestr = '{}/{}'.format(pdate.month, pdate.day)
+        datestr = '{}/{}/{}'.format(pdate.year, pdate.month, pdate.day)
         edate = self.effective_date
         if edate is not None:
-            datestr += '={}/{}'.format(edate.month, edate.day)
+            datestr += '={}/{}/{}'.format(edate.year, edate.month, edate.day)
         print datestr,
         if self.is_posted:
             print '*',
