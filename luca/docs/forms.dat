@@ -6,7 +6,8 @@
 ; Here are the three kinds of entry that this file is designed to support:
 ;
 ; 2012/7/31
-;     Forms:W-2: 1 Wages                $2500.00
+;     Forms:W-2:Wages                   $3000.00
+;     Forms:W-2:Retirement deferral     $-500.00
 ;     Forms:W-2: 2 Federal income tax   $-287.05
 ;     Forms:W-2:16 State income tax      $-61.95
 ;     Forms:W-2:19 Local income tax       $-9.75
@@ -23,20 +24,39 @@
 ;
 
 ;
-; --------------------------------------
-; Step 1: Turn W-2 data into obligations
+; --------------------------
+; Step 1: Compute W-2 line 1
 ;
 
+; Lines 3 and 5 can simply be filled in with the raw value given as the
+; employee "Wages", but line 1 should subtract out any deferrals toward
+; retirement.
+
+= "Forms:W-2:Wages"
+    $account                                              -1
+    Forms:W-2: 1 Wages                                     1
+    Forms:W-2: 3 Social security wages                     1
+    Forms:W-2: 5 Medicare wages                            1
+    Forms:W-2                                             -2
+
+= "Forms:W-2:Retirement deferral"
+    $account                                              -1
+    Forms:W-2: 1 Wages                                     1
+
+;
+; --------------------------------------------------
+; Step 2: Compute Social Security and Medicare taxes
+;
 ; Social Security and Medicare tax rates vary from year to year.
 ; Through the end of 2012, Congress was offering employees a lower 4.2%
 ; Social Security tax rate compared to the 6.2% paid by employers.
 
-= expr (account == "Forms:W-2: 1 Wages" & date < [2013/01/01])
+= expr (account == "Forms:W-2:Wages" & date < [2013/01/01])
  Forms:W-2: 4 Social security                     (- 0.0420)
  Forms:W-2: 6 Medicare                            (- 0.0145)
  Forms:Due:Payroll                         (0.0420 + 0.0145)
 
-= expr (account == "Forms:W-2: 1 Wages" & date < [2013/01/01])
+= expr (account == "Forms:W-2:Wages" & date < [2013/01/01])
  Forms:941: 5a Social Security             (0.0620 + 0.0420)
  Forms:941: 5c Medicare                    (0.0145 + 0.0145)
  Forms:Due:941:Payroll withheld          (- 0.0420 - 0.0145)
@@ -44,12 +64,12 @@
 
 ; But with the beginning of 2013, the employee rate went back to 6.2%.
 
-= expr (account == "Forms:W-2: 1 Wages" & date >= [2013/01/01])
+= expr (account == "Forms:W-2:Wages" & date >= [2013/01/01])
  Forms:W-2: 4 Social security                     (- 0.0620)
  Forms:W-2: 6 Medicare                            (- 0.0145)
  Forms:Due:Payroll                         (0.0620 + 0.0145)
 
-= expr (account == "Forms:W-2: 1 Wages" & date >= [2013/01/01])
+= expr (account == "Forms:W-2:Wages" & date >= [2013/01/01])
  Forms:941: 5a Social Security             (0.0620 + 0.0620)
  Forms:941: 5c Medicare                    (0.0145 + 0.0145)
  Forms:Due:941:Payroll withheld          (- 0.0620 - 0.0145)
