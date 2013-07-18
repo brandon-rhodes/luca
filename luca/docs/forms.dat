@@ -68,8 +68,7 @@
 
 ; Form 941
 
-;= "Expenses: 7:Form 941"
-= expr (account == "Expenses: 7:Form 941" & date > [2012/7/1])
+= "Expenses: 7:Form 941"
  Forms:Due:941:Payroll withheld                            1
  Forms:941:Payroll withheld                               -1
 
@@ -77,8 +76,7 @@
  Forms:Due:941:Payroll withheld                            1
  Forms:941:Payroll withheld                               -1
 
-;= "Expenses:12:Form 941"
-= expr (account == "Expenses:12:Form 941" & date > [2012/7/1])
+= "Expenses:12:Form 941"
  Forms:Due:941:Employer taxes                              1
  Forms:941:Taxes paid                                     -1
 
