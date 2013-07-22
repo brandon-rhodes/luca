@@ -89,7 +89,8 @@ def process(json_data):
         form_module.defaults(form)
 
     form._enter_output_mode()
-    form_module.compute(form)
+    if hasattr(form_module, 'compute'):
+        form_module.compute(form)
 
     return form, form_module
 
