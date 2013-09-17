@@ -63,7 +63,7 @@ def parse(filename):
 
         # The `section` word list is now established.
 
-        year = 2012
+        year = 2013
 
         dates = [ i for i in range(len(section) - 1)
                   if date_re.match(section[i])
@@ -154,7 +154,7 @@ def parse_transaction_table(lines, items):
         elif '$' in fields[-1]:
             while '/' not in fields[0]:
                 fields.pop(0)
-            year = 2012
+            year = 2013
             month, day = [ int(s) for s in fields[1].split('/') ]
 
             if fields[-1].startswith('('):
