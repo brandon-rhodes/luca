@@ -149,7 +149,9 @@ class PDF(object):
     # How form logic writes data into fields.
 
     def __setitem__(self, substring, values):
-        if not isinstance(substring, str):
+        if isinstance(substring, tuple):
+            substring = self.pattern.format(*substring)
+        elif not isinstance(substring, str):
             substring = self.pattern.format(substring)
         names = [name for name in self.names if substring in name]
         if not isinstance(values, (tuple, list)):
