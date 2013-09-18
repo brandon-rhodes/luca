@@ -1,11 +1,12 @@
 from luca.forms.formlib import Form
-from luca.kit import Decimal, cents
+from luca.kit import cents, zzstr
 
 title = u"Supplemental Income and Loss"
 zero = cents(0)
 
 def defaults(form):
     f = form
+    f.form_version = '2012'
     f.ssn = ''
     f.name = ''
     f.is_1099_required = False
@@ -93,103 +94,98 @@ def compute(form):
 
     f.line41 = f.line26 + f.line32 + f.line37 + f.line39 + f.line40
 
-def fill(form, fields):
+def fill_out(form, pdf):
     f = form
+    pdf.load('us.f1040se--{}.pdf'.format(f.form_version))
 
-    fields['p1-t1['] = [f.name, f.name]
-    fields['t2['] = [f.ssn, f.ssn]
+    pdf['p1-t1['] = [f.name, f.name]
+    pdf['t2['] = [f.ssn, f.ssn]
 
-    yesno(f.is_1099_required, fields['c1_01[0]'])
-    yesno(f.is_1099_required, fields['c1_03[0]'])
+    pdf['c1_01['] = yesno(f.is_1099_required)
+    pdf['c1_03['] = yesno(f.is_1099_required)
 
     # Part I: Income or Loss From Rental Real Estate and Royalties
 
-    for i, subform_name in enumerate('ABC'):
-        sub = getattr(form.Part_I, subform_name)
-        cols = slice(2*i, 2*(i+1))
+    subforms = [getattr(form.Part_I, letter) for letter in 'ABC']
 
-        fields['Pg1Table1a['][i] = sub.address
-        fields['Pg1Table1b['][i] = sub.type
+    pdf['Pg1Table1a'] = [s.address for s in subforms]
+    pdf['Pg1Table1b'] = [str(s.type) for s in subforms]
+    pdf['Table_Line2[0]'] = concat(
+            [z(s.fair_rental_days), z(s.personal_use_days), z(s.qjv)]
+            for s in subforms
+            )
 
-        row = fields['Table_Line2[0].{}[0]'.format(subform_name.lower())]
-        row[0] = z(sub.fair_rental_days)
-        row[1] = z(sub.personal_use_days)
-        row[2] = sub.qjv
+    pdf.pattern = 'Pg1Table2[0].Line{}[0]'
 
-        for j in range(3, 23):
-            pattern = 'Line{}['.format(j)
-            value = getattr(sub, 'line{}'.format(j))
-            fields[pattern][cols] = zz(value)
+    for j in range(3, 5):
+        attr = 'line{}'.format(j)
+        pdf[j] = concat(zzstr(getattr(s, attr)) for s in subforms)
 
-    fields['Page1[0].p1-t505['], fields['Page1[0].p1-t504['] = zz(f.line23a)
-    fields['Page1[0].p1-t176['], fields['Page1[0].p1-t177['] = zz(f.line23b)
-    fields['Page1[0].p1-t508['], fields['Page1[0].p1-t509['] = zz(f.line23c)
-    fields['Page1[0].p1-t510['], fields['Page1[0].p1-t511['] = zz(f.line23d)
-    fields['Page1[0].p1-t512['], fields['Page1[0].p1-t513['] = zz(f.line23e)
+    pdf.pattern = 'Pg1Table3[0].Line{}[0]'
 
-    fields['Page1[0].p1-t507['], fields['Page1[0].p1-t506['] = zz(f.line24)
-    fields['Page1[0].p1-t178['], fields['Page1[0].p1-t179['] = zz(-f.line25)
-    fields['Page1[0].p1-t180['], fields['Page1[0].p1-t181['] = zz(f.line26)
+    for j in range(5, 23):
+        attr = 'line{}'.format(j)
+        pdf[j] = concat(zzstr(getattr(s, attr)) for s in subforms)
+
+    pdf.pattern = 'Page1[0].p1-t{}['
+
+    pdf[505], pdf[504] = zzstr(f.line23a)
+    pdf[176], pdf[177] = zzstr(f.line23b)
+    pdf[508], pdf[509] = zzstr(f.line23c)
+    pdf[510], pdf[511] = zzstr(f.line23d)
+    pdf[512], pdf[513] = zzstr(f.line23e)
+
+    pdf[507], pdf[506] = zzstr(f.line24)
+    pdf[178], pdf[179] = zzstr(-f.line25)
+    pdf[180], pdf[181] = zzstr(f.line26)
 
     # Part II: Income or Loss From Partnerships and S Corporations
 
-    table = fields['Line28TableA-E']
+    pdf.pattern = '{}'
 
-    for i, letter in enumerate('ABCD'):
-        row = table[5*i : 5*(i+1)]
-        sub = getattr(f.Part_II, letter)
-        row[0] = sub.name
-        row[1] = sub.type
-        row[2] = '1' if sub.is_foreign else 'Off'
-        row[3] = sub.ein
-        row[4] = '1' if sub.any_not_at_risk else 'Off'
+    subforms = [getattr(f.Part_II, letter) for letter in 'ABCD']
 
-    table = fields['Line28TableF-J']
+    pdf['Line28TableA-E[0]'] = concat(
+        [s.name, s.type, onoff(s.is_foreign), s.ein, onoff(s.any_not_at_risk)]
+        for s in subforms
+        )
 
-    for i, letter in enumerate('ABCD'):
-        row = table[10*i : 10*(i+1)]
-        sub = getattr(f.Part_II, letter)
-        row[0:2] = zz(sub.f)
-        row[2:4] = zz(sub.g)
-        row[4:6] = zz(sub.h)
-        row[6:8] = zz(sub.i)
-        row[8:10] = zz(sub.j)
+    pdf['Line28TableF-J[0]'] = concat(
+        concat([zzstr(s.f), zzstr(s.g), zzstr(s.h), zzstr(s.i), zzstr(s.j)])
+        for s in subforms
+        )
 
-    fields['.p2-t57['], fields['.p2-t58['] = zz(f.line29ag)
-    fields['.p2-t59['], fields['.p2-t60['] = zz(f.line29aj)
+    pdf['.p2-t57['], pdf['.p2-t58['] = zzstr(f.line29ag)
+    pdf['.p2-t59['], pdf['.p2-t60['] = zzstr(f.line29aj)
 
-    fields['.p2-t61['], fields['.p2-t62['] = zz(f.line29bf)
-    fields['.p2-t63['], fields['.p2-t64['] = zz(f.line29bh)
-    fields['.p2-t65['], fields['.p2-t66['] = zz(f.line29bi)
+    pdf['.p2-t61['], pdf['.p2-t62['] = zzstr(f.line29bf)
+    pdf['.p2-t63['], pdf['.p2-t64['] = zzstr(f.line29bh)
+    pdf['.p2-t65['], pdf['.p2-t66['] = zzstr(f.line29bi)
 
-    fields['.p2-t67['], fields['.p2-t68['] = zz(f.line30)
-    fields['.p2-t69['], fields['.p2-t70['] = zz(f.line31)
-    fields['.p2-t71['], fields['.p2-t72['] = zz(f.line32)
+    pdf['.p2-t67['], pdf['.p2-t68['] = zzstr(f.line30)
+    pdf['.p2-t69['], pdf['.p2-t70['] = zzstr(f.line31)
+    pdf['.p2-t71['], pdf['.p2-t72['] = zzstr(f.line32)
 
     # TODO: Part III
     # TODO: Part IV
 
-    fields['.p2-t117['], fields['.p2-t118['] = zz(f.line40)
-    fields['.p2-t119['], fields['.p2-t120['] = zz(f.line41)
-    fields['.p2-t121['], fields['.p2-t122['] = zz(f.line42)
-    fields['.p2-t123['], fields['.p2-t124['] = zz(f.line43)
+    pdf['.p2-t117['], pdf['.p2-t118['] = zzstr(f.line40)
+    pdf['.p2-t119['], pdf['.p2-t120['] = zzstr(f.line41)
+    pdf['.p2-t121['], pdf['.p2-t122['] = zzstr(f.line42)
+    pdf['.p2-t123['], pdf['.p2-t124['] = zzstr(f.line43)
 
 # General-purpose functions that will probably be factored out of here:
 
-def yesno(value, fields):
-    if value:
-        fields[0] = 'Yes'
-    else:
-        fields[1] = 'No'
+def concat(lists):
+    return sum(lists, [])
+
+def yesno(value):
+    return ('Yes' if value else 'Off', 'Off' if value else 'No')
+
+def onoff(value):
+    return '1' if value else 'Off'
 
 def z(value):
     if not value:
         return u''
     return unicode(value)
-
-def zz(value):
-    if not isinstance(value, Decimal):
-        return value
-    if not value:
-        return (u'', u'')
-    return unicode(value).split('.')
