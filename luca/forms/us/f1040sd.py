@@ -1,10 +1,11 @@
-from luca.kit import Decimal, cents, dsum, zero
+from luca.kit import Decimal, dsum, zero, zstr
 
 title = u'Schedule D (Form 1040): Capital Gains and Losses'
 
 
 def defaults(form):
     f = form
+    f.form_version = '2012'
     f.name = ''
     f.ssn = ''
 
@@ -25,7 +26,7 @@ def defaults(form):
 
     # Part III: Summary
 
-    f.line18 = f.line19 = Decimal('NaN')
+    f.line18 = f.line19 = zero
     f.line22 = None
 
 
@@ -66,39 +67,42 @@ def compute(form):
     # Part III: Summary
 
     f.line16 = f.line7 + f.line15
-    f.line17 = f.line15 >= 0 and f.line16 >= 0
 
-    if f.line17:
-        # TODO: need a pretty error message if line18 or line19 has not
-        # been filled out.
-        f.line20 = (f.line18 == zero) and (f.line19 == zero)
+    if f.line16 > zero:
+        f.line17 = f.line15 >= zero and f.line16 >= zero
+        if f.line17:
+            # TODO: need a pretty error message if line18 or line19 has not
+            # been filled out.
+            f.line20 = (not f.line18) and (not f.line19)
+        else:
+            f.line20 = None
+    elif f.line16 < zero:
+        f.line17 = None
+        f.line20 = None
+        f.line21 = min(- f.line16, Decimal('3000.00'))
 
-    # TODO: is line 21 never computed?
-    f.line21 = zero
 
-
-def fill(form, fields):
+def fill_out(form, pdf):
     f = form
-    page = 1
+    pdf.load('us.f1040sd--{}.pdf'.format(f.form_version))
 
-    def put(n, value):
-        fields['f%d_%03d[' % (page, n)] = z(value)
-
-    fields['f1_001['] = f.name
-    fields['f1_002['] = f.ssn
+    pdf['f1_001['] = f.name
+    pdf['f1_002['] = f.ssn
 
     # Part I: Short-Term Capital Gains and Losses
+
+    pdf.pattern = 'f1_{:03d}'
 
     n = 3
     for line in 1, 2, 3:
         for letter in 'degh':
             value = getattr(f, 'line{}{}'.format(line, letter))
-            put(n, value)
+            pdf[n] = zstr(value)
             n += 1
 
     for line in 4, 5, 6, 7:
         value = getattr(f, 'line{}'.format(line))
-        put(n, value)
+        pdf[n] = zstr(value)
         n += 1
 
     # Part II: Long-Term Capital Gains and Losses
@@ -106,46 +110,34 @@ def fill(form, fields):
     for line in 8, 9, 10:
         for letter in 'degh':
             value = getattr(f, 'line{}{}'.format(line, letter))
-            put(n, value)
+            pdf[n] = zstr(value)
             n += 1
 
     for line in 11, 12, 13, 14, 15:
         value = getattr(f, 'line{}'.format(line))
-        put(n, value)
+        pdf[n] = zstr(value)
         n += 1
 
     # Part III: Summary
 
-    page = 2
+    pdf.pattern = 'f2_{:03d}'
 
-    put(1, f.line16)
-    fields['.c2_01_0_[0]'] = 'Yes' if f.line17 is True else 'Off'
-    fields['.c2_01_0_[1]'] = 'No' if f.line17 is False else 'Off'
-    put(2, f.line18)
-    put(3, f.line19)
-    fields['.c2_02_0_[0]'] = 'Yes' if f.line20 is True else 'Off'
-    fields['.c2_02_0_[1]'] = 'No' if f.line20 is False else 'Off'
-    put(5, f.line21)
-    fields['.c2_03_0_[0]'] = 'Yes' if f.line22 is True else 'Off'
-    fields['.c2_03_0_[1]'] = 'No' if f.line22 is False else 'Off'
+    pdf[1] = zstr(f.line16)
+    pdf[2] = zstr(f.line18)
+    pdf[3] = zstr(f.line19)
+    pdf[5] = zstr(f.line21)
+
+    pdf.pattern = '.c2_0{}_'
+
+    pdf[1] = yesno(f.line17)
+    pdf[2] = yesno(f.line20)
+    pdf[3] = yesno(f.line22)
 
 
 # General-purpose functions that will probably be factored out of here:
 
-def yesno(value, fields):
-    if value:
-        fields[0] = 'Yes'
-    else:
-        fields[1] = 'No'
-
-def z(value):
-    if not value:
-        return u''
-    return unicode(value)
-
-def zz(value):
-    if not isinstance(value, Decimal):
-        return value
-    if not value:
-        return (u'', u'')
-    return unicode(value).split('.')
+def yesno(value):
+    if value is None:
+        return ('Off', 'Off')
+    return ('Yes' if value else 'Off',
+            'Off' if value else 'No')
