@@ -56,9 +56,17 @@ def fill_out(form, pdf):
     pdf['f1_001_0_[0]'] = f.name, f.name
     pdf['f1_002_0_[0]'] = f.ssn, f.ssn
 
-    pdf.pattern = 'f{}_{}[0]'
 
     for pageno, part in [(1, f.Part_I), (2, f.Part_II)]:
+
+        pdf.pattern = 'topmostSubform[0].Page{}[0].c1_0{}_0_[{}]'
+
+        for n, letter in enumerate('ABC'):
+            value = letter if part.box == letter else 'Off'
+            pdf[pageno, pageno, n] = value
+
+        pdf.pattern = 'f{}_{}[0]'
+
         n = 1
         for row in part.line1:
             pdf[pageno, n + 0] = row.a
