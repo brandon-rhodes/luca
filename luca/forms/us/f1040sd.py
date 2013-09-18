@@ -39,6 +39,13 @@ def check(form, forms, eq):
             n = dsum(getattr(f.Part_I, line) for f in these)
             eq('line{}{}'.format(i, letter), n)
 
+    for i, box in enumerate('ABC', 8):
+        these = [f for f in f8949s if f.Part_I.box == box]
+        for letter in 'degh':
+            line = 'line2{}'.format(letter)
+            n = dsum(getattr(f.Part_II, line) for f in these)
+            eq('line{}{}'.format(i, letter), n)
+
 
 def compute(form):
     f = form
