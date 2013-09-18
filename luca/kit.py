@@ -1,6 +1,5 @@
 """A kit in the British sense: standard-equipment utilities that code needs."""
 
-import re
 from decimal import Decimal, ROUND_HALF_UP
 
 # Currency conveniences.
