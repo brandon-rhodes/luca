@@ -148,11 +148,16 @@ class PDF(object):
 
     # How form logic writes data into fields.
 
-    def __setitem__(self, substring, values):
-        if isinstance(substring, tuple):
-            substring = self.pattern.format(*substring)
-        elif not isinstance(substring, str):
-            substring = self.pattern.format(substring)
+    def __setitem__(self, args, values):
+        if not isinstance(args, tuple):
+            args = (args,)
+
+        try:
+            substring = self.pattern.format(*args)
+        except IndexError:
+            raise ValueError('your index tuple {!r} is the wrong length for '
+                             'the template {!r}'.format(args, self.pattern))
+
         names = [name for name in self.names if substring in name]
         if not isinstance(values, (tuple, list)):
             values = [values]
