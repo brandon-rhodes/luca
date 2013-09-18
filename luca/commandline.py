@@ -18,6 +18,12 @@ def main():
         )
     subparsers = parser.add_subparsers(help='sub-command help')
 
+    p = subparsers.add_parser('check',
+                              help='double-check a directory of tax files')
+    p.add_argument('path', metavar='path',
+                   help='Path to the directory containing form JSON files')
+    p.set_defaults(func=check)
+
     p = subparsers.add_parser('complete', help='complete a tax form')
     p.add_argument('json_path', metavar='json-path',
                    help='Path to the JSON file containing the form')
@@ -50,6 +56,9 @@ def main():
 
     args = parser.parse_args()
     args.func(args)
+
+def check(args):
+    luca.forms.actions.check(args.path)
 
 def complete(args):
     luca.forms.actions.complete(args.json_path)

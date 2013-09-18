@@ -13,6 +13,7 @@ from pyPdf import PdfFileWriter, PdfFileReader
 from reportlab.pdfgen.canvas import Canvas
 
 from luca.forms import formlib
+from luca.kit import dstr
 
 integer_re = re.compile(r'\d+$')
 decimal_re = re.compile(r'\d+\.\d+$')
@@ -33,6 +34,39 @@ def print_defaults(form_name):
         form_module.defaults(form)
 
     print formlib.dump_json(form).encode('utf-8')
+
+
+def check(path):
+    forms = []
+    tuples = []
+
+    for filename in os.listdir(path):
+        if not filename.endswith('.json'):
+            continue
+        with open(os.path.join(path, filename)) as f:
+            json_data = f.read()
+        #form, form_module = load(json_data)
+        form, form_module = process(json_data)
+        forms.append(form)
+        tuples.append((filename, form, form_module))
+
+    #print [f.form for f in forms]
+    n = [0]
+
+    def eq(name, value):
+        n[0] += 1
+        form  # necessary to establish scoping for the following eval
+        actual = eval('form.' + name)
+        if actual != value:
+            print filename, name, '=', actual, 'but should be', dstr(value)
+        # TODO: add --verbose and print in that case too
+
+    for filename, form, form_module in tuples:
+        form_check = getattr(form_module, 'check', None)
+        if form_check is not None:
+            form_check(form, forms, eq)
+
+    print 'Ran', n[0], 'check{}'.format('' if n[0] == 1 else 's')
 
 
 def complete(jsonpath):
@@ -71,7 +105,7 @@ def complete(jsonpath):
         run_draw(form, form_module, inputpath, outputpath)
 
 
-def process(json_data):
+def load(json_data):
     form = formlib.load_json(json_data.decode('utf-8'))
 
     if not hasattr(form, 'form'):
@@ -87,6 +121,12 @@ def process(json_data):
     if hasattr(form_module, 'defaults'):
         form._enter_default_mode()
         form_module.defaults(form)
+
+    return form, form_module
+
+
+def process(json_data):
+    form, form_module = load(json_data)
 
     form._enter_output_mode()
     if hasattr(form_module, 'compute'):
