@@ -12,12 +12,36 @@ def cents(value):
         value = Decimal(value)
     return value.quantize(cent, rounding=ROUND_HALF_UP)
 
+def dsum(sequence=()):
+    """Return the sum of a sequence of Decimals.
+
+    >>> dsum([Decimal('1.23'), Decimal('0.07')])
+    Decimal('1.30')
+    >>> dsum()
+    Decimal('0.00')
+
+    """
+    return sum(sequence, zero)
+
+def dstr(value):
+    """Return a Decimal with thousands commas, parenthesized if negative.
+
+    >>> dstr(Decimal('1234567.89'))
+    u'1,234,567.89 '
+    >>> dstr(Decimal('-1234567.89'))
+    u'(1,234,567.89)'
+    >>> dstr(zero)
+    u'0.00 '
+
+    """
+    return (u'({:,})'.format(-value) if value < 0 else u'{:,} '.format(value))
+
 def zstr(value):
     """Return u'' for a false `value`, else format it with thousands commas.
 
     This is useful on tax forms such as those of the IRS where they
     would rather have you leave a field blank instead of writing an
-    explicit zero value like ``0.00``.  Includes thousands commas.
+    explicit zero value like ``0.00``.
 
     >>> zstr(Decimal('1234567.89'))
     u'1,234,567.89 '
@@ -27,9 +51,7 @@ def zstr(value):
     u''
 
     """
-    return (u'{:,} '.format(value) if value > 0
-            else u'({:,})'.format(-value) if value < 0
-            else u'')
+    return dstr(value) if value else u''
 
 def zzstr(value):
     """Return Unicode strings ``(dollars, cents)`` for Decimal `value`.
