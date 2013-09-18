@@ -1,7 +1,6 @@
-from luca.kit import Decimal, cents
+from luca.kit import Decimal, cents, dsum, zero
 
 title = u'Schedule D (Form 1040): Capital Gains and Losses'
-zero = cents(0)
 
 
 def defaults(form):
@@ -28,6 +27,17 @@ def defaults(form):
 
     f.line18 = f.line19 = Decimal('NaN')
     f.line22 = None
+
+
+def check(form, forms, eq):
+    f8949s = [f for f in forms if f.form == 'us.f8949']
+
+    for i, box in enumerate('ABC', 1):
+        these = [f for f in f8949s if f.Part_I.box == box]
+        for letter in 'degh':
+            line = 'line2{}'.format(letter)
+            n = dsum(getattr(f.Part_I, line) for f in these)
+            eq('line{}{}'.format(i, letter), n)
 
 
 def compute(form):
