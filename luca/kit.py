@@ -21,12 +21,16 @@ def zstr(value):
     explicit zero value like ``0.00``.  Includes thousands commas.
 
     >>> zstr(Decimal('1234567.89'))
-    u'1,234,567.89'
+    u'1,234,567.89 '
+    >>> zstr(Decimal('-1234567.89'))
+    u'(1,234,567.89)'
     >>> zstr(zero)
     u''
 
     """
-    return u'{:,}'.format(value) if value else u''
+    return (u'{:,} '.format(value) if value > 0
+            else u'({:,})'.format(-value) if value < 0
+            else u'')
 
 def zzstr(value):
     """Return Unicode strings ``(dollars, cents)`` for Decimal `value`.
@@ -37,17 +41,21 @@ def zzstr(value):
     value, if large enough, will include thousands commas.
 
     >>> zzstr(Decimal('1234567.89'))
-    [u'1,234,567', u'89']
+    [u'1,234,567', u'89 ']
+    >>> zzstr(Decimal('-1234567.89'))
+    [u'(1,234,567', u'89)']
     >>> zzstr(zero)
     [u'', u'']
 
     This routine is typically used when a form has split up a dollars
     field and a cents field::
 
-        fields['t57'], fields['t58'] = zz(f.line29ag)
+        fields['t57'], fields['t58'] = zzstr(f.line29ag)
 
     """
-    return u'{:,}'.format(value).rsplit('.', 1) if value else [u'', u'']
+    return (u'{:,} '.format(value).rsplit('.', 1) if value > 0
+            else u'({:,})'.format(-value).rsplit('.', 1) if value < 0
+            else [u'', u''])
 
 # Time periods.
 
