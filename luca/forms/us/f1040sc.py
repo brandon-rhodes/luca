@@ -75,12 +75,6 @@ def fill_out(form, pdf):
     f = form
     pdf.load('us.f1040sc--{}.pdf'.format(f.form_version))
 
-    # page = 1
-    # def put(n, value):
-    #     sa, sb = zz(value)
-    #     pdf['f%d_%03d[' % (page, n+0)] = sa
-    #     pdf['f%d_%03d[' % (page, n+1)] = sb
-
     pdf.pattern = 'f1_{:03}['
 
     pdf[1] = f.name
