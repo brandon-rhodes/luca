@@ -25,6 +25,13 @@ def defaults(form):
     f.line28_text3 = ''
     f.line30 = False
 
+def check(form, forms, eq):
+    nothing = [None]
+    f1040 = forms.get('us.f1040', nothing)[0]
+    if f1040:
+        eq('line2', f1040.line38)
+        eq('line25', f1040.line38)
+
 def compute(form):
     f = form
     f.line3 = cents(f.line2 * 75 / 1000)
