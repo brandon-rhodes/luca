@@ -1,4 +1,4 @@
-from luca.kit import cents, dsum, zero, zzstr
+from luca.kit import dsum, zero, zzstr
 
 title = u'Form 1040: U.S. Individual Income Tax Return'
 
@@ -8,8 +8,9 @@ def lines(string):
     return ['line' + suffix for suffix in string.split()]
 
 income_lines = lines('7 8a 8b 9a 9b 10 11 12 13 14 15a 15b '
-                     '16a 16b 17 18 19 20a 20b 21 22')
+                     '16a 16b 17 18 19 20a 20b 21')
 income_tally = lines('7 8a 9a 10 11 12 13 14 15b 16b 17 18 19 20b 21')
+adjustment_lines = lines('23 24 25 26 27 28 29 30 31a 32 33 34 35')
 
 def defaults(form):
     f = form
@@ -33,10 +34,12 @@ def defaults(form):
     f.line6a = False
     f.line6b = False
 
-    for line in income_lines[:-1]:
+    for line in income_lines + adjustment_lines:
         setattr(f, line, zero)
 
     f.line21_text = u''
+    f.line32b = u''
+
 
 def check(form, forms, eq):
     nothing = [None]
@@ -71,6 +74,9 @@ def compute(form):
     # TODO: dependents
     f.line6d = f.line6ab
     f.line22 = dsum(getattr(f, line) for line in income_tally)
+    f.line36 = dsum(getattr(f, line) for line in adjustment_lines)
+    f.line37 = f.line22 - f.line35
+
 
 def fill_out(form, pdf):
     f = form
@@ -110,9 +116,12 @@ def fill_out(form, pdf):
     pdf[45] = str(f.line6d)
 
     n = 46
-    for line in income_lines:
+    for line in income_lines + lines('22') + adjustment_lines + lines('36 37'):
         pdf[n], pdf[n+1] = zzstr(getattr(f, line))
-        n += 2
-        if n == 84:
-            pdf[n] = f.line21_text
-            n += 1
+        if n == 82:
+            pdf[84] = f.line21_text
+            n = 85
+        elif n == 103:
+            n = 108
+        else:
+            n += 2
