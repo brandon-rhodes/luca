@@ -1,10 +1,10 @@
-from luca.kit import Decimal, cents
+from luca.kit import Decimal, cents, zero, zzstr
 
 title = u'Schedule A (Form 1040): Itemized Deductions'
-zero = cents(0)
 
 def defaults(form):
     f = form
+    f.form_version = '2012'
     f.name = ''
     f.ssn = ''
 
@@ -38,35 +38,36 @@ def compute(form):
     f.line29 = (f.line4 + f.line9 + f.line15 + f.line19 + f.line20
               + f.line27 + f.line28)
 
-def fill(form, fields):
+def fill_out(form, pdf):
     f = form
+    pdf.load('us.f1040sa--{}.pdf'.format(f.form_version))
 
     def put(n, value):
-        sa, sb = zz(value)
-        fields['-t{}['.format(n+0)] = sa
-        fields['-t{}['.format(n+1)] = sb
+        sa, sb = zzstr(value)
+        pdf['-t{}['.format(n+0)] = sa
+        pdf['-t{}['.format(n+1)] = sb
 
-    fields['-t1['] = f.name
-    fields['-t2['] = f.ssn
+    pdf['-t1['] = f.name
+    pdf['-t2['] = f.ssn
 
     put(5, f.line1)
     put(7, f.line2)
     put(9, f.line3)
     put(11, f.line4)
 
-    fields['-cb1[0]'] = '1' if f.line5_type == 'income' else 'Off'
-    fields['-cb1[1]'] = '2' if f.line5_type == 'sales' else 'Off'
+    pdf['-cb1[0]'] = '1' if f.line5_type == 'income' else 'Off'
+    pdf['-cb1[1]'] = '2' if f.line5_type == 'sales' else 'Off'
     put(13, f.line5)
     put(15, f.line6)
     put(17, f.line7)
-    fields['-t19['] = f.line8_text1
-    fields['-t20['] = f.line8_text2
+    pdf['-t19['] = f.line8_text1
+    pdf['-t20['] = f.line8_text2
     put(21, f.line8)
     put(23, f.line9)
 
     put(25, f.line10)
-    fields['-t27['] = f.line11_text1
-    fields['-t28['] = f.line11_text2
+    pdf['-t27['] = f.line11_text1
+    pdf['-t28['] = f.line11_text2
     put(29, f.line11)
     put(31, f.line12)
     put(400, f.line13)
@@ -80,41 +81,21 @@ def fill(form, fields):
 
     put(47, f.line20)
 
-    fields['-t51['] = f.line21_text1
+    pdf['-t51['] = f.line21_text1
     put(49, f.line21)
     put(52, f.line22)
-    fields['-t54['] = f.line23_text1
-    fields['-t55['] = f.line23_text2
+    pdf['-t54['] = f.line23_text1
+    pdf['-t55['] = f.line23_text2
     put(56, f.line23)
     put(58, f.line24)
     put(60, f.line25)
     put(62, f.line26)
     put(64, f.line27)
 
-    fields['-t66['] = f.line28_text1
-    fields['-t67['] = f.line28_text2
-    fields['-t68['] = f.line28_text3
+    pdf['-t66['] = f.line28_text1
+    pdf['-t67['] = f.line28_text2
+    pdf['-t68['] = f.line28_text3
     put(69, f.line28)
 
     put(71, f.line29)
-    fields['-cb5['] = 'X' if f.line30 else 'Off'
-
-# General-purpose functions that will probably be factored out of here:
-
-def yesno(value, fields):
-    if value:
-        fields[0] = 'Yes'
-    else:
-        fields[1] = 'No'
-
-def z(value):
-    if not value:
-        return u''
-    return unicode(value)
-
-def zz(value):
-    if not isinstance(value, Decimal):
-        return value
-    if not value:
-        return (u'', u'')
-    return unicode(value).split('.')
+    pdf['-cb5['] = 'X' if f.line30 else 'Off'
