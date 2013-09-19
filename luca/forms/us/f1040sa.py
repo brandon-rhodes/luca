@@ -1,4 +1,4 @@
-from luca.kit import Decimal, cents, zero, zzstr
+from luca.kit import cents, zero, zzstr
 
 title = u'Schedule A (Form 1040): Itemized Deductions'
 
