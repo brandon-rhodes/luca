@@ -78,6 +78,11 @@ def check(form, forms, eq):
     if f1040se:
         eq('line17', f1040se.line41)
 
+    f1040sse = forms.get('us.f1040sse', nothing)[0]
+    if f1040sse:
+        eq('line56', f1040sse.line5)
+        eq('line27', f1040sse.line6)
+
 
 def compute(form):
     f = form
