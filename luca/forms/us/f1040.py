@@ -91,7 +91,7 @@ def compute(form):
     f.line6d = f.line6ab
     f.line22 = dsum(getattr(f, line) for line in income_tally)
     f.line36 = dsum(getattr(f, line) for line in adjustments)
-    f.line37 = f.line22 - f.line35
+    f.line37 = f.line22 - f.line36
     f.line38 = f.line37
     # TODO: standard deduction
     f.line41 = f.line38 - f.line40
