@@ -5,6 +5,7 @@ import re
 import importlib
 import subprocess
 from StringIO import StringIO
+from collections import defaultdict
 from subprocess import Popen, PIPE
 
 import fdfgen
@@ -37,7 +38,7 @@ def print_defaults(form_name):
 
 
 def check(path):
-    forms = []
+    forms = defaultdict(list)
     tuples = []
 
     for filename in os.listdir(path):
@@ -47,7 +48,7 @@ def check(path):
             json_data = f.read()
         #form, form_module = load(json_data)
         form, form_module = process(json_data)
-        forms.append(form)
+        forms[form.form].append(form)
         tuples.append((filename, form, form_module))
 
     #print [f.form for f in forms]

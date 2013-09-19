@@ -31,7 +31,9 @@ def defaults(form):
 
 
 def check(form, forms, eq):
-    f8949s = [f for f in forms if f.form == 'us.f8949']
+    f8949s = forms['us.f8949']
+    if not f8949s:
+        return
 
     for i, box in enumerate('ABC', 1):
         these = [f for f in f8949s if f.Part_I.box == box]
