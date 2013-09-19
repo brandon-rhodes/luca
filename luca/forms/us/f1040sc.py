@@ -1,10 +1,10 @@
-from luca.kit import Decimal, cents
+from luca.kit import dsum, zero, zzstr
 
 title = u'Schedule C (Form 1040): Profit or Loss From Business'
-zero = cents(0)
 
 def defaults(form):
     f = form
+    f.form_version = '2012'
     f.name = ''
     f.ssn = ''
     for letter in 'ABCD':
@@ -55,7 +55,7 @@ def compute(form):
 
     # Part II: Expenses
 
-    f.line28 = sum(getattr(f, attr) for attr in _expense_lines())
+    f.line28 = dsum(getattr(f, attr) for attr in _expense_lines())
     f.line29 = f.line7 - f.line28
     f.line31 = f.line29 - f.line30
 
@@ -69,86 +69,97 @@ def compute(form):
 
     # Part V: Other Expenses
 
-    f.line48 = sum((value for expense, value in f.Part_V), zero)
+    f.line48 = dsum(value for expense, value in f.Part_V)
 
-def fill(form, fields):
+def fill_out(form, pdf):
     f = form
-    page = 1
+    pdf.load('us.f1040sc--{}.pdf'.format(f.form_version))
 
-    def put(n, value):
-        sa, sb = zz(value)
-        fields['f%d_%03d[' % (page, n+0)] = sa
-        fields['f%d_%03d[' % (page, n+1)] = sb
+    # page = 1
+    # def put(n, value):
+    #     sa, sb = zz(value)
+    #     pdf['f%d_%03d[' % (page, n+0)] = sa
+    #     pdf['f%d_%03d[' % (page, n+1)] = sb
 
-    fields['f1_001['] = f.name
-    fields['f1_002['] = f.ssn
+    pdf.pattern = 'f1_{:03}['
 
-    fields['f1_003['] = f.A
-    fields['f1_004['] = f.B
-    fields['f1_005['] = f.C
-    fields['f1_006['] = f.D
+    pdf[1] = f.name
+    pdf[2] = f.ssn
 
-    fields['f1_007['] = f.E_text1
-    fields['f1_008['] = f.E_text2
+    pdf[3] = f.A
+    pdf[4] = f.B
+    pdf[5] = f.C
+    pdf[6] = f.D
 
-    fields['.c1_01['] = '0' if f.F == 'cash' else 'Off'
-    fields['.c1_02['] = '0' if f.F == 'accrual' else 'Off'
-    fields['.c1_03['] = '0' if f.F == 'other' else 'Off'
-    fields['f1_009['] = f.F_text
+    pdf[7] = f.E_text1
+    pdf[8] = f.E_text2
+    pdf[9] = f.F_text
 
-    fields['.c1_04[0]'] = 'Yes' if f.G else 'Off'
-    fields['.c1_04[1]'] = 'Off' if f.G else 'No'
+    pdf.pattern = '{}'
 
-    fields['.c1_05[0]'] = '1' if f.H else 'Off'
+    pdf['.c1_01['] = '0' if f.F == 'cash' else 'Off'
+    pdf['.c1_02['] = '0' if f.F == 'accrual' else 'Off'
+    pdf['.c1_03['] = '0' if f.F == 'other' else 'Off'
 
-    fields['.c1_06[0]'] = 'Yes' if f.I else 'Off'
-    fields['.c1_06[1]'] = 'Off' if f.I else 'No'
+    pdf['.c1_04[0]'] = 'Yes' if f.G else 'Off'
+    pdf['.c1_04[1]'] = 'Off' if f.G else 'No'
 
-    fields['.c1_07[0]'] = 'Yes' if f.J else 'Off'
-    fields['.c1_07[1]'] = 'Off' if f.J else 'No'
+    pdf['.c1_05[0]'] = '1' if f.H else 'Off'
+
+    pdf['.c1_06[0]'] = 'Yes' if f.I else 'Off'
+    pdf['.c1_06[1]'] = 'Off' if f.I else 'No'
+
+    pdf['.c1_07[0]'] = 'Yes' if f.J else 'Off'
+    pdf['.c1_07[1]'] = 'Off' if f.J else 'No'
 
     # Part I: Income
 
-    fields['.c1_08_0_['] = '1' if f.line1_box else 'Off'
-    put(10, f.line1)
+    pdf['.c1_08_0_['] = '1' if f.line1_box else 'Off'
+
+    pdf.pattern = 'f1_{:03}['
+
+    pdf[10], pdf[11] = zzstr(f.line1)
+
     n = 18
     for i in range(2, 8):
-        put(n, getattr(f, 'line{}'.format(i)))
+        pdf[n], pdf[n+1] = zzstr(getattr(f, 'line{}'.format(i)))
         n += 2
 
     # Part II: Expenses
 
     n = 30
     for attr in _expense_lines():
-        put(n, getattr(f, attr))
+        pdf[n], pdf[n+1] = zzstr(getattr(f, attr))
         if n == 74:
             n = 84
         else:
             n += 2
 
-    put(76, f.line28)
-    put(78, f.line29)
-    put(80, f.line30)
-    put(82, f.line31)
+    pdf[76], pdf[77] = zzstr(f.line28)
+    pdf[78], pdf[79] = zzstr(f.line29)
+    pdf[80], pdf[81] = zzstr(f.line30)
+    pdf[82], pdf[83] = zzstr(f.line31)
+
+    pdf.pattern = '{}'
 
     if f.line31 < zero:
-        fields['.c1_08['] = '1' if f.line32 == 'a' else 'Off'
-        fields['.c1_09['] = '1' if f.line32 == 'b' else 'Off'
+        pdf['.c1_08['] = '1' if f.line32 == 'a' else 'Off'
+        pdf['.c1_09['] = '1' if f.line32 == 'b' else 'Off'
 
     # Part III: Cost of Goods Sold
 
-    page = 2
+    pdf['.c2_01['] = '1' if f.line33 == 'a' else 'Off'
+    pdf['.c2_02['] = '1' if f.line33 == 'b' else 'Off'
+    pdf['.c2_03['] = '1' if f.line33 == 'c' else 'Off'
 
-    fields['.c2_01['] = '1' if f.line33 == 'a' else 'Off'
-    fields['.c2_02['] = '1' if f.line33 == 'b' else 'Off'
-    fields['.c2_03['] = '1' if f.line33 == 'c' else 'Off'
+    pdf['.c2_04[0]'] = 'Yes' if f.line34 else 'Off'
+    pdf['.c2_04[1]'] = 'Off' if f.line34 else 'No'
 
-    fields['.c2_04[0]'] = 'Yes' if f.line34 else 'Off'
-    fields['.c2_04[1]'] = 'Off' if f.line34 else 'No'
+    pdf.pattern = 'f2_{:03}['
 
     n = 1
     for i in range(35, 43):
-        put(n, getattr(f, 'line{}'.format(i)))
+        pdf[n], pdf[n+1] = zzstr(getattr(f, 'line{}'.format(i)))
         n += 2
 
     # Part IV: Information on Your Vehicle
@@ -158,10 +169,11 @@ def fill(form, fields):
 
     n = 23
     for text, value in f.Part_V:
-        setattr(f, 'f2_%03d' % n, text)
-        put(n + 1, value)
+        pdf[n] = text
+        pdf[n+1], pdf[n+2] = zzstr(value)
+        n += 3
 
-    put(50, f.line48)
+    pdf[50], pdf[51] = zzstr(f.line48)
 
 # Helper functions.
 
@@ -172,23 +184,3 @@ def _expense_lines():
             yield 'line{}b'.format(n)
         else:
             yield 'line{}'.format(n)
-
-# General-purpose functions that will probably be factored out of here:
-
-def yesno(value, fields):
-    if value:
-        fields[0] = 'Yes'
-    else:
-        fields[1] = 'No'
-
-def z(value):
-    if not value:
-        return u''
-    return unicode(value)
-
-def zz(value):
-    if not isinstance(value, Decimal):
-        return value
-    if not value:
-        return (u'', u'')
-    return unicode(value).split('.')
