@@ -26,6 +26,7 @@ def compute(form):
 def fill_out(form, pdf):
     f = form
     pdf.load('us.f1040sb--{}.pdf'.format(f.form_version))
+    pdf.pages = 1,
 
     pdf['_01['] = f.name
     pdf['_02['] = f.ssn
