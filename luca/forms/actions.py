@@ -116,10 +116,10 @@ def complete(jsonpath):
 def load(json_data):
     form = formlib.load_json(json_data.decode('utf-8'))
 
-    if not hasattr(form, 'form'):
+    if not hasattr(form, 'form_name'):
         raise ValueError('your JSON "input" object needs to specify a "form"')
 
-    form_module_name = 'luca.forms.' + form.form
+    form_module_name = 'luca.forms.' + form.form_name
     try:
         form_module = importlib.import_module(form_module_name)
     except ImportError:
