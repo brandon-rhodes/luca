@@ -62,9 +62,9 @@ def compute(form):
         g = getattr(f, 'line{}g'.format(line))
         setattr(f, 'line{}h'.format(line), d - e + g)
 
-    f.line7 = f.line1h + f.line2h + f.line3h + f.line4 + f.line5 + f.line6
+    f.line7 = f.line1h + f.line2h + f.line3h + f.line4 + f.line5 - f.line6
     f.line15 = (f.line8h + f.line9h + f.line10h
-              + f.line11 + f.line12 + f.line13 + f.line14)
+              + f.line11 + f.line12 + f.line13 - f.line14)
 
     # Part III: Summary
 
