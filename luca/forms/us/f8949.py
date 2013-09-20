@@ -13,14 +13,14 @@ def defaults(form):
 
     f.Part_I = Form()
     f.Part_I.box = 'A'
-    f.Part_I.line1 = [
+    f.Part_I.table = [
         _example_row(),
         _example_row(),
         ]
 
     f.Part_II = Form()
     f.Part_II.box = 'A'
-    f.Part_II.line1 = [
+    f.Part_II.table = [
         _example_row(),
         _example_row(),
         ]
@@ -38,15 +38,15 @@ def compute(form):
     f = form
 
     for part in f.Part_I, f.Part_II:
-        rows = part.line1
+        rows = part.table
 
         for row in rows:
             row.h = row.d - row.e + row.g
 
-        part.line2d = sum((row.d for row in rows), zero)
-        part.line2e = sum((row.e for row in rows), zero)
-        part.line2g = sum((row.g for row in rows), zero)
-        part.line2h = sum((row.h for row in rows), zero)
+        part.total_d = sum((row.d for row in rows), zero)
+        part.total_e = sum((row.e for row in rows), zero)
+        part.total_g = sum((row.g for row in rows), zero)
+        part.total_h = sum((row.h for row in rows), zero)
 
 
 def fill_out(form, pdf):
@@ -68,7 +68,7 @@ def fill_out(form, pdf):
         pdf.pattern = 'f{}_{}[0]'
 
         n = 1
-        for row in part.line1:
+        for row in part.table:
             pdf[pageno, n + 0] = row.a
             pdf[pageno, n + 1] = row.b
             pdf[pageno, n + 2] = row.c
@@ -81,12 +81,12 @@ def fill_out(form, pdf):
 
     pdf.pattern = '{}'
 
-    pdf['f1_159['] = zstr(f.Part_I.line2d)
-    pdf['f1_160['] = zstr(f.Part_I.line2e)
-    pdf['f1_161['] = zstr(f.Part_I.line2g)
-    pdf['f1_162['] = zstr(f.Part_I.line2h)
+    pdf['f1_159['] = zstr(f.Part_I.total_d)
+    pdf['f1_160['] = zstr(f.Part_I.total_e)
+    pdf['f1_161['] = zstr(f.Part_I.total_g)
+    pdf['f1_162['] = zstr(f.Part_I.total_h)
 
-    pdf['f2_167['] = zstr(f.Part_II.line2d)
-    pdf['f2_168['] = zstr(f.Part_II.line2e)
-    pdf['f2_169['] = zstr(f.Part_II.line2g)
-    pdf['f2_170['] = zstr(f.Part_II.line2h)
+    pdf['f2_167['] = zstr(f.Part_II.total_d)
+    pdf['f2_168['] = zstr(f.Part_II.total_e)
+    pdf['f2_169['] = zstr(f.Part_II.total_g)
+    pdf['f2_170['] = zstr(f.Part_II.total_h)
