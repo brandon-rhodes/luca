@@ -4,12 +4,12 @@ from luca.forms.formlib import Form
 from luca.kit import zero, zstr
 
 
+versions = u'2012',
 first_nine_lines = '1 2 3 4 5a 5b 6 7 8a 8b 9'.split()
 
 
 def defaults(form):
     f = form
-    f.year = 2012
     f.final = False
     f.amended = False
     f.beginning_date = ''
@@ -40,7 +40,7 @@ def compute(form):
 
 def fill_out(form, pdf):
     f = form
-    pdf.load('us.f1120ssk--{}.pdf'.format(f.year))
+    pdf.load('us.f1120ssk--{}.pdf'.format(f.form_version))
 
     pdf['c1_01_0_[0]'] = 'Yes' if f.final else 'Off'
     pdf['c1_02_0_[0]'] = 'Yes' if f.amended else 'Off'

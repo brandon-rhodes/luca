@@ -1,11 +1,11 @@
-from luca.kit import Decimal, cents, zzstr
+from luca.kit import cents, zzstr
 
 title = u'Schedule B (Form 1040): Interest and Ordinary Dividends'
+versions = '2012',
 zero = cents(0)
 
 def defaults(form):
     f = form
-    f.form_version = '2012'
     f.name = ''
     f.ssn = ''
 

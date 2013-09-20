@@ -3,11 +3,11 @@ from luca.kit import zero, zstr
 
 
 title = u'Miscellaneous Income'
+versions = u'2012',
 
 
 def defaults(form):
     f = form
-    f.year = 2012
     f.payer = ''
     f.payer_number = ''
     f.recipient_number = ''
@@ -38,7 +38,7 @@ def compute(form):
 
 def fill_out(form, pdf):
     f = form
-    pdf.load('us.f1099msc--{}.pdf'.format(f.year))
+    pdf.load('us.f1099msc--{}.pdf'.format(f.form_version))
 
     # The pdftk "fill_form" command seems to ignore "\r" characters
     # so we have to draw the payer ourselves; see draw() below.

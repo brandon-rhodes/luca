@@ -2,11 +2,11 @@ from luca.forms.formlib import Form
 from luca.kit import cents, zzstr
 
 title = u"Supplemental Income and Loss"
+versions = '2012',
 zero = cents(0)
 
 def defaults(form):
     f = form
-    f.form_version = '2012'
     f.ssn = ''
     f.name = ''
     f.is_1099_required = False

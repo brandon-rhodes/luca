@@ -1,9 +1,11 @@
 """Form W-9 Request for Taxpayer Identification Number and Certification"""
 
 
+versions = '2011',
+
+
 def defaults(form):
     f = form
-    f.form_version = '2011'
     f.name = ''
     f.business_name = ''
     f.classification = ''

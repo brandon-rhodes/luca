@@ -6,6 +6,7 @@ eighthpercent = Decimal('.008')
 sixthpercent = Decimal('.006')
 
 title = u"Employer's Annual Federal Unemployment (FUTA) Tax Return"
+versions = u'2012',
 
 
 def compute(form):

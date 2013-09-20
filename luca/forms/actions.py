@@ -20,7 +20,7 @@ integer_re = re.compile(r'\d+$')
 decimal_re = re.compile(r'\d+\.\d+$')
 
 
-def print_defaults(form_name):
+def print_defaults(form_name, form_version):
     form_module_name = 'luca.forms.' + form_name
     try:
         form_module = importlib.import_module(form_module_name)
@@ -28,8 +28,15 @@ def print_defaults(form_name):
         raise ValueError('cannot find a Luca form named {!r}'.format(
                 form_module_name))
 
+    if form_version is None or form_version not in form_module.versions:
+        print 'Form versions supported:'
+        for version in form_module.versions:
+            print '   ', version
+        return
+
     form = formlib.Form()
-    form.form = form_name
+    form.form_name = form_name
+    form.form_version = form_version
 
     if hasattr(form_module, 'defaults'):
         form_module.defaults(form)

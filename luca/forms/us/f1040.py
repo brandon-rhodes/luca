@@ -1,6 +1,7 @@
 from luca.kit import Decimal, dsum, zero, zzstr
 
 title = u'Form 1040: U.S. Individual Income Tax Return'
+versions = u'2012',
 
 filing_statuses = 'S MJ MS HoH QW'.split()
 
@@ -19,7 +20,6 @@ payments = lines(range(62, 64) + ['64a', '64b'] + range(65, 72))
 
 def defaults(form):
     f = form
-    f.form_version = u'2012'
     f.ssn = u''
     f.spouse_ssn = u''
 

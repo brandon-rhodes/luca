@@ -1,10 +1,10 @@
 from luca.kit import cents, zero, zzstr
 
 title = u'Schedule A (Form 1040): Itemized Deductions'
+versions = u'2012',
 
 def defaults(form):
     f = form
-    f.form_version = '2012'
     f.name = ''
     f.ssn = ''
 

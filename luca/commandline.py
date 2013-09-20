@@ -32,7 +32,9 @@ def main():
     p = subparsers.add_parser('defaults', help='print the default JSON'
                               ' data for a tax form')
     p.add_argument('form_name', metavar='form-name',
-                   help='Name of the form, like us.irs1040sa')
+                   help='Form name, like us.f1040sa')
+    p.add_argument('form_version', metavar='form-version', nargs='?',
+                   help='Version of the form, like 2012')
     p.set_defaults(func=defaults)
 
     p = subparsers.add_parser('download', help='download')
@@ -64,7 +66,7 @@ def complete(args):
     luca.forms.actions.complete(args.json_path)
 
 def defaults(args):
-    luca.forms.actions.print_defaults(args.form_name)
+    luca.forms.actions.print_defaults(args.form_name, args.form_version)
 
 def download(args):
     nickname = args.nickname

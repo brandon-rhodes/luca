@@ -1,10 +1,10 @@
 from luca.kit import dsum, zero, zzstr
 
 title = u'Schedule C (Form 1040): Profit or Loss From Business'
+versions = u'2012',
 
 def defaults(form):
     f = form
-    f.form_version = '2012'
     f.name = ''
     f.ssn = ''
     for letter in 'ABCD':

@@ -1,12 +1,12 @@
 from luca.kit import Decimal, cents, zero, zzstr
 
 title = u'Schedule SE (Form 1040): Self-Employment Tax'
+versions = '2012',
 
 # TODO: someday also support Section B (Long Schedule SE)
 
 def defaults(form):
     f = form
-    f.form_version = '2012'
     f.name = ''
     f.ssn = ''
     f.line1a = zero

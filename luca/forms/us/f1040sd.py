@@ -1,11 +1,10 @@
 from luca.kit import Decimal, dsum, zero, zstr
 
 title = u'Schedule D (Form 1040): Capital Gains and Losses'
-
+versions = '2012',
 
 def defaults(form):
     f = form
-    f.form_version = '2012'
     f.name = ''
     f.ssn = ''
 

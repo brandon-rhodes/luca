@@ -2,6 +2,9 @@ from decimal import Decimal
 from luca.kit import cents, validate, zero, zzstr
 
 
+versions = u'2012',
+
+
 def defaults(form):
     f = form
     f.name = u''
@@ -35,7 +38,7 @@ def compute(form):
     validate.quarter(f.quarter)
     f.line4 = not (f.line5a1 or f.line5b1 or f.line5c1)
 
-    social_security_rate = Decimal('0.104' if f.year < 2013 else '0.124')
+    social_security_rate = Decimal('0.104' if int(f.year) < 2013 else '0.124')
     medicare_rate = Decimal('0.029')
 
     f.line5a2 = cents(f.line5a1 * social_security_rate)

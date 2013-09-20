@@ -8,11 +8,12 @@ TODO: Schedule M-1
 from luca.forms.formlib import Form
 from luca.kit import validate, zero, zstr, zzstr
 
+versions = u'2012',
+
 
 def defaults(form):
     f = form
 
-    f.year = 2012
     f.beginning_date = ''
     f.ending_date = ''
     f.ending_year = ''
@@ -100,7 +101,7 @@ def defaults(form):
 
 def compute(form):
     f = form
-    validate.year(f.year)
+    validate.year(int(f.form_version))
 
     f.line1c = f.line1a - f.line1b
     f.line3 = f.line1c - f.line2
@@ -146,7 +147,7 @@ def compute(form):
 
 def fill_out(form, pdf):
     f = form
-    pdf.load('us.f1120s--{}.pdf'.format(f.year))
+    pdf.load('us.f1120s--{}.pdf'.format(f.form_version))
 
     def split(i, value, j=None):
         if j is None:
