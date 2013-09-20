@@ -78,6 +78,7 @@ def compute(form):
             f.line20 = (not f.line18) and (not f.line19)
         else:
             f.line20 = None
+        f.line21 = zero
     elif f.line16 < zero:
         f.line17 = None
         f.line20 = None
