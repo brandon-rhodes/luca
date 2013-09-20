@@ -80,37 +80,53 @@ def fill_out_2011(form, pdf):
 
     for pageno, part in [(1, f.Part_I), (2, f.Part_II)]:
 
-        pdf.pattern = 'topmostSubform[0].Page{}[0].c1_0{}_0_[{}]'
+        pdf.pattern = 'topmostSubform[0].Page{}[0].c{}_0{}_0_[0]'
 
-        for n, letter in enumerate('ABC'):
+        for n, letter in enumerate('ABC', 1):
             value = letter if part.box == letter else 'Off'
             pdf[pageno, pageno, n] = value
 
-        pdf.pattern = 'f{}_{}[0]'
+        pdf.pattern = 'f{}_{:03}_0_[0]'
 
-        n = 1
+        i = 14
+        j = 226
         for row in part.table:
-            pdf[pageno, n + 0] = row.a
-            pdf[pageno, n + 1] = row.b
-            pdf[pageno, n + 2] = row.c
-            pdf[pageno, n + 3] = zstr(row.d)
-            pdf[pageno, n + 4] = zstr(row.e)
-            pdf[pageno, n + 5] = row.f
-            pdf[pageno, n + 6] = zstr(row.g)
-            pdf[pageno, n + 7] = zstr(row.h)
-            n += 10
+
+            if i <= 176:
+                pdf[pageno, i+0] = row.a
+                pdf[pageno, j] = row.b
+                pdf[pageno, i+1] = row.c
+                pdf[pageno, i+2] = row.d
+                pdf[pageno, i+3] = zstr(row.e)
+                pdf[pageno, i+5] = zstr(row.f)
+                pdf[pageno, i+7] = zstr(row.g)
+            else:
+                pdf[pageno, i+0] = row.a
+                pdf[pageno, i+1] = row.b
+                pdf[pageno, i+2] = row.c
+                pdf[pageno, i+3] = row.d
+                pdf[pageno, i+4] = zstr(row.e)
+                pdf[pageno, i+6] = zstr(row.f)
+                pdf[pageno, i+8] = zstr(row.g)
+
+            if i < 176:
+                i += 9
+            elif i == 176:
+                i = 245
+            else:
+                i += 10
+
+            j += 1
 
     pdf.pattern = '{}'
 
-    pdf['f1_159['] = zstr(f.Part_I.total_d)
-    pdf['f1_160['] = zstr(f.Part_I.total_e)
-    pdf['f1_161['] = zstr(f.Part_I.total_g)
-    pdf['f1_162['] = zstr(f.Part_I.total_h)
+    pdf['f1_500_'] = zstr(f.Part_I.total_e)
+    pdf['f1_476_'] = zstr(f.Part_I.total_f)
+    pdf['f1_502_'] = zstr(f.Part_I.total_g)
 
-    pdf['f2_167['] = zstr(f.Part_II.total_d)
-    pdf['f2_168['] = zstr(f.Part_II.total_e)
-    pdf['f2_169['] = zstr(f.Part_II.total_g)
-    pdf['f2_170['] = zstr(f.Part_II.total_h)
+    pdf['f2_500_'] = zstr(f.Part_II.total_e)
+    pdf['f2_476_'] = zstr(f.Part_II.total_f)
+    pdf['f2_502_'] = zstr(f.Part_II.total_g)
 
 def fill_out_2012(form, pdf):
     f = form
