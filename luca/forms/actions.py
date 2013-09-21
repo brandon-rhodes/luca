@@ -55,7 +55,7 @@ def check(path):
             json_data = f.read()
         #form, form_module = load(json_data)
         form, form_module = process(json_data)
-        forms[form.form].append(form)
+        forms[form.form_name].append(form)
         tuples.append((filename, form, form_module))
 
     #print [f.form for f in forms]
