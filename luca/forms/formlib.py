@@ -99,7 +99,7 @@ def load_json(text):
     outer = json.loads(text, object_pairs_hook=_form_from_pairs)
     return outer.inputs
 
-_decimal_re = re.compile(ur'^-?[\d,]+\.\d\d$')
+_decimal_re = re.compile(ur'^-?[\d,]+\.[\d,]+$')
 
 def _form_from_pairs(pairs):
     f = Form()

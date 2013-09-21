@@ -132,6 +132,14 @@ class FormTests(TestCase):
         assert f.line1 == [["First Bank", Decimal('1.23')],
                            ["Second Bank", Decimal('4.56')]]
 
+    def test_building_from_json_detects_many_digit_decimals(self):
+        f = load_json(u'{"inputs": {"line1": [["First Percent", "1.2"],'
+                      ' ["Second Percent", "4.56001"]]}}')
+        assert isinstance(f.line1[0][1], Decimal)
+        assert isinstance(f.line1[1][1], Decimal)
+        assert f.line1 == [["First Percent", Decimal('1.2')],
+                           ["Second Percent", Decimal('4.56001')]]
+
     def test_json_output_handles_decimals_in_lists(self):
         f = Form()
         f.line1 = [["First Bank", Decimal('1.23')],
