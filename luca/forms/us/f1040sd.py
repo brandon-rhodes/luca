@@ -1,3 +1,4 @@
+from luca.forms.formlib import Form
 from luca.kit import Decimal, dsum, zero, zstr
 
 title = u'Schedule D (Form 1040): Capital Gains and Losses'
@@ -8,6 +9,14 @@ def defaults(form):
     f.name = ''
     f.ssn = ''
 
+    f.carryover_worksheet = Form()
+
+    cw = f.carryover_worksheet
+    cw.previous_f1040_line41 = zero
+    cw.previous_f1040sd_line7 = zero
+    cw.previous_f1040sd_line15 = zero
+    cw.previous_f1040sd_line21 = zero
+
     # Part I: Short-Term Capital Gains and Losses
     # Part II: Long-Term Capital Gains and Losses
 
@@ -17,13 +26,13 @@ def defaults(form):
         for letter in letters:
             setattr(f, 'line{}{}'.format(line, letter), zero)
 
-    f.line4 = f.line5 = f.line6 = zero
+    f.line4 = f.line5 = zero
 
     for line in 8, 9, 10:
         for letter in letters:
             setattr(f, 'line{}{}'.format(line, letter), zero)
 
-    f.line11 = f.line12 = f.line13 = f.line14 = zero
+    f.line11 = f.line12 = f.line13 = zero
 
     # Part III: Summary
 
@@ -56,6 +65,21 @@ def check(form, forms, eq):
 def compute(form):
     f = form
 
+    cw = f.carryover_worksheet
+    cw.line1 = cw.previous_f1040_line41
+    cw.line2 = max(zero, - cw.previous_f1040sd_line21)
+    cw.line3 = max(zero, cw.line1 + cw.line2)
+    cw.line4 = min(cw.line2, cw.line3)
+    cw.line5 = max(zero, - cw.previous_f1040sd_line7)
+    cw.line6 = max(zero, cw.previous_f1040sd_line15)
+    cw.line7 = cw.line4 + cw.line6
+    cw.line8 = max(zero, cw.line5 - cw.line7)
+    cw.line9 = max(zero, - cw.previous_f1040sd_line15)
+    cw.line10 = max(zero, cw.previous_f1040sd_line7)
+    cw.line11 = max(zero, cw.line4 - cw.line5)
+    cw.line12 = cw.line10 + cw.line11
+    cw.line13 = max(zero, cw.line9 - cw.line12)
+
     # Part I: Short-Term Capital Gains and Losses
     # Part II: Long-Term Capital Gains and Losses
 
@@ -68,7 +92,9 @@ def compute(form):
             + getattr(f, 'line{}{}'.format(line, letters[2]))
             )
 
+    f.line6 = cw.line8
     f.line7 = f.line1h + f.line2h + f.line3h + f.line4 + f.line5 - f.line6
+    f.line14 = cw.line13
     f.line15 = (f.line8h + f.line9h + f.line10h
               + f.line11 + f.line12 + f.line13 - f.line14)
 
