@@ -1,6 +1,6 @@
 {
  "inputs": {
-  "form": "us.f941",
+  "form_name": "us.f941",
   "year": 2012,
   "quarter": 4,
   "ein": "12-3456789",
