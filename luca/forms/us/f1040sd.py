@@ -92,9 +92,11 @@ def compute(form):
             + getattr(f, 'line{}{}'.format(line, letters[2]))
             )
 
-    f.line6 = cw.line8
+    if not hasattr(f, 'line6'):
+        f.line6 = cw.line8
     f.line7 = f.line1h + f.line2h + f.line3h + f.line4 + f.line5 - f.line6
-    f.line14 = cw.line13
+    if not hasattr(f, 'line13'):
+        f.line14 = cw.line13
     f.line15 = (f.line8h + f.line9h + f.line10h
               + f.line11 + f.line12 + f.line13 - f.line14)
 
