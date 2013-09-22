@@ -45,6 +45,11 @@ def defaults(form):
     f.Part_V = [['', zero], ['', zero]]
 
 def check(form, forms, eq):
+    matches = forms['us.f8829']
+    if matches:
+        f8829 = matches[0]
+        eq('line30', f8829.line35)
+
     if form.line31 > 0:
         if not forms.get('us.f1040sse', ()):
             print ('Error: Schedule C line 41 is more than zero; you need to '
