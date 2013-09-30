@@ -44,16 +44,11 @@ def print_defaults(form_name, form_version):
     print formlib.dump_json(form).encode('utf-8')
 
 
-def check(path):
+def check(dirpath):
     forms = defaultdict(list)
     tuples = []
 
-    for filename in os.listdir(path):
-        if not filename.endswith('.json'):
-            continue
-        with open(os.path.join(path, filename)) as f:
-            json_data = f.read()
-        #form, form_module = load(json_data)
+    for filename, path, json_data in forms_inside_directory(dirpath):
         form, form_module = process(json_data)
         forms[form.form_name].append(form)
         tuples.append((filename, form, form_module))
@@ -77,7 +72,15 @@ def check(path):
     print 'Ran', n[0], 'check{}'.format('' if n[0] == 1 else 's')
 
 
-def complete(jsonpath):
+def complete(path):
+    if os.path.isfile(path):
+        return complete_form(path)
+
+    for filename, jsonpath, json_data in forms_inside_directory(path):
+        complete_form(jsonpath)
+
+
+def complete_form(jsonpath):
     with open(jsonpath) as f:
         json_data = f.read()
 
@@ -111,6 +114,16 @@ def complete(jsonpath):
         inputpath = outputpath
     if hasattr(form_module, 'draw'):
         run_draw(form, form_module, inputpath, outputpath)
+
+
+def forms_inside_directory(dirpath):
+    for filename in os.listdir(dirpath):
+        if not filename.endswith('.json'):
+            continue
+        path = os.path.join(dirpath, filename)
+        with open(path) as f:
+            json_data = f.read()
+        yield filename, path, json_data
 
 
 def load(json_data):
