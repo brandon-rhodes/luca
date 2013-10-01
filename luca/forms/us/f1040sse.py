@@ -41,6 +41,7 @@ def compute(form):
 def fill_out(form, pdf):
     f = form
     pdf.load('us.f1040sse--{}.pdf'.format(f.form_version))
+    pdf.pages = 1,
 
     pdf.pattern = 'p1-t{}[0]'
 
