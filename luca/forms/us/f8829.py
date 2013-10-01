@@ -1,5 +1,4 @@
-from luca.forms.formlib import Form
-from luca.kit import Decimal, cents, dsum, zero, zstr, zzstr, ROUND_HALF_UP
+from luca.kit import Decimal, cents, zero, zstr, zzstr, ROUND_HALF_UP
 
 title = u''
 versions = u'2012',
