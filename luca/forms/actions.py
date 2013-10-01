@@ -197,6 +197,7 @@ class PDF(object):
         self.pages = ['1-end']
         self.pattern = '{}'
         self.fdf_fields = []
+        self.canvases = {}
 
     # The beginning.
 
@@ -228,6 +229,15 @@ class PDF(object):
             tup = (name, value)
             self.fdf_fields.append(tup)
 
+    # How form logic fetches canvases for drawing atop form pages.
+
+    def get_canvas(self, page_number):
+        canvas = self.canvases.get(page_number)
+        if canvas is None:
+            canvas = Canvas('canvas{}.pdf'.format(page_number))
+            self.canvases[page_number] = canvas
+        return canvas
+
     # The finale.
 
     def save(self, path):
@@ -237,17 +247,44 @@ class PDF(object):
         pages = [str(p) for p in self.pages]
 
         p1 = Popen(
-            ['pdftk', self.original_pdf_path, 'fill_form', '-', 'output', '-'],
+            ['pdftk', self.original_pdf_path, 'fill_form', '-',
+             'output', '-', 'flatten'],
             stdin=PIPE, stdout=PIPE,
             )
         p2 = Popen(
-            ['pdftk', '-', 'cat'] +  pages + ['output', path],
+            ['pdftk', '-', 'cat'] + pages + ['output', path],
             stdin=p1.stdout,
             )
         p1.stdout.close()
         p1.stdin.write(fdf)
         p1.stdin.close()
         p2.wait()
+
+        if not self.canvases:
+            return
+
+        with open(path, 'rb') as f:
+            inputdata = f.read()
+        pdf = PdfFileReader(StringIO(inputdata))
+
+        output = PdfFileWriter()
+
+        for i in range(pdf.numPages):
+            page = pdf.getPage(i)
+            canvas = self.canvases.get(i + 1)
+            if canvas is not None:
+                canvas.showPage()
+                overlay = PdfFileReader(StringIO(canvas.getpdfdata()))
+                page.mergePage(overlay.getPage(0))
+            output.addPage(page)
+
+        # We call write() outside of the open() context to avoid
+        # truncating the file if write() dies with an exception.
+
+        output_stream = StringIO()
+        output.write(output_stream)
+        with open(path, 'w') as f:
+            f.write(output_stream.getvalue())
 
 
 def run_draw(form, form_module, inputpath, outputpath):
