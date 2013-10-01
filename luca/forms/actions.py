@@ -130,7 +130,8 @@ def load(json_data):
     form = formlib.load_json(json_data.decode('utf-8'))
 
     if not hasattr(form, 'form_name'):
-        raise ValueError('your JSON "input" object needs to specify a "form"')
+        raise ValueError('your JSON "input" object'
+                         ' needs to specify a "form_name"')
 
     form_module_name = 'luca.forms.' + form.form_name
     try:
