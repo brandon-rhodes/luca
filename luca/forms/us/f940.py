@@ -37,8 +37,13 @@ def compute(form):
         f.line17 = ''
 
 
-def draw(form, canvas):
+def fill_out(form, pdf):
     f = form
+
+    pdf.load('us.f940--{}.pdf'.format(f.version))
+    pdf.pages = 1, 2
+
+    canvas = pdf.get_canvas(1)
     canvas.setFont('Helvetica', 12)
 
     def put(x, y, value):
@@ -88,7 +93,7 @@ def draw(form, canvas):
     put(551, 142, f.line14)
     put(551, 142 - stride, f.line15)
 
-    canvas.showPage()
+    canvas = pdf.get_canvas(2)
 
     put(36, 725, f.name)
     put(400, 725, f.ein)
@@ -104,5 +109,3 @@ def draw(form, canvas):
     put(386, 365, f.sign_name)
     put(386, 365 - 1 * stride, f.sign_title)
     put(428, 365 - 2 * stride, f.sign_phone)
-
-    canvas.showPage()
