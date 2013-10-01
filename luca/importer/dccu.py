@@ -144,8 +144,8 @@ def parse_transaction_table(lines, items):
         if 'TOTAL FEES FOR THIS PERIOD' in line:
             break
         fields = line.split()
-        if fields == ['FEES']:
-            break
+        # if fields == ['FEES']:
+        #     break
 
         if not fields:
             if items and not isinstance(items[-1], BlankLine):
