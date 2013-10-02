@@ -26,4 +26,9 @@ def main():
                            'output', 'fields.pdf'])
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except subprocess.CalledProcessError as e:
+        sys.stderr.write('\nFailed command: {}\nReturn code: {}\n'.format(
+                ' '.join(e.cmd), e.returncode))
+        sys.exit(e.returncode)
