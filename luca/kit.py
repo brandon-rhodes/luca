@@ -6,11 +6,17 @@ from decimal import Decimal, ROUND_HALF_UP
 
 zero = Decimal('0.00')
 cent = Decimal('0.01')
+one = Decimal('1')
 
 def cents(value):
     if not isinstance(value, Decimal):
         value = Decimal(value)
     return value.quantize(cent, rounding=ROUND_HALF_UP)
+
+def dollars(value):
+    if not isinstance(value, Decimal):
+        value = Decimal(value)
+    return value.quantize(one, rounding=ROUND_HALF_UP)
 
 def dsum(sequence=()):
     """Return the sum of a sequence of Decimals.
