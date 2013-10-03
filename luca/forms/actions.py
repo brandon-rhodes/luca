@@ -1,9 +1,10 @@
 """One-off program to generate tax forms until I learn the workflow."""
 
+import importlib
 import os
 import re
-import importlib
 import subprocess
+import sys
 from StringIO import StringIO
 from collections import defaultdict
 from subprocess import Popen, PIPE
@@ -258,6 +259,10 @@ class PDF(object):
         # truncating the file if write() dies with an exception.
 
         output_stream = StringIO()
-        output.write(output_stream)
+        try:
+            output.write(output_stream)
+        except Exception as e:
+            sys.stderr.write('PyPDF exception: {}\n'.format(e))
+            sys.exit(1)
         with open(path, 'w') as f:
             f.write(output_stream.getvalue())
