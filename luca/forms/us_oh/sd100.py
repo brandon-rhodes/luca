@@ -77,12 +77,17 @@ def fill_out(form, pdf):
     pdf.load('us_oh.sd100--{}.pdf'.format(f.form_version))
     pdf.pages = 1, 2
 
-    pdf['F0010PrimarySSN'] = f.ssn
+    # Fields on both page 1 and page 2
+
+    pdf['PrimarySSN'] = f.ssn
+    pdf['SD#'] = f.school_district_number
+
+    # Fields on page 1
+
     # pdf['F0020PrimaryDecd']
     pdf['F0030SecondarySSN'] = f.spouse_ssn
     # pdf['F0040SecondaryDecd']
     # pdf['F0050holdTaxYR']
-    pdf['F0060SD#'] = f.school_district_number
     pdf['F0070PrimaryFirstName'] = f.first_name
     pdf['F0080PrimaryMI'] = f.middle_initial
     pdf['F0090PrimaryLastName'] = f.last_name
