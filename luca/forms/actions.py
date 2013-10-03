@@ -93,27 +93,11 @@ def complete_form(jsonpath):
     if not os.path.isdir('out'):
         os.mkdir('out')
 
-    if hasattr(form_module, 'fill_out'):
-        # Support new-style fill_out() pattern, to which all forms will
-        # soon be rewritten.
-        pdf = PDF()
-        form_module.fill_out(form, pdf)
-        basename, ext = os.path.splitext(os.path.basename(jsonpath))
-        outputpath = os.path.join('out', basename + '.pdf')
-        pdf.save(outputpath)
-        return
-
-    pdfpath = form.form + '--2012.pdf'
-    fullpath = download_pdf(pdfpath)
-
-    outputpath = os.path.join('out', os.path.basename(pdfpath))
-    print 'Generating', outputpath
-    inputpath = fullpath
-    if hasattr(form_module, 'fill'):
-        run_fill(form, form_module, inputpath, outputpath)
-        inputpath = outputpath
-    if hasattr(form_module, 'draw'):
-        run_draw(form, form_module, inputpath, outputpath)
+    pdf = PDF()
+    form_module.fill_out(form, pdf)
+    basename, ext = os.path.splitext(os.path.basename(jsonpath))
+    outputpath = os.path.join('out', basename + '.pdf')
+    pdf.save(outputpath)
 
 
 def forms_inside_directory(dirpath):
@@ -155,24 +139,6 @@ def process(json_data):
         form_module.compute(form)
 
     return form, form_module
-
-
-def run_fill(form, form_module, pdfpath, outputpath):
-    out = subprocess.check_output(['pdftk', pdfpath, 'dump_data_fields'])
-    lines = [ line.split(None, 1) for line in out.splitlines() ]
-    names = [ fields[1] for fields in lines if fields[0] == 'FieldName:' ]
-
-    fields = Fields(names)
-    form_module.fill(form, fields)
-    fields = fields.items
-
-    fdf = fdfgen.forge_fdf('', fields, [], [], [])
-    fdf_file = open('data.fdf', 'w')
-    fdf_file.write(fdf)
-    fdf_file.close()
-
-    subprocess.check_call(['pdftk', pdfpath, 'fill_form', 'data.fdf',
-                           'output', outputpath])
 
 
 def download_pdf(pdfpath):
@@ -285,26 +251,3 @@ class PDF(object):
         output.write(output_stream)
         with open(path, 'w') as f:
             f.write(output_stream.getvalue())
-
-
-def run_draw(form, form_module, inputpath, outputpath):
-    with open(inputpath, 'rb') as f:
-        inputdata = f.read()
-    original_form = PdfFileReader(StringIO(inputdata))
-
-    canvas = Canvas('fields.pdf')
-    page_numbers = form_module.draw(form, canvas)
-    overlays = PdfFileReader(StringIO(canvas.getpdfdata()))
-
-    output = PdfFileWriter()
-
-    for i in range(overlays.numPages):
-        page = original_form.getPage(i)
-        overlay = overlays.getPage(i)
-        page.mergePage(overlay)
-        if (page_numbers is None) or ((i + 1) in page_numbers):
-            output.addPage(page)
-
-    print('Writing {}'.format(outputpath))
-    with open(outputpath, 'w') as f:
-        output.write(f)
