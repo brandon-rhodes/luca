@@ -181,15 +181,21 @@ class PDF(object):
         if not isinstance(args, tuple):
             args = (args,)
 
-        try:
-            substring = self.pattern.format(*args)
-        except IndexError:
-            raise ValueError('your index tuple {!r} is the wrong length for '
-                             'the template {!r}'.format(args, self.pattern))
+        pattern = self.pattern
+        if pattern is None:
+            names = [''.join(str(arg) for arg in args)]
+        else:
+            try:
+                substring = self.pattern.format(*args)
+            except IndexError:
+                raise ValueError('your index tuple {!r} is the wrong length '
+                                 'for the template {!r}'
+                                 .format(args, self.pattern))
+            names = [name for name in self.names if substring in name]
 
-        names = [name for name in self.names if substring in name]
         if not isinstance(values, (tuple, list)):
             values = [values]
+
         for i, name in enumerate(names):
             value = values[i % len(values)]
             tup = (name, value)
@@ -214,7 +220,7 @@ class PDF(object):
 
         p1 = Popen(
             ['pdftk', self.original_pdf_path, 'fill_form', '-',
-             'output', '-', 'flatten'],
+             'output', '-'], #, 'flatten'],
             stdin=PIPE, stdout=PIPE,
             )
         p2 = Popen(

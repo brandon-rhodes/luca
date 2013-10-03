@@ -42,6 +42,21 @@ def dstr(value):
     """
     return (u'({:,})'.format(-value) if value < 0 else u'{:,} '.format(value))
 
+def znstr(value):
+    """Return a Decimal with thousands commas, with a minus sign if negative.
+
+    An empty string is returned if the value is zero.
+
+    >>> znstr(Decimal('1234567.89'))
+    u'1,234,567.89'
+    >>> znstr(Decimal('-1234567.89'))
+    u'-1,234,567.89'
+    >>> znstr(zero)
+    u''
+
+    """
+    return u'{:,}'.format(value) if value else u''
+
 def zstr(value):
     """Return u'' for a false `value`, else format it with thousands commas.
 

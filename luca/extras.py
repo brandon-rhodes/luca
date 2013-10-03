@@ -16,6 +16,7 @@ def main():
               if line.startswith('FieldName: ') ]
 
     fields = [ (name, name.split('.')[-1]) for name in names ]
+    # verbose: fields = [ (name, name) for name in names ]
 
     fdf = forge_fdf('', fields, [], [], [])
     fdf_file = open('data.fdf', 'w')
