@@ -218,6 +218,10 @@ class PDF(object):
         fdf = fdfgen.forge_fdf('', self.fdf_fields, [], [], [])
         pages = [str(p) for p in self.pages]
 
+        # TODO: the "cat" step breaks the JavaScript used to print
+        # Georgia Form 600S, so we should just skip the step if the PDF
+        # fails to specify a list of pages.
+
         p1 = Popen(
             ['pdftk', self.original_pdf_path, 'fill_form', '-',
              'output', '-'], #, 'flatten'],
