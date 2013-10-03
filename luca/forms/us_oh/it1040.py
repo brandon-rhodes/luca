@@ -4,9 +4,8 @@ title = u'Individual Income Tax Return'
 versions = '2012',
 
 zero = Decimal('0')
-deductions = (
-    '35a 35b 36 37a 37b 38a 38b 38c 39 40 41a 41b '
-    '42 43a 43b 43c 44 45').split()
+deductions = ('35a 35b 36 37a 37b 38a 38b 38c 39 '
+              '40 41a 41b 42 43a 43b 43c 44 45').split()
 nonbusiness_credits = range(48, 57)
 
 # TODO: someday also support Section B (Long Schedule SE)
@@ -155,19 +154,19 @@ def fill_out(form, pdf):
     if f.line7 or f.line13:
         pdf.pages.append(4)
 
-    pdf['PrimarySSN'] = f.ssn
-    pdf['SecondarySSN'] = f.spouse_ssn
-    pdf['PrimaryFirst'] = f.first_name
-    pdf['PrimaryMI'] = f.middle_initial
-    pdf['PrimaryLast'] = f.last_name
-    pdf['SpouseFirst'] = f.spouse_first_name
-    pdf['SpouseMI'] = f.spouse_middle_initial
-    pdf['SpouseLast'] = f.spouse_last_name
-    pdf['MailingAddress'] = f.address
-    pdf['City'] = f.city
-    pdf['State'] = f.state
-    pdf['MailingAddressZip'] = f.zip
-    pdf['MailingAddressCounty'] = f.county[:4]
+    pdf['PrimarySSN'] = f.ssn.upper()
+    pdf['SecondarySSN'] = f.spouse_ssn.upper()
+    pdf['PrimaryFirst'] = f.first_name.upper()
+    pdf['PrimaryMI'] = f.middle_initial.upper()
+    pdf['PrimaryLast'] = f.last_name.upper()
+    pdf['SpouseFirst'] = f.spouse_first_name.upper()
+    pdf['SpouseMI'] = f.spouse_middle_initial.upper()
+    pdf['SpouseLast'] = f.spouse_last_name.upper()
+    pdf['MailingAddress'] = f.address.upper()
+    pdf['City'] = f.city.upper()
+    pdf['State'] = f.state.upper()
+    pdf['MailingAddressZip'] = f.zip.upper()
+    pdf['MailingAddressCounty'] = f.county[:4].upper()
     pdf['E-mail Address'] = f.email
 
     def yes(value1, value2):
@@ -195,8 +194,8 @@ def fill_out(form, pdf):
     pdf['SpousePoliticalFundNo'] = yes(f.spouse_political_party_fund, False)
 
     pdf['School'] = str(f.school_district_number)
-
     pdf['exemptions'] = str(f.exemptions)
+    pdf['dispVal'] = str(int(f.line11_percent))
 
     for attr in dir(f):
         if attr.startswith('line'):
