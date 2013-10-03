@@ -201,5 +201,5 @@ def fill_out(form, pdf):
         if attr.startswith('line'):
             value = getattr(f, attr)
             if isinstance(value, Decimal):
-                s = str(value).replace('.00', '')
-            pdf[attr.capitalize()] = s
+                value = str(value).replace('.00', '')
+            pdf[attr.capitalize()] = value
