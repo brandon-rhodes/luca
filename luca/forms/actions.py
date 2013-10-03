@@ -224,7 +224,7 @@ class PDF(object):
 
         p1 = Popen(
             ['pdftk', self.original_pdf_path, 'fill_form', '-',
-             'output', '-'], #, 'flatten'],
+             'output', '-', 'flatten'],
             stdin=PIPE, stdout=PIPE,
             )
         p2 = Popen(
