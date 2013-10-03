@@ -45,7 +45,6 @@ def fill_out(form, pdf):
     #
     # fields['f1_001[0]'].all = f.payer
 
-
     pdf.pattern = 'f1_{:03}[0]'
     pdf[1] = f.payer
 
@@ -65,10 +64,8 @@ def fill_out(form, pdf):
     pdf[15] = zstr(f.line6)
     pdf[16] = zstr(f.line7)
     pdf[17] = zstr(f.line8)
-    pdf['c1_02_0_[0]'] = 'Yes' if f.line9 else 'Off'
     pdf[18] = zstr(f.line10)
     pdf[101] = zstr(f.line11)
-    pdf['Box12[0]'] = f.line12
     pdf[19] = zstr(f.line13)
     pdf[20] = zstr(f.line14)
 
@@ -85,16 +82,6 @@ def fill_out(form, pdf):
     if len(f.states) > 2:
         raise ValueError('Form 1099-MISC only supports two states')
 
-
-def off_draw(form, canvas):
-    f = form
-    lines = f.payer.splitlines()
-
-    for page in range(1, 8):
-        if page in (2, 3, 4, 6, 7):
-            canvas.setFont('Courier', 9)
-            for i, line in enumerate(lines):
-                canvas.drawString(54, 728 - i * 10, line)
-        canvas.showPage()
-
-    return 3, 4, 5, 6, 7
+    pdf.pattern = '{}'
+    pdf['c1_02_0_[0]'] = 'Yes' if f.line9 else 'Off'
+    pdf['Box12[0]'] = f.line12

@@ -162,7 +162,6 @@ def fill_out(form, pdf):
                 fieldname = '{}.{}'.format(sname, n).upper()
             if isinstance(value, Decimal):
                 value = str(dollars(value))
-            print (fieldname, value)
             pdf[fieldname] = value
 
     pdf.pattern = '{}'

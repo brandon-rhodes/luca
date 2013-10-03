@@ -40,7 +40,7 @@ def compute(form):
 def fill_out(form, pdf):
     f = form
 
-    pdf.load('us.f940--{}.pdf'.format(f.version))
+    pdf.load('us.f940--{}.pdf'.format(f.form_version))
     pdf.pages = 1, 2
 
     canvas = pdf.get_canvas(1)
