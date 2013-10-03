@@ -26,6 +26,9 @@ def defaults(form):
     f.line12a = zero
     f.line12b = 0
     f.line16 = 'a'
+    f.line16_month1 = zero
+    f.line16_month2 = zero
+    f.line16_month3 = zero
     f.Part_4 = False
     f.signer_name = u''
     f.signer_title = u''
@@ -56,6 +59,9 @@ def compute(form):
         f.line14 = zero
         f.line15 = f.line13 - f.line10
     # TODO: refuse to let them check box 1 on line16 if they do not qualify
+
+    total = f.line16_month1 + f.line16_month2 + f.line16_month3
+    f.line16_total = total
 
 
 def fill_out(form, pdf):
@@ -125,10 +131,19 @@ def fill_out(form, pdf):
     pdf[name(14)] = f.ein
 
     pdf['c2_01_0_[0]'] = 'Chck1' if f.line16 == 'a' else 'Off'
+    pdf['c2_01_0_[1]'] = 'Chck2' if f.line16 == 'b' else 'Off'
+    pdf['c2_01_0_[2]'] = 'Chck3' if f.line16 == 'c' else 'Off'
 
-    # TODO: allow other options for Part 2
+    pdf.pattern = '.f2_{:02}_0_[0]'
+    pdf[3], pdf[4] = zzstr(f.line16_month1)
+    pdf[5], pdf[6] = zzstr(f.line16_month2)
+    pdf[7], pdf[8] = zzstr(f.line16_month3)
+    pdf[9], pdf[10] = zzstr(f.line16_total)
+
     # TODO: support Part 3
     # TODO: allow "yes" and further information for Part 4
+
+    pdf.pattern = '{}'
 
     pdf['c2_06_0_[0]'] = 'Yes' if f.Part_4 else 'Off'
     pdf['c2_06_0_[1]'] = 'Off' if f.Part_4 else 'No'
