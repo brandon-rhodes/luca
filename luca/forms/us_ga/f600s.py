@@ -137,7 +137,7 @@ def fill_out(form, pdf):
     pdf['SALES_TAX_REG_NUM'] = f.sales_tax_number
     pdf['CITY'] = f.city.upper()
     pdf['STATE'] = f.state
-    pdf['ZIP'] = f.zip
+    pdf['ZIP5'] = f.zip
     pdf['DATE_ADMITTED_IN_GA'] = f.date_admitted
     pdf['NAICS'] = f.naics_code
     pdf['BOOKS_CITY_LOC'] = f.books_city.upper()
