@@ -2,7 +2,7 @@
 """Trial of rule-driven accounting."""
 
 import re
-import subprocess
+import sys
 from datetime import date
 from decimal import Decimal
 
@@ -10,14 +10,13 @@ import yaml
 from StringIO import StringIO
 from bottle import route, run, template
 
+from luca.pdf import extract_text_from_pdf_file
+
 sample_yaml = u"""\
 - 2013-09:
   - / MA$/: Expenses.Travel.boxborough9
   - / NH$/: Expenses.Travel.boxborough9
 """
-print yaml.safe_load(StringIO(sample_yaml))
-# import sys
-# sys.exit(0)
 
 transaction_start = re.compile(ur"""
     \s*(\d*)          # "Reference Number"
@@ -34,6 +33,8 @@ def process_transactions(transactions, rule):
     if isinstance(rule, str) or isinstance(rule, unicode):
         category = unicode(rule)
         for t in transactions:
+            if t.category is not None:
+                raise ValueError('transaction already has a category')
             t.category = category
     elif isinstance(rule, list):
         for item in rule:
@@ -59,11 +60,9 @@ def process_transactions(transactions, rule):
 
 @route('/')
 def index(name='World'):
-    command = ['pdftotext', '-layout', 'rms-visa-2013-10.pdf', '-']
-    content = subprocess.check_output(command).decode('utf-8')
-
+    text = extract_text_from_pdf_file(sys.argv[1])
     transactions = []
-    lines = iter(content.splitlines())
+    lines = iter(text.splitlines())
     i = 0
 
     for line in lines:
@@ -96,8 +95,8 @@ def index(name='World'):
         foo += '%s %s %s %s : %s\n' % (
             t.date, t.amount, repr(t.description), t.comments, t.category)
 
-    return template('<pre>{{foo}}</pre><hr><pre>{{name}}</pre>!',
-                    foo=foo, name=content)
+    return template('<pre>{{foo}}</pre><hr><pre>{{text}}</pre>!',
+                    foo=foo, text=text)
 
 def main():
     run(host='localhost', port=8080, reloader=True, interval=0.2)
