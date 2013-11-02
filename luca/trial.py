@@ -3,13 +3,12 @@
 
 import re
 import sys
-from datetime import date
-from decimal import Decimal
 
 import yaml
 from StringIO import StringIO
 from bottle import route, run, template
 
+from luca.importer.dccu import import_dccu_visa_pdf
 from luca.pdf import extract_text_from_pdf_file
 
 sample_yaml = u"""\
@@ -17,14 +16,6 @@ sample_yaml = u"""\
   - / MA$/: Expenses.Travel.boxborough9
   - / NH$/: Expenses.Travel.boxborough9
 """
-
-transaction_start = re.compile(ur"""
-    \s*(\d*)          # "Reference Number"
-    \s+(\d\d)/(\d\d)  # "Trans Date"
-    \s+(\d\d)/(\d\d)  # "Post Date"
-    \s+([^$]*)        # "Description"
-    \$(\d+\.\d\d)$    # "Amount"
-    """, re.VERBOSE)
 
 class T(object):
     pass
@@ -61,31 +52,7 @@ def process_transactions(transactions, rule):
 @route('/')
 def index(name='World'):
     text = extract_text_from_pdf_file(sys.argv[1])
-    transactions = []
-    lines = iter(text.splitlines())
-    i = 0
-
-    for line in lines:
-        match = transaction_start.match(line)
-        if match:
-            t = T()
-            month = int(match.group(2))
-            day = int(match.group(3))
-            t.date = date(2013, month, day)
-            description = match.group(6).strip()
-            if description.endswith(' **'):
-                description = description[:-3].strip()
-            t.description = description
-            t.amount = Decimal(match.group(7))
-            t.comments = []
-            t.category = None
-            transactions.append(t)
-            i = match.start(6)
-        elif i and line[:i].isspace() and not line[i:i+1].isspace():
-            t.comments.append(line.strip())
-        elif i:
-            i = 0
-
+    transactions = import_dccu_visa_pdf(text, T)
     y = yaml.safe_load(StringIO(sample_yaml))
     print y
     process_transactions(transactions, y)
@@ -95,8 +62,7 @@ def index(name='World'):
         foo += '%s %s %s %s : %s\n' % (
             t.date, t.amount, repr(t.description), t.comments, t.category)
 
-    return template('<pre>{{foo}}</pre><hr><pre>{{text}}</pre>!',
-                    foo=foo, text=text)
+    return template('<pre>{{foo}}</pre>', foo=foo)
 
 def main():
     run(host='localhost', port=8080, reloader=True, interval=0.2)
