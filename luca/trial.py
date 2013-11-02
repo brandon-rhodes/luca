@@ -51,8 +51,12 @@ def process_transactions(transactions, rule):
 
 @route('/')
 def index(name='World'):
-    text = extract_text_from_pdf_file(sys.argv[1])
-    transactions = import_dccu_visa_pdf(text, T)
+    transactions = []
+    for path in sys.argv[1:]:
+        text = extract_text_from_pdf_file(path)
+        more_transactions = import_dccu_visa_pdf(text, T)
+        transactions.extend(more_transactions)
+    transactions.sort(key=lambda t: t.date)
     y = yaml.safe_load(StringIO(sample_yaml))
     print y
     process_transactions(transactions, y)
