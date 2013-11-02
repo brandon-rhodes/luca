@@ -11,12 +11,6 @@ from bottle import route, run, template
 from luca.importer.dccu import import_dccu_visa_pdf
 from luca.pdf import extract_text_from_pdf_file
 
-sample_yaml = u"""\
-- 2013-09:
-  - / MA$/: Expenses.Travel.boxborough9
-  - / NH$/: Expenses.Travel.boxborough9
-"""
-
 class T(object):
     pass
 
@@ -51,14 +45,18 @@ def process_transactions(transactions, rule):
 
 @route('/')
 def index(name='World'):
+
+    with open(sys.argv[1]) as f:
+        y = yaml.safe_load(f)
+    print y
+
     transactions = []
-    for path in sys.argv[1:]:
+    for path in sys.argv[2:]:
         text = extract_text_from_pdf_file(path)
         more_transactions = import_dccu_visa_pdf(text, T)
         transactions.extend(more_transactions)
     transactions.sort(key=lambda t: t.date)
-    y = yaml.safe_load(StringIO(sample_yaml))
-    print y
+
     process_transactions(transactions, y)
 
     foo = ''
