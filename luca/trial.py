@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Trial of rule-driven accounting."""
 
-import re
 import sys
 from itertools import groupby
 
@@ -10,49 +9,10 @@ from bottle import route, run, template
 
 from luca.importer.dccu import import_dccu_visa_pdf
 from luca.pdf import extract_text_from_pdf_file
+from luca.rules import apply_rule_tree
 
 class T(object):
     pass
-
-def process_transactions(transactions, rule):
-    if isinstance(rule, str) or isinstance(rule, unicode):
-        category = unicode(rule)
-        for t in transactions:
-            if t.category is not None:
-                raise ValueError('transaction already has a category')
-            t.category = category
-    elif isinstance(rule, list):
-        for item in rule:
-            process_transactions(transactions, item)
-    elif isinstance(rule, dict):
-        for key, value in rule.items():
-            if isinstance(key, str) and (key.startswith('/') and
-                                         key.endswith('/')):
-                r = re.compile(key[1:-1])
-                process_transactions(
-                    [t for t in transactions
-                     if r.search(t.description)
-                     or any(r.search(c) for c in t.comments)],
-                    value,
-                    )
-            elif isinstance(key, int) and 1900 <= key <= 2100:
-                process_transactions(
-                    [t for t in transactions if t.date.year == key],
-                    value,
-                    )
-            elif isinstance(key, int) and 1 <= key <= 12:
-                process_transactions(
-                    [t for t in transactions if t.date.month == key],
-                    value,
-                    )
-            else: # 'YYYY-MM'
-                year = int(key[:4])
-                month = int(key[5:7])
-                process_transactions(
-                    [t for t in transactions
-                     if t.date.year == year and t.date.month == month],
-                    value,
-                    )
 
 def group_transactions_by_category(transactions):
     """Return a new list [(category, [transaction, ...], ...]."""
@@ -67,7 +27,7 @@ def group_transactions_by_category(transactions):
 def index(name='World'):
 
     with open(sys.argv[1]) as f:
-        y = yaml.safe_load(f)
+        rule_tree = yaml.safe_load(f)
 
     transactions = []
     for path in sys.argv[2:]:
@@ -75,7 +35,7 @@ def index(name='World'):
         more_transactions = import_dccu_visa_pdf(text, T)
         transactions.extend(more_transactions)
 
-    process_transactions(transactions, y)
+    apply_rule_tree(transactions, None, rule_tree)
     category_list = group_transactions_by_category(transactions)
 
     lines = ['<pre>']
