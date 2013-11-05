@@ -11,8 +11,9 @@ def apply_rule_tree(transactions, category, rule_tree):
         transactions2, category2 = apply_rule(transactions, category, rule)
         for t in transactions2:
             if t.category is not None:
-                raise ValueError('Error - trying to reassign category')
-            t.category = category2
+                t.category = '!CONFLICT: {} or {}'.format(t.category, category)
+            else:
+                t.category = category2
 
     elif isinstance(rule_tree, list):
         for subtree in rule_tree:
