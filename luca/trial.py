@@ -12,7 +12,9 @@ from luca.pdf import extract_text_from_pdf_file
 from luca.rules import apply_rule_tree
 
 class T(object):
-    pass
+    def __init__(self):
+        self.category = None
+        self.earlier_categories = []
 
 def group_transactions_by_category(transactions):
     """Return a new list [(category, [transaction, ...], ...]."""
@@ -43,9 +45,9 @@ def index(name='World'):
         lines.append(str(category))
         for t in transaction_list:
             lines.append('%s%s %s %s %s' % (
-                ' ' * 12, t.date, t.amount, repr(t.description), t.comments))
+                u' ' * 12, t.date, t.amount, t.description, t.comments))
 
-    return '\n'.join(lines)
+    return u'\n'.join(lines)
 
 def main():
     run(host='localhost', port=8080, reloader=True, interval=0.2)

@@ -32,7 +32,6 @@ def import_dccu_visa_pdf(text, Transaction):
             t.description = description
             t.amount = Decimal(match.group(7))
             t.comments = []
-            t.category = None
             transactions.append(t)
             i = match.start(6)
         elif i and line[:i].isspace() and not line[i:i+1].isspace():

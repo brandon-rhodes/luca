@@ -11,9 +11,8 @@ def apply_rule_tree(transactions, category, rule_tree):
         transactions2, category2 = apply_rule(transactions, category, rule)
         for t in transactions2:
             if t.category is not None:
-                t.category = '!CONFLICT: {} or {}'.format(t.category, category)
-            else:
-                t.category = category2
+                t.earlier_categories.append(t.category)
+            t.category = category2
 
     elif isinstance(rule_tree, list):
         for subtree in rule_tree:
@@ -39,6 +38,11 @@ def apply_rule(transactions, category, rule):
         elif rule.startswith('~/') and rule.endswith('/'):
             r = re.compile(rule[2:-1])
             f = lambda t: not r.search(t.description)
+        elif rule.startswith('~'):
+            if rule == '~categorized':
+                f = lambda t: t.category is None
+            else:
+                raise ValueError('unrecognized rule %r' % rule)
         else:
             match = _month_day_re.match(rule)
             if match:
