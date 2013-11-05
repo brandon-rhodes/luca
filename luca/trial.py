@@ -6,7 +6,6 @@ import sys
 from itertools import groupby
 
 import yaml
-from StringIO import StringIO
 from bottle import route, run, template
 
 from luca.importer.dccu import import_dccu_visa_pdf
@@ -27,12 +26,23 @@ def process_transactions(transactions, rule):
             process_transactions(transactions, item)
     elif isinstance(rule, dict):
         for key, value in rule.items():
-            if key.startswith('/') and key.endswith('/'):
+            if isinstance(key, str) and (key.startswith('/') and
+                                         key.endswith('/')):
                 r = re.compile(key[1:-1])
                 process_transactions(
                     [t for t in transactions
                      if r.search(t.description)
                      or any(r.search(c) for c in t.comments)],
+                    value,
+                    )
+            elif isinstance(key, int) and 1900 <= key <= 2100:
+                process_transactions(
+                    [t for t in transactions if t.date.year == key],
+                    value,
+                    )
+            elif isinstance(key, int) and 1 <= key <= 12:
+                process_transactions(
+                    [t for t in transactions if t.date.month == key],
                     value,
                     )
             else: # 'YYYY-MM'
@@ -58,7 +68,6 @@ def index(name='World'):
 
     with open(sys.argv[1]) as f:
         y = yaml.safe_load(f)
-    print y
 
     transactions = []
     for path in sys.argv[2:]:
