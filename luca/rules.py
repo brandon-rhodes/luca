@@ -24,9 +24,26 @@ def apply_rule_tree(transactions, category, rule_tree):
             transactions2, category2 = apply_rule(transactions, category, rule)
             apply_rule_tree(transactions2, category2, subtree)
 
+_month_day_re = re.compile('\d\d/\d\d$')
 
 def apply_rule(transactions, category, rule):
     """Return (transactions, category)."""
+
+    f = None
+
+    if isinstance(rule, str):
+        if rule.startswith('/') and rule.endswith('/'):
+            r = re.compile(rule[1:-1])
+            f = lambda t: r.search(t.description)
+        elif rule.startswith('~/') and rule.endswith('/'):
+            r = re.compile(rule[2:-1])
+            f = lambda t: not r.search(t.description)
+        else:
+            match = _month_day_re.match(rule)
+            if match:
+                month = int(rule[:2])
+                day = int(rule[3:])
+                f = lambda t: t.date.month == month and t.date.day == day
 
     if isinstance(rule, str):
         s = rule
@@ -34,21 +51,11 @@ def apply_rule(transactions, category, rule):
     elif isinstance(rule, int):
         s = str(rule)
         n = rule
-    else:
-        raise ValueError('no rule looks like this! %r' % rule)
-
-    f = None
 
     if (n is not None) and 1900 <= n <= 2100:
         f = lambda t: t.date.year == n
     elif (n is not None) and 1 <= n <= 12:
         f = lambda t: t.date.month == n
-    elif (s is not None) and s.startswith('/') and s.endswith('/'):
-        r = re.compile(s[1:-1])
-        f = lambda t: r.search(t.description)
-    elif (s is not None) and s.startswith('~/') and s.endswith('/'):
-        r = re.compile(s[2:-1])
-        f = lambda t: not r.search(t.description)
 
     if f is None:
         category = rule
