@@ -28,8 +28,6 @@ def apply_rule_tree(transactions, category, rule_tree):
 def apply_rule(transactions, category, rule):
     """Return (transactions, category)."""
 
-    print repr(rule)
-
     if isinstance(rule, str):
         s = rule
         n = int(rule) if rule.isdigit() else None
@@ -48,6 +46,9 @@ def apply_rule(transactions, category, rule):
     elif (s is not None) and s.startswith('/') and s.endswith('/'):
         r = re.compile(s[1:-1])
         f = lambda t: r.search(t.description)
+    elif (s is not None) and s.startswith('~/') and s.endswith('/'):
+        r = re.compile(s[2:-1])
+        f = lambda t: not r.search(t.description)
 
     if f is None:
         category = rule
