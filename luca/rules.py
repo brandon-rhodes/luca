@@ -10,6 +10,8 @@ def apply_rule_tree(transactions, category, rule_tree):
         rule = rule_tree
         transactions2, category2 = apply_rule(transactions, category, rule)
         for t in transactions2:
+            if t.category is not None:
+                raise ValueError('Error - trying to reassign category')
             t.category = category2
 
     elif isinstance(rule_tree, list):
