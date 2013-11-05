@@ -25,21 +25,25 @@ def apply_rule_tree(transactions, category, rule_tree):
 def apply_rule(transactions, category, rule):
     """Return (transactions, category)."""
 
+    print repr(rule)
+
     if isinstance(rule, str):
         s = rule
         n = int(rule) if rule.isdigit() else None
     elif isinstance(rule, int):
         s = str(rule)
         n = rule
+    else:
+        raise ValueError('no rule looks like this! %r' % rule)
 
     f = None
 
-    if (n is not None) and 1900 <= rule <= 2100:
-        f = lambda t: t.date.year == rule
-    elif (n is not None) and 1 <= rule <= 12:
-        f = lambda t: t.date.month == rule
+    if (n is not None) and 1900 <= n <= 2100:
+        f = lambda t: t.date.year == n
+    elif (n is not None) and 1 <= n <= 12:
+        f = lambda t: t.date.month == n
     elif (s is not None) and s.startswith('/') and s.endswith('/'):
-        r = re.compile(rule[1:-1])
+        r = re.compile(s[1:-1])
         f = lambda t: r.search(t.description)
 
     if f is None:
