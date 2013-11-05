@@ -40,4 +40,8 @@ def import_dccu_visa_pdf(text, Transaction):
         elif i:
             i = 0
 
+    for t in transactions:
+        if t.description == u'Card Fee' and t.comments:
+            t.description = t.comments.pop(0)
+
     return transactions
