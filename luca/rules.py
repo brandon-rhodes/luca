@@ -1,7 +1,7 @@
 """Apply YAML rules to transactions."""
 
 import re
-
+from datetime import date
 
 def apply_rule_tree(transactions, category, rule_tree):
     """Um."""
@@ -25,6 +25,7 @@ def apply_rule_tree(transactions, category, rule_tree):
             apply_rule_tree(transactions2, category2, subtree)
 
 _month_day_re = re.compile('\d\d/\d\d$')
+_month_day_to_month_day_re = re.compile('\d\d/\d\d-\d\d/\d\d$')
 
 def apply_rule(transactions, category, rule):
     """Return (transactions, category)."""
@@ -44,6 +45,17 @@ def apply_rule(transactions, category, rule):
                 month = int(rule[:2])
                 day = int(rule[3:])
                 f = lambda t: t.date.month == month and t.date.day == day
+            else:
+                match = _month_day_to_month_day_re.match(rule)
+                if match:
+                    month1 = int(rule[:2])
+                    day1 = int(rule[3:5])
+                    month2 = int(rule[6:8])
+                    day2 = int(rule[9:11])
+                    f = lambda t: (
+                        date(t.date.year, month1, day1) <= t.date and
+                        t.date <= date(t.date.year, month2, day2)
+                        )
 
     if isinstance(rule, str):
         s = rule
