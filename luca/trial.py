@@ -2,6 +2,8 @@
 """Trial of rule-driven accounting."""
 
 import sys
+from collections import defaultdict
+from decimal import Decimal
 from itertools import groupby
 
 import yaml
@@ -13,8 +15,20 @@ from luca.rules import apply_rule_tree
 
 class T(object):
     def __init__(self):
-        self.category = None
+        self.category = '(uncategorized)'
         self.earlier_categories = []
+
+def sum_categories(transactions):
+    sums = defaultdict(Decimal)
+    for t in transactions:
+        c = t.category
+        sums[c] += t.amount
+        pieces = c.rsplit('.', 1)
+        while len(pieces) == 2:
+            c = pieces[0]
+            sums[c] += t.amount
+            pieces = c.rsplit('.', 1)
+    return sums
 
 def group_transactions_by_category(transactions):
     """Return a new list [(category, [transaction, ...], ...]."""
@@ -38,13 +52,14 @@ def index(name='World'):
         transactions.extend(more_transactions)
 
     apply_rule_tree(transactions, None, rule_tree)
+    sums = sum_categories(transactions)
     category_list = group_transactions_by_category(transactions)
 
     lines = ['<pre>']
     for category, transaction_list in category_list:
-        lines.append(str(category))
+        lines.append('{:10,}  {}'.format(sums[category], category))
         for t in transaction_list:
-            lines.append('%s%s %s %s %s' % (
+            lines.append('{}{} {:10,} {} {}'.format(
                 u' ' * 12, t.date, t.amount, t.description, t.comments))
 
     return u'\n'.join(lines)

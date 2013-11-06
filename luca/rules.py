@@ -40,7 +40,7 @@ def apply_rule(transactions, category, rule):
             f = lambda t: not r.search(t.description)
         elif rule.startswith('~'):
             if rule == '~categorized':
-                f = lambda t: t.category is None
+                f = lambda t: t.category == '(uncategorized)'
             else:
                 raise ValueError('unrecognized rule %r' % rule)
         else:
