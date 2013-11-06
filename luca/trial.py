@@ -44,7 +44,14 @@ def index(name='World'):
 
     transactions = []
     for path in sys.argv[2:]:
-        text = extract_text_from_pdf_file(path)
+        if path.lower().endswith('.pdf'):
+            text = extract_text_from_pdf_file(path)
+        elif path.lower().endswith('.txt'):
+            with open(path) as f:
+                text = f.read().decode('utf-8')
+        else:
+            raise ValueError('no idea what to do with file {!r}'.format(path))
+
         transaction_lists = [importer(text, T) for importer in importers]
         keepers = [tlist for tlist in transaction_lists if tlist is not None]
         if len(keepers) == 0:
