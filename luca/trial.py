@@ -32,12 +32,9 @@ def sum_categories(transactions):
 
 def group_transactions_by_category(transactions):
     """Return a new list [(category, [transaction, ...], ...]."""
-    tlist = sorted(transactions, key=lambda t: (t.category or '\177', t.date))
-    category_list = []
-    for category, group in groupby(tlist, lambda t: t.category):
-        tup = (category, list(group))
-        category_list.append(tup)
-    return category_list
+    tlist = sorted(transactions, key=lambda t: (t.category, t.date))
+    return {category: list(iterator) for category, iterator
+            in groupby(tlist, lambda t: t.category)}
 
 @route('/')
 def index(name='World'):
@@ -59,12 +56,16 @@ def index(name='World'):
         transactions.extend(keepers[0])
 
     apply_rule_tree(transactions, None, rule_tree)
-    sums = sum_categories(transactions)
-    category_list = group_transactions_by_category(transactions)
+    catdict = group_transactions_by_category(transactions)
+    sumdict = sum_categories(transactions)
+    categories = set(catdict) | set(sumdict)
 
     lines = ['<pre>']
-    for category, transaction_list in category_list:
-        lines.append('{:10,}  {}'.format(sums[category], category))
+    for category in sorted(categories):
+        lines.append('{:10,}  {}'.format(sumdict[category], category))
+        transaction_list = catdict.get(category, None)
+        if not transaction_list:
+            continue
         for t in transaction_list:
             lines.append('{}{} {:10,} {}'.format(
                 u' ' * 12, t.date, t.amount, t.description))
