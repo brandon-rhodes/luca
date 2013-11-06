@@ -66,8 +66,8 @@ def index(name='World'):
     for category, transaction_list in category_list:
         lines.append('{:10,}  {}'.format(sums[category], category))
         for t in transaction_list:
-            lines.append('{}{} {:10,} {} {}'.format(
-                u' ' * 12, t.date, t.amount, t.description, t.comments))
+            lines.append('{}{} {:10,} {}'.format(
+                u' ' * 12, t.date, t.amount, t.description))
 
     return u'\n'.join(lines)
 
