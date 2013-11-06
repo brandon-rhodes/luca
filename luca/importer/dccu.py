@@ -61,11 +61,12 @@ def import_dccu_checking_pdf(text, Transaction):
 
 
 _visa_transaction_re = re.compile(ur"""
-    \s*(\d*)          # "Reference Number"
-    \s+(\d\d)/(\d\d)  # "Trans Date"
-    \s+(\d\d)/(\d\d)  # "Post Date"
-    \s+([^$]*)        # "Description"
-    \$(\d+\.\d\d)$    # "Amount"
+    \s*
+    (\d+\s+)?                  # "Reference Number"
+    (\d\d)/(\d\d)\s+           # "Trans Date"
+    (\d\d)/(\d\d)\s+           # "Post Date"
+    ([^($]*)                   # "Description"
+    \(?\$([\d,]+\.\d\d)(\)?)$  # "Amount"
     """, re.VERBOSE)
 
 def import_dccu_visa_pdf(text, Transaction):
@@ -81,6 +82,7 @@ def import_dccu_visa_pdf(text, Transaction):
     i = 0
 
     for line in lines:
+        line = line.rstrip()
         match = _visa_transaction_re.match(line)
         if match:
             t = Transaction()
@@ -91,7 +93,9 @@ def import_dccu_visa_pdf(text, Transaction):
             if description.endswith(' **'):
                 description = description[:-3].strip()
             t.description = [description]
-            t.amount = Decimal(match.group(7))
+            t.amount = Decimal(match.group(7).replace(',', ''))
+            if match.group(8):
+                t.amount = - t.amount
             t.comments = []
             transactions.append(t)
             i = match.start(6)
