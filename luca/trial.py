@@ -19,8 +19,10 @@ class T(object):
         self.earlier_categories = []
 
 def sum_categories(transactions):
+    assets = Decimal('0')
     sums = defaultdict(Decimal)
     for t in transactions:
+        assets += t.amount
         c = t.category
         sums[c] += t.amount
         pieces = c.rsplit('.', 1)
@@ -28,7 +30,7 @@ def sum_categories(transactions):
             c = pieces[0]
             sums[c] += t.amount
             pieces = c.rsplit('.', 1)
-    return sums
+    return assets, sums
 
 def group_transactions_by_category(transactions):
     """Return a new list [(category, [transaction, ...], ...]."""
@@ -65,15 +67,21 @@ def index(name='World'):
     apply_rule_tree(transactions, None, rule_tree)
     transactions = [t for t in transactions if t.category is not None]
     catdict = group_transactions_by_category(transactions)
-    sumdict = sum_categories(transactions)
+    assets, sumdict = sum_categories(transactions)
     categories = set(catdict) | set(sumdict)
 
     lines = ['<style>'
              'body {background-color: #ffffff; color: #073642}'
+             'pre {font-family: Inconsolata}'
              'strong {color: #002b36}'
              'pos {color: #859900; font-weight: bold}'
              'neg {color: #dc322f; font-weight: bold}'
              '</style><pre>']
+
+    tag = 'pos' if assets >= 0 else 'neg'
+    lines.append('<{}>{:>12}</{}>  <strong>Assets</strong>'.format(
+        tag, qformat(assets), tag))
+
     for category in sorted(categories):
         csum = sumdict[category]
         tag = 'pos' if csum >= 0 else 'neg'
