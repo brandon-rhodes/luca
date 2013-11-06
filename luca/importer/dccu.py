@@ -83,12 +83,18 @@ def import_dccu_visa_pdf(text, Transaction):
 
     for line in lines:
         line = line.rstrip()
+        stripped_line = line.lstrip()
+        if stripped_line.startswith('Statement Closing Date'):
+            closing = stripped_line.split()[3].split('/')  # '01/10/2013'
+            year = int(closing[2])
+            is_january = int(closing[0]) == 1
         match = _visa_transaction_re.match(line)
         if match:
             t = Transaction()
             month = int(match.group(2))
             day = int(match.group(3))
-            t.date = date(2013, month, day)
+            bump = -1 if is_january and month > 1 else 0
+            t.date = date(year + bump, month, day)
             description = match.group(6).strip()
             if description.endswith(' **'):
                 description = description[:-3].strip()
