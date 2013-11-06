@@ -15,7 +15,7 @@ from luca.rules import apply_rule_tree
 
 class T(object):
     def __init__(self):
-        self.category = '(uncategorized)'
+        self.category = None
         self.earlier_categories = []
 
 def sum_categories(transactions):
@@ -56,21 +56,38 @@ def index(name='World'):
         transactions.extend(keepers[0])
 
     apply_rule_tree(transactions, None, rule_tree)
+    transactions = [t for t in transactions if t.category is not None]
     catdict = group_transactions_by_category(transactions)
     sumdict = sum_categories(transactions)
     categories = set(catdict) | set(sumdict)
 
-    lines = ['<pre>']
+    lines = ['<style>'
+             'body {background-color: #ffffff; color: #073642}'
+             'strong {color: #002b36}'
+             'pos {color: #859900; font-weight: bold}'
+             'neg {color: #dc322f; font-weight: bold}'
+             '</style><pre>']
     for category in sorted(categories):
-        lines.append('{:10,}  {}'.format(sumdict[category], category))
+        csum = sumdict[category]
+        tag = 'pos' if csum >= 0 else 'neg'
+        lines.append('<{}>{:>12}</{}>  <strong>{}</strong>'.format(
+            tag, qformat(csum), tag, category))
         transaction_list = catdict.get(category, None)
         if not transaction_list:
             continue
         for t in transaction_list:
-            lines.append('{}{} {:10,} {}'.format(
-                u' ' * 12, t.date, t.amount, t.description))
+            tag = 'pos' if t.amount >= 0 else 'neg'
+            lines.append('{}{} <{}>{:>12}</{}> {}'.format(
+                u' ' * 14, t.date, tag, qformat(t.amount), tag, t.description))
 
     return u'\n'.join(lines)
+
+def qformat(quantity):
+    """Stringify `quantity`, putting parentheses around a negative value."""
+    if quantity < 0:
+        return '{:,}-'.format(-quantity)
+    else:
+        return '{:,} '.format(quantity)
 
 def main():
     run(host='localhost', port=8080, reloader=True, interval=0.2)

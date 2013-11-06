@@ -36,7 +36,7 @@ def import_dccu_checking_pdf(text, Transaction):
             t.date = date(2013, month, day)
             t.description = [match.group(5).strip()]
             t.amount = Decimal(match.group(6))
-            if match.group(7) != u'-':
+            if match.group(7) == u'-':
                 t.amount = -t.amount
             transactions.append(t)
             i = match.start(5)
@@ -100,7 +100,7 @@ def import_dccu_visa_pdf(text, Transaction):
                 description = description[:-3].strip()
             t.description = [description]
             t.amount = Decimal(match.group(7).replace(',', ''))
-            if match.group(8):
+            if not match.group(8):
                 t.amount = - t.amount
             t.comments = []
             transactions.append(t)
