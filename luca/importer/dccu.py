@@ -4,7 +4,54 @@ import re
 from datetime import date
 from decimal import Decimal
 
-transaction_start_re = re.compile(ur"""
+_checking_transaction_re = re.compile(ur"""
+    \s+
+    (\d\d)/(\d\d)\s+       # "Posting Date"
+    (?:(\d\d)/(\d\d)\s+)?  # "Effective Date"
+    ([^$]*)\s+             # "Transaction Description"
+    (\d+\.\d\d)(-?)\s+     # "Transaction Amount"
+    (\d+\.\d\d)$           # "NEW BALANCE"
+    """, re.VERBOSE)
+
+def import_dccu_checking_pdf(text, Transaction):
+    """Parse a Delta Community Credit Union checking account statement."""
+
+    if 'www.DeltaCommunityCU.com' not in text:
+        return None
+    if 'ACCOUNTS ARE NON-TRANSFERABLE EXCEPT ON THE BOOKS' not in text:
+        return None
+
+    transactions = []
+    lines = iter(text.splitlines())
+    i = 0
+
+    for line in lines:
+        match = _checking_transaction_re.match(line)
+        if match:
+            t = Transaction()
+            month = int(match.group(1))
+            day = int(match.group(2))
+            t.date = date(2013, month, day)
+            t.description = match.group(5).strip()
+            t.amount = Decimal(match.group(6))
+            if match.group(7) == u'-':
+                t.amount = -t.amount
+            t.comments = []
+            transactions.append(t)
+            i = match.start(5)
+        elif i and line[:i].isspace() and not line[i:i+1].isspace():
+            t.comments.append(line.strip())
+        elif i:
+            i = 0
+
+    for t in transactions:
+        if t.description == u'Card Fee' and t.comments:
+            t.description = t.comments.pop(0)
+
+    return transactions
+
+
+_visa_transaction_re = re.compile(ur"""
     \s*(\d*)          # "Reference Number"
     \s+(\d\d)/(\d\d)  # "Trans Date"
     \s+(\d\d)/(\d\d)  # "Post Date"
@@ -15,12 +62,17 @@ transaction_start_re = re.compile(ur"""
 def import_dccu_visa_pdf(text, Transaction):
     """Parse a Delta Community Credit Union Visa statement."""
 
+    if 'www.DeltaCommunityCU.com' not in text:
+        return None
+    if 'Business Credit Card Statement' not in text:
+        return None
+
     transactions = []
     lines = iter(text.splitlines())
     i = 0
 
     for line in lines:
-        match = transaction_start_re.match(line)
+        match = _visa_transaction_re.match(line)
         if match:
             t = Transaction()
             month = int(match.group(2))
@@ -44,3 +96,6 @@ def import_dccu_visa_pdf(text, Transaction):
             t.description = t.comments.pop(0)
 
     return transactions
+
+
+importers = [import_dccu_checking_pdf, import_dccu_visa_pdf]

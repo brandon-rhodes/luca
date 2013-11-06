@@ -9,7 +9,7 @@ from itertools import groupby
 import yaml
 from bottle import route, run, template
 
-from luca.importer.dccu import import_dccu_visa_pdf
+from luca.importer.dccu import importers
 from luca.pdf import extract_text_from_pdf_file
 from luca.rules import apply_rule_tree
 
@@ -48,8 +48,15 @@ def index(name='World'):
     transactions = []
     for path in sys.argv[2:]:
         text = extract_text_from_pdf_file(path)
-        more_transactions = import_dccu_visa_pdf(text, T)
-        transactions.extend(more_transactions)
+        transaction_lists = [importer(text, T) for importer in importers]
+        keepers = [tlist for tlist in transaction_lists if tlist is not None]
+        if len(keepers) == 0:
+            raise RuntimeError('cannot find an importer for file: {}'
+                               .format(path))
+        elif len(keepers) > 1:
+            raise RuntimeError('found too many importers for file: {}'
+                               .format(path))
+        transactions.extend(keepers[0])
 
     apply_rule_tree(transactions, None, rule_tree)
     sums = sum_categories(transactions)
