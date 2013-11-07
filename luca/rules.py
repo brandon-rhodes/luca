@@ -1,54 +1,88 @@
-"""Apply YAML rules to transactions."""
+"""Compile YAML rules into a Python function."""
 
 import re
+from ast import (AST, If, Name, Return, Str, Param, FunctionDef, Interactive,
+                 arguments, fix_missing_locations, parse)
 from datetime import date
 
-def apply_rule_tree(transactions, category, rule_tree):
-    """Um."""
 
-    if isinstance(rule_tree, int) or isinstance(rule_tree, str):
-        rule = rule_tree
-        transactions2, category2 = apply_rule(transactions, category, rule)
-        for t in transactions2:
-            if t.category is not None:
-                t.earlier_categories.append(t.category)
-            t.category = category2
+def compile_tree(tree):
+    tree_node = analyze_tree(tree, None)
 
-    elif isinstance(rule_tree, list):
-        for subtree in rule_tree:
-            apply_rule_tree(transactions, category, subtree)
+    node = Interactive(body=[
+        FunctionDef(
+            name='run_rules',
+            args=arguments(args=[Name(id='t', ctx=Param())],
+                           vararg=None, kwarg=None, defaults=[]),
+            body=[tree_node],
+            decorator_list=[]),
+        ])
+    fixed = fix_missing_locations(node)
+    code = compile(fixed, '<luca rule compiler>', 'single')
 
-    elif isinstance(rule_tree, dict):
-        for rule, subtree in rule_tree.items():
-            transactions2, category2 = apply_rule(transactions, category, rule)
-            apply_rule_tree(transactions2, category2, subtree)
+    globals_dict = {'date': date, 'search': re.search}
+    eval(code, globals_dict)
+    run_rules = globals_dict['run_rules']
+    return run_rules
 
-_month_day_re = re.compile('\d\d/\d\d$')
-_month_day_to_month_day_re = re.compile('\d\d/\d\d-\d\d/\d\d$')
 
-def apply_rule(transactions, category, rule):
-    """Return (transactions, category)."""
+def eparse(source):
+    """Parse the expression in `source` and return its AST.
 
-    f = None
+    This function is careful to remove the ast.Expression object which
+    ast.parse() wraps around its return value in eval mode.
+
+    """
+    expression_node = parse(source, mode='eval')
+    return expression_node.body
+
+
+def analyze_tree(tree, category):
+
+    if isinstance(tree, list):
+        subtrees = [analyze_tree(subtree, category) for subtree in tree]
+        return If(eparse('True'), subtrees, [])
+
+    elif isinstance(tree, dict):
+        if len(tree) != 1:
+            raise ValueError('len(dict) != 1')
+        rule, subtree = tree.items()[0]
+        r = analyze_rule(rule)
+        if isinstance(r, AST):
+            test = r
+            return If(test, [analyze_tree(subtree, category)], [])
+        else:
+            category = r
+            return analyze_tree(subtree, category)
+
+    else:
+        rule = tree
+        r = analyze_rule(rule)
+        if isinstance(r, AST):
+            test = r
+            if category is None:
+                raise ValueError('bottomed out without category')
+            return If(test, [Return(Str(category))], [])
+        else:
+            category = r
+            return Return(Str(category))
+
+
+def analyze_rule(rule):
+    """Return (new_category, None) or (None, test)."""
 
     if isinstance(rule, str):
         if rule.startswith('/') and rule.endswith('/'):
-            r = re.compile(rule[1:-1])
-            f = lambda t: r.search(t.description)
+            return eparse('search(%r, t.description)' % rule[1:-1])
         elif rule.startswith('~/') and rule.endswith('/'):
-            r = re.compile(rule[2:-1])
-            f = lambda t: not r.search(t.description)
-        elif rule.startswith('~'):
-            if rule == '~categorized':
-                f = lambda t: t.category is None
-            else:
-                raise ValueError('unrecognized rule %r' % rule)
+            return eparse('not search(%r, t.description)' % rule[2:-1])
         else:
             match = _month_day_re.match(rule)
             if match:
                 month = int(rule[:2])
                 day = int(rule[3:])
-                f = lambda t: t.date.month == month and t.date.day == day
+                return eparse('t.date.month == %r and t.date.day == %r'
+                             % (month, day))
             else:
                 match = _month_day_to_month_day_re.match(rule)
                 if match:
@@ -56,26 +90,23 @@ def apply_rule(transactions, category, rule):
                     day1 = int(rule[3:5])
                     month2 = int(rule[6:8])
                     day2 = int(rule[9:11])
-                    f = lambda t: (
-                        date(t.date.year, month1, day1) <= t.date and
-                        t.date <= date(t.date.year, month2, day2)
-                        )
+                    return eparse('date(t.date.year, %r, %r) <= t.date and '
+                                 't.date <= date(t.date.year, %r, %r)'
+                                 % (month1, day1, month2, day2))
 
     if isinstance(rule, str):
-        s = rule
         n = int(rule) if rule.isdigit() else None
-    elif isinstance(rule, int):
-        s = str(rule)
-        n = rule
+    else:
+        n = rule if isinstance(rule, int) else None
 
     if (n is not None) and 1900 <= n <= 2100:
-        f = lambda t: t.date.year == n
+        return eparse('t.date.year == %r' % n)
     elif (n is not None) and 1 <= n <= 12:
-        f = lambda t: t.date.month == n
+        return eparse('t.date.month == %r' % n)
 
-    if f is None:
-        category = rule
-    else:
-        transactions = [t for t in transactions if f(t)]
+    category = rule
+    return category
 
-    return transactions, category
+
+_month_day_re = re.compile('\d\d/\d\d$')
+_month_day_to_month_day_re = re.compile('\d\d/\d\d-\d\d/\d\d$')

@@ -11,7 +11,7 @@ from bottle import route, run, template
 
 from luca.importer.dccu import importers
 from luca.pdf import extract_text_from_pdf_file
-from luca.rules import apply_rule_tree
+from luca import rules
 
 
 def sum_categories(transactions):
@@ -39,6 +39,8 @@ def index(name='World'):
 
     with open(sys.argv[1]) as f:
         rule_tree = yaml.safe_load(f)
+    #from pprint import pprint
+    #pprint(rule_tree)
 
     transactions = []
     for path in sys.argv[2:]:
@@ -60,7 +62,10 @@ def index(name='World'):
                                .format(path))
         transactions.extend(keepers[0])
 
-    apply_rule_tree(transactions, None, rule_tree)
+    rule_tree_function = rules.compile_tree(rule_tree)
+    for tt in transactions:
+        tt.category = rule_tree_function(tt)
+
     transactions = [t for t in transactions if t.category is not None]
     catdict = group_transactions_by_category(transactions)
     assets, sumdict = sum_categories(transactions)
