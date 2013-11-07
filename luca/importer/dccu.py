@@ -3,6 +3,22 @@
 import re
 from datetime import date
 from decimal import Decimal
+from .model import Transaction
+
+_checking_beginning_re = re.compile(ur"""
+    \s+
+    (\d\d)/(\d\d)\s+       # "Posting Date"
+    (ID\ \d\d\d\d\ .*)     # (Account name)
+    Balance\ Forward\s+
+    (\d+\.\d\d)$           # "NEW BALANCE"
+    """, re.VERBOSE)
+
+_checking_ending_re = re.compile(ur"""
+    \s+
+    (\d\d)/(\d\d)\s+       # "Posting Date"
+    Ending\ Balance\s+
+    (\d+\.\d\d)$           # "NEW BALANCE"
+    """, re.VERBOSE)
 
 _checking_transaction_re = re.compile(ur"""
     \s+
@@ -13,7 +29,7 @@ _checking_transaction_re = re.compile(ur"""
     (\d+\.\d\d)$           # "NEW BALANCE"
     """, re.VERBOSE)
 
-def import_dccu_checking_pdf(text, Transaction):
+def import_dccu_checking_pdf(text):
     """Parse a Delta Community Credit Union checking account statement."""
 
     if u'www.DeltaCommunityCU.com' not in text:
@@ -28,6 +44,14 @@ def import_dccu_checking_pdf(text, Transaction):
     i = 0
 
     for line in lines:
+        match = _checking_beginning_re.match(line)
+        if match:
+            print match.group(0)
+            continue
+        match = _checking_ending_re.match(line)
+        if match:
+            print match.group(0)
+            continue
         match = _checking_transaction_re.match(line)
         if match:
             t = Transaction()
@@ -69,7 +93,7 @@ _visa_transaction_re = re.compile(ur"""
     \(?\$([\d,]+\.\d\d)(\)?)$  # "Amount"
     """, re.VERBOSE)
 
-def import_dccu_visa_pdf(text, Transaction):
+def import_dccu_visa_pdf(text):
     """Parse a Delta Community Credit Union Visa statement."""
 
     if u'www.DeltaCommunityCU.com' not in text:
@@ -102,7 +126,6 @@ def import_dccu_visa_pdf(text, Transaction):
             t.amount = Decimal(match.group(7).replace(',', ''))
             if not match.group(8):
                 t.amount = - t.amount
-            t.comments = []
             transactions.append(t)
             i = match.start(6)
         elif i and line[:i].isspace() and not line[i:i+1].isspace():

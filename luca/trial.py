@@ -13,10 +13,6 @@ from luca.importer.dccu import importers
 from luca.pdf import extract_text_from_pdf_file
 from luca.rules import apply_rule_tree
 
-class T(object):
-    def __init__(self):
-        self.category = None
-        self.earlier_categories = []
 
 def sum_categories(transactions):
     assets = Decimal('0')
@@ -54,7 +50,7 @@ def index(name='World'):
         else:
             raise ValueError('no idea what to do with file {!r}'.format(path))
 
-        transaction_lists = [importer(text, T) for importer in importers]
+        transaction_lists = [importer(text) for importer in importers]
         keepers = [tlist for tlist in transaction_lists if tlist is not None]
         if len(keepers) == 0:
             raise RuntimeError('cannot find an importer for file: {}'
