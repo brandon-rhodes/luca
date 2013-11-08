@@ -5,7 +5,7 @@ Usage:
   luca form <name> <version>
   luca complete <tax-filing.json>
   luca check <directory-of-json-filings>
-  luca tally <rules.yaml>
+  luca tally <rules.yaml> <statement-path>...
   luca (-h | --help)
 
 """
@@ -30,6 +30,9 @@ def main():
         luca.forms.actions.complete(args['<tax-filing.json>'])
     elif args['check']:
         luca.forms.actions.check(args['<directory-of-json-filings>'])
+    elif args['tally']:
+        from luca.tally import run_yaml_file
+        print run_yaml_file(args['<rules.yaml>'], args['<statement-path>'])
 
 
 def old_download_command(args):

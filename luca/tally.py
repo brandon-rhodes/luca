@@ -36,14 +36,18 @@ def group_transactions_by_category(transactions):
 
 @route('/')
 def index(name='World'):
+    pass
 
-    with open(sys.argv[1]) as f:
+def run_yaml_file(path, statement_paths):
+
+    with open(path) as f:
         rule_tree = yaml.safe_load(f)
+
     #from pprint import pprint
     #pprint(rule_tree)
 
     transactions = []
-    for path in sys.argv[2:]:
+    for path in statement_paths:
         if path.lower().endswith('.pdf'):
             text = extract_text_from_pdf_file(path)
         elif path.lower().endswith('.txt'):
