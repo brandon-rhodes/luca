@@ -1,9 +1,17 @@
-"""Compile YAML rules into a Python function."""
+"""Compile YAML rules into a Python function.
 
+The `compile_tree()` routine is the main function in this module; the
+other functions exist to support it.  See the documentation for more
+information about writing YAML rules.
+
+"""
 import re
 from ast import (AST, If, Name, Return, Str, Param, FunctionDef, Interactive,
                  arguments, fix_missing_locations, parse)
 from datetime import date
+
+_month_day_re = re.compile('\d\d/\d\d$')
+_month_day_to_month_day_re = re.compile('\d\d/\d\d-\d\d/\d\d$')
 
 
 def compile_tree(tree):
@@ -106,7 +114,3 @@ def analyze_rule(rule):
 
     category = rule
     return category
-
-
-_month_day_re = re.compile('\d\d/\d\d$')
-_month_day_to_month_day_re = re.compile('\d\d/\d\d-\d\d/\d\d$')
