@@ -17,6 +17,7 @@ setup(name='luca',
       packages=['luca'],
       install_requires=[
         'bottle',
+        'docopt',
         'fdfgen',
         'pyyaml',
         'reportlab',

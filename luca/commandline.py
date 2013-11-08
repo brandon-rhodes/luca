@@ -1,8 +1,17 @@
-"""The `luca` command line."""
+"""Fra Luca financial accounting utilities.
 
-import argparse
+Usage:
+  luca forms
+  luca form <name> <version>
+  luca complete <tax-filing.json>
+  luca check <directory-of-json-filings>
+  luca tally <rules.yaml>
+  luca (-h | --help)
+
+"""
 import os
 import sys
+from docopt import docopt
 
 import luca.forms.actions
 import luca.importer.dccu
@@ -13,62 +22,17 @@ from .model import Transaction
 from .ofx import io
 
 def main():
-    parser = argparse.ArgumentParser(
-        description='Fra Luca double entry bookkeeping.',
-        )
-    subparsers = parser.add_subparsers(help='sub-command help')
+    args = docopt(__doc__)
 
-    p = subparsers.add_parser('check',
-                              help='double-check a directory of tax files')
-    p.add_argument('path', metavar='path',
-                   help='Path to the directory containing form JSON files')
-    p.set_defaults(func=check)
+    if args['form']:
+        luca.forms.actions.print_defaults(args['<name>'], args['<version>'])
+    elif args['complete']:
+        luca.forms.actions.complete(args['<tax-filing.json>'])
+    elif args['check']:
+        luca.forms.actions.check(args['<directory-of-json-filings>'])
 
-    p = subparsers.add_parser('complete', help='complete a tax form')
-    p.add_argument('json_path', metavar='json-path',
-                   help='Path to the JSON file containing the form')
-    p.set_defaults(func=complete)
 
-    p = subparsers.add_parser('defaults', help='print the default JSON'
-                              ' data for a tax form')
-    p.add_argument('form_name', metavar='form-name',
-                   help='Form name, like us.f1040sa')
-    p.add_argument('form_version', metavar='form-version', nargs='?',
-                   help='Version of the form, like 2012')
-    p.set_defaults(func=defaults)
-
-    p = subparsers.add_parser('download', help='download')
-    p.add_argument('nickname', metavar='institution',
-                          help='from which institution to download')
-    p.add_argument('-a', action='store_true',
-                          help='refresh our account list for the institution')
-    p.set_defaults(func=download)
-
-    p = subparsers.add_parser('import', help='import')
-    p.set_defaults(func=import_subcommand)
-    p.add_argument('path', help='file from which to import transactions',
-                   nargs='*')
-
-    p = subparsers.add_parser('merge', help='merge')
-    p.set_defaults(func=merge)
-
-    for name in 'st', 'status':
-        p = subparsers.add_parser(name, help='status')
-        p.set_defaults(func=status)
-
-    args = parser.parse_args()
-    args.func(args)
-
-def check(args):
-    luca.forms.actions.check(args.path)
-
-def complete(args):
-    luca.forms.actions.complete(args.json_path)
-
-def defaults(args):
-    luca.forms.actions.print_defaults(args.form_name, args.form_version)
-
-def download(args):
+def old_download_command(args):
     nickname = args.nickname
     logins = files.read_logins()
     login = logins[nickname]
@@ -87,7 +51,7 @@ def download(args):
         data = io.download_activity(login.fi, login.username, login.password, op)
         files.ofx_create(nickname + '-activity-DATE.xml', data)
 
-def merge(args):
+def old_merge_command(args):
     logins = files.read_logins()
     transactions = []
     for (nickname, login) in sorted(logins.items()):
@@ -113,7 +77,7 @@ def merge(args):
         print
 
 
-def import_subcommand(args):
+def old_import_subcommand(args):
     transactions = []
     for path in args.path:
         more = import_action(path)
