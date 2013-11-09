@@ -5,11 +5,12 @@ Usage:
   luca form <name> <version>
   luca complete <tax-filing.json>
   luca check <directory-of-json-filings>
-  luca tally [-v] <rules.yaml> <statement-path>...
+  luca tally [-bv] <rules.yaml> <statement-path>...
   luca (-h | --help)
 
 Options:
-  -v    Verbose: display the transactions that make up each category.
+  -b    Balances: display a running balance for each account, by date
+  -v    Verbose: display the transactions that make up each category
 
 """
 import os
@@ -36,7 +37,7 @@ def main():
     elif args['tally']:
         from luca.tally import run_yaml_file
         print run_yaml_file(args['<rules.yaml>'], args['<statement-path>'],
-                            args['-v'])
+                            args['-b'], args['-v'])
 
 
 def old_download_command(args):

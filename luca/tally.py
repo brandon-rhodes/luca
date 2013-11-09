@@ -34,7 +34,7 @@ def group_transactions_by_category(transactions):
     return {category: list(iterator) for category, iterator
             in groupby(tlist, lambda tr: tr.category)}
 
-def run_yaml_file(path, statement_paths, be_verbose):
+def run_yaml_file(path, statement_paths, show_balances, be_verbose):
 
     with open(path) as f:
         rule_tree = yaml.safe_load(f)
@@ -68,7 +68,10 @@ def run_yaml_file(path, statement_paths, be_verbose):
         balances.extend(new_balances)
         transactions.extend(new_transactions)
 
-    verify_balances(balances, transactions)
+    t = Terminal()
+    screen_width = t.width or 80
+
+    verify_balances(balances, transactions, show_balances, t)
 
     for tr in transactions:
         tr.category = rule_tree_function(tr)
@@ -77,9 +80,6 @@ def run_yaml_file(path, statement_paths, be_verbose):
     catdict = group_transactions_by_category(transactions)
     sumdict = sum_categories(transactions)
     categories = set(catdict) | set(sumdict)
-
-    t = Terminal()
-    screen_width = t.width or 80
 
     output_lines = []
     add = output_lines.append
@@ -128,7 +128,7 @@ def run_yaml_file(path, statement_paths, be_verbose):
 
     return u'\n'.join(output_lines)
 
-def verify_balances(balances, transactions):
+def verify_balances(balances, transactions, show_balances, t):
     """Raise an exception if the transactions do not match the balances."""
 
     # We are careful to balances before transactions in the original
@@ -138,6 +138,8 @@ def verify_balances(balances, transactions):
     events = list(balances)
     events.extend(transactions)
     events.sort(key=attrgetter('date'))
+    if show_balances:
+        events.sort(key=attrgetter('account'))
 
     amounts = {}
 
@@ -145,13 +147,28 @@ def verify_balances(balances, transactions):
 
         if e.event_type == 'balance':
             if e.account not in amounts:
+                if show_balances:
+                    print
+                    print e.account
+                    print
                 amounts[e.account] = e.amount
                 continue
 
-            assert amounts[e.account] == e.amount
+            equal = (amounts[e.account] == e.amount)
+
+            if show_balances:
+                print e.date, ('==' if equal else '!='), e.amount
+
+            assert equal
 
         elif e.event_type == 'transaction':
             if e.account not in amounts:
                 continue
 
             amounts[e.account] += e.amount
+
+            if show_balances:
+                print e.date, amounts[e.account]
+
+    if show_balances:
+        print
