@@ -15,10 +15,10 @@ from luca import rules
 
 
 def sum_categories(transactions):
-    assets = Decimal('0')
     sums = defaultdict(Decimal)
     for tr in transactions:
-        assets += tr.amount
+        sums['Accounts'] += tr.amount
+        sums['Accounts.' + tr.account] += tr.amount
         c = tr.category
         sums[c] += tr.amount
         pieces = c.rsplit('.', 1)
@@ -26,7 +26,7 @@ def sum_categories(transactions):
             c = pieces[0]
             sums[c] += tr.amount
             pieces = c.rsplit('.', 1)
-    return assets, sums
+    return sums
 
 def group_transactions_by_category(transactions):
     """Return a new list [(category, [transaction, ...], ...]."""
@@ -68,7 +68,7 @@ def run_yaml_file(path, statement_paths, be_verbose):
 
     transactions = [tr for tr in transactions if tr.category is not None]
     catdict = group_transactions_by_category(transactions)
-    assets, sumdict = sum_categories(transactions)
+    sumdict = sum_categories(transactions)
     categories = set(catdict) | set(sumdict)
 
     t = Terminal()
@@ -97,12 +97,16 @@ def run_yaml_file(path, statement_paths, be_verbose):
             return t.green('{:{},} '.format(amount, amount_width - 1))
 
 
-    add('{} Assets'.format(f(assets)))
+    #add('{} Assets'.format(f(assets)))
 
     for category in sorted(categories):
         csum = sumdict[category]
         depth = category.count('.')
-        add('{}{} {}'.format(category_indent * depth, f(csum), category))
+        if not be_verbose and depth:
+            name = category[category.rfind('.')+1:]
+        else:
+            name = category
+        add('{}{} {}'.format(category_indent * depth, f(csum), name))
         if not be_verbose:
             continue
         transaction_list = catdict.get(category, None)

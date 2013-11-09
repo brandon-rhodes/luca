@@ -37,16 +37,17 @@ def import_dccu_checking_pdf(text):
     if u'ACCOUNTS ARE NON-TRANSFERABLE EXCEPT ON THE BOOKS' not in text:
         return None
 
-    id_minimum_len = len('01/08 24325453009900018833450')
+    account = None
+    id_minimum_len = len('01/08 96873230009628183520165')
     id_start_index = len('01/08 ')
     transactions = []
     lines = iter(text.splitlines())
-    i = 0
+    indent = 0
 
     for line in lines:
         match = _checking_beginning_re.match(line)
         if match:
-            print match.group(0)
+            account = match.group(3)
             continue
         match = _checking_ending_re.match(line)
         if match:
@@ -57,14 +58,16 @@ def import_dccu_checking_pdf(text):
             t = Transaction()
             month = int(match.group(1))
             day = int(match.group(2))
+            t.account = account
             t.date = date(2013, month, day)
             t.description = [match.group(5).strip()]
             t.amount = Decimal(match.group(6))
             if match.group(7) == u'-':
                 t.amount = -t.amount
             transactions.append(t)
-            i = match.start(5)
-        elif i and line[:i].isspace() and not line[i:i+1].isspace():
+            indent = match.start(5)
+        elif (indent and line[:indent].isspace()
+              and not line[indent:indent+1].isspace()):
             more = line.strip()
             if more.startswith('Based on Average Daily Balance'):
                 continue
@@ -73,8 +76,8 @@ def import_dccu_checking_pdf(text):
                 if id.isdigit():
                     more = more[:id_start_index - 1] + more[id_minimum_len:]
             t.description.append(more)
-        elif i:
-            i = 0
+        elif indent:
+            indent = 0
 
     for t in transactions:
         if t.description[0] == u'Card Fee' and len(t.description) > 1:
@@ -115,6 +118,7 @@ def import_dccu_visa_pdf(text):
         match = _visa_transaction_re.match(line)
         if match:
             t = Transaction()
+            t.account = 'Credit cards'
             month = int(match.group(2))
             day = int(match.group(3))
             year = closing_year - 1 if month > closing_month else closing_year
