@@ -1,9 +1,11 @@
 """Delta Community Credit Union PDF statements."""
 
 import re
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
-from .model import Transaction
+from .model import Balance, Transaction, can_import_texts_containing
+
+one_day = timedelta(days=1)
 
 _checking_beginning_re = re.compile(ur"""
     \s+
@@ -29,17 +31,17 @@ _checking_transaction_re = re.compile(ur"""
     (\d+\.\d\d)$           # "NEW BALANCE"
     """, re.VERBOSE)
 
+@can_import_texts_containing(
+    u'www.DeltaCommunityCU.com',
+    u'ACCOUNTS ARE NON-TRANSFERABLE EXCEPT ON THE BOOKS',
+    )
 def import_dccu_checking_pdf(text):
     """Parse a Delta Community Credit Union checking account statement."""
-
-    if u'www.DeltaCommunityCU.com' not in text:
-        return None
-    if u'ACCOUNTS ARE NON-TRANSFERABLE EXCEPT ON THE BOOKS' not in text:
-        return None
 
     account = None
     id_minimum_len = len('01/08 96873230009628183520165')
     id_start_index = len('01/08 ')
+    balances = []
     transactions = []
     lines = iter(text.splitlines())
     indent = 0
@@ -47,22 +49,33 @@ def import_dccu_checking_pdf(text):
     for line in lines:
         match = _checking_beginning_re.match(line)
         if match:
-            account = match.group(3)
+            group = match.group
+            account = group(3).strip()
+            b = Balance()
+            b.account = account
+            b.date = date(year=2013, month=int(group(1)), day=int(group(2)))
+            b.amount = Decimal(group(4))
+            balances.append(b)
             continue
         match = _checking_ending_re.match(line)
         if match:
-            print match.group(0)
+            group = match.group
+            b = Balance()
+            b.account = account
+            end_date = date(year=2013, month=int(group(1)), day=int(group(2)))
+            b.date = end_date + one_day
+            b.amount = Decimal(group(3))
+            balances.append(b)
             continue
         match = _checking_transaction_re.match(line)
         if match:
+            group = match.group
             t = Transaction()
-            month = int(match.group(1))
-            day = int(match.group(2))
             t.account = account
-            t.date = date(2013, month, day)
-            t.description = [match.group(5).strip()]
-            t.amount = Decimal(match.group(6))
-            if match.group(7) == u'-':
+            t.date = date(year=2013, month=int(group(1)), day=int(group(2)))
+            t.description = [group(5).strip()]
+            t.amount = Decimal(group(6))
+            if group(7) == u'-':
                 t.amount = -t.amount
             transactions.append(t)
             indent = match.start(5)
@@ -84,7 +97,7 @@ def import_dccu_checking_pdf(text):
             del t.description[0]
         t.description = ' - '.join(t.description)
 
-    return transactions
+    return balances, transactions
 
 
 _visa_transaction_re = re.compile(ur"""
@@ -96,13 +109,12 @@ _visa_transaction_re = re.compile(ur"""
     \(?\$([\d,]+\.\d\d)(\)?)$  # "Amount"
     """, re.VERBOSE)
 
+@can_import_texts_containing(
+    u'www.DeltaCommunityCU.com',
+    u'Business Credit Card Statement',
+    )
 def import_dccu_visa_pdf(text):
     """Parse a Delta Community Credit Union Visa statement."""
-
-    if u'www.DeltaCommunityCU.com' not in text:
-        return None
-    if u'Business Credit Card Statement' not in text:
-        return None
 
     transactions = []
     lines = iter(text.splitlines())
@@ -117,18 +129,19 @@ def import_dccu_visa_pdf(text):
             closing_month = int(closing[0])
         match = _visa_transaction_re.match(line)
         if match:
+            group = match.group
             t = Transaction()
             t.account = 'Credit cards'
-            month = int(match.group(2))
-            day = int(match.group(3))
+            month = int(group(2))
+            day = int(group(3))
             year = closing_year - 1 if month > closing_month else closing_year
             t.date = date(year, month, day)
-            description = match.group(6).strip()
+            description = group(6).strip()
             if description.endswith(' **'):
                 description = description[:-3].strip()
             t.description = [description]
-            t.amount = Decimal(match.group(7).replace(',', ''))
-            if not match.group(8):
+            t.amount = Decimal(group(7).replace(',', ''))
+            if not group(8):
                 t.amount = - t.amount
             transactions.append(t)
             i = match.start(6)
@@ -145,7 +158,7 @@ def import_dccu_visa_pdf(text):
             del t.description[-1]
         t.description = ' - '.join(t.description)
 
-    return transactions
+    return [], transactions
 
 
 importers = [import_dccu_checking_pdf, import_dccu_visa_pdf]

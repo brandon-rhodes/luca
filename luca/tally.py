@@ -4,6 +4,7 @@
 from collections import defaultdict
 from decimal import Decimal
 from itertools import groupby
+from operator import attrgetter
 from textwrap import wrap
 
 import yaml
@@ -12,7 +13,6 @@ from blessings import Terminal
 from luca.importer.dccu import importers
 from luca.pdf import extract_text_from_pdf_file
 from luca import rules
-
 
 def sum_categories(transactions):
     sums = defaultdict(Decimal)
@@ -39,10 +39,11 @@ def run_yaml_file(path, statement_paths, be_verbose):
     with open(path) as f:
         rule_tree = yaml.safe_load(f)
 
-    #from pprint import pprint
-    #pprint(rule_tree)
+    rule_tree_function = rules.compile_tree(rule_tree)
 
+    balances = []
     transactions = []
+
     for path in statement_paths:
         if path.lower().endswith('.pdf'):
             text = extract_text_from_pdf_file(path)
@@ -52,17 +53,23 @@ def run_yaml_file(path, statement_paths, be_verbose):
         else:
             raise ValueError('no idea what to do with file {!r}'.format(path))
 
-        transaction_lists = [importer(text) for importer in importers]
-        keepers = [tlist for tlist in transaction_lists if tlist is not None]
-        if len(keepers) == 0:
+        matching_importers = [importer for importer in importers
+                              if importer.does_this_match(text)]
+
+        if len(matching_importers) == 0:
             raise RuntimeError('cannot find an importer for file: {}'
                                .format(path))
-        elif len(keepers) > 1:
+        elif len(matching_importers) > 1:
             raise RuntimeError('found too many importers for file: {}'
                                .format(path))
-        transactions.extend(keepers[0])
 
-    rule_tree_function = rules.compile_tree(rule_tree)
+        importer = matching_importers[0]
+        new_balances, new_transactions = importer(text)
+        balances.extend(new_balances)
+        transactions.extend(new_transactions)
+
+    verify_balances(balances, transactions)
+
     for tr in transactions:
         tr.category = rule_tree_function(tr)
 
@@ -97,8 +104,6 @@ def run_yaml_file(path, statement_paths, be_verbose):
             return t.green('{:{},} '.format(amount, amount_width - 1))
 
 
-    #add('{} Assets'.format(f(assets)))
-
     for category in sorted(categories):
         csum = sumdict[category]
         depth = category.count('.')
@@ -122,3 +127,31 @@ def run_yaml_file(path, statement_paths, be_verbose):
         add('')
 
     return u'\n'.join(output_lines)
+
+def verify_balances(balances, transactions):
+    """Raise an exception if the transactions do not match the balances."""
+
+    # We are careful to balances before transactions in the original
+    # list so that the stable sort leaves all balances for a particular
+    # date in front of any transactions for that same date.
+
+    events = list(balances)
+    events.extend(transactions)
+    events.sort(key=attrgetter('date'))
+
+    amounts = {}
+
+    for e in events:
+
+        if e.event_type == 'balance':
+            if e.account not in amounts:
+                amounts[e.account] = e.amount
+                continue
+
+            assert amounts[e.account] == e.amount
+
+        elif e.event_type == 'transaction':
+            if e.account not in amounts:
+                continue
+
+            amounts[e.account] += e.amount
