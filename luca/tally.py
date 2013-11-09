@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """Trial of rule-driven accounting."""
 
-import sys
 from collections import defaultdict
 from decimal import Decimal
 from itertools import groupby
+from textwrap import wrap
 
 import yaml
-from bottle import route, run, template
+from blessings import Terminal
 
 from luca.importer.dccu import importers
 from luca.pdf import extract_text_from_pdf_file
@@ -17,28 +17,24 @@ from luca import rules
 def sum_categories(transactions):
     assets = Decimal('0')
     sums = defaultdict(Decimal)
-    for t in transactions:
-        assets += t.amount
-        c = t.category
-        sums[c] += t.amount
+    for tr in transactions:
+        assets += tr.amount
+        c = tr.category
+        sums[c] += tr.amount
         pieces = c.rsplit('.', 1)
         while len(pieces) == 2:
             c = pieces[0]
-            sums[c] += t.amount
+            sums[c] += tr.amount
             pieces = c.rsplit('.', 1)
     return assets, sums
 
 def group_transactions_by_category(transactions):
     """Return a new list [(category, [transaction, ...], ...]."""
-    tlist = sorted(transactions, key=lambda t: (t.category, t.date))
+    tlist = sorted(transactions, key=lambda tr: (tr.category, tr.date))
     return {category: list(iterator) for category, iterator
-            in groupby(tlist, lambda t: t.category)}
+            in groupby(tlist, lambda tr: tr.category)}
 
-@route('/')
-def index(name='World'):
-    pass
-
-def run_yaml_file(path, statement_paths):
+def run_yaml_file(path, statement_paths, be_verbose):
 
     with open(path) as f:
         rule_tree = yaml.safe_load(f)
@@ -67,50 +63,58 @@ def run_yaml_file(path, statement_paths):
         transactions.extend(keepers[0])
 
     rule_tree_function = rules.compile_tree(rule_tree)
-    for tt in transactions:
-        tt.category = rule_tree_function(tt)
+    for tr in transactions:
+        tr.category = rule_tree_function(tr)
 
-    transactions = [t for t in transactions if t.category is not None]
+    transactions = [tr for tr in transactions if tr.category is not None]
     catdict = group_transactions_by_category(transactions)
     assets, sumdict = sum_categories(transactions)
     categories = set(catdict) | set(sumdict)
 
-    lines = ['<style>'
-             'body {background-color: #ffffff; color: #073642}'
-             'pre {font-family: Inconsolata}'
-             'strong {color: #002b36}'
-             'pos {color: #859900; font-weight: bold}'
-             'neg {color: #dc322f; font-weight: bold}'
-             '</style><pre>']
+    t = Terminal()
+    screen_width = t.width or 80
 
-    tag = 'pos' if assets >= 0 else 'neg'
-    lines.append('<{}>{:>12}</{}>  <strong>Assets</strong>'.format(
-        tag, qformat(assets), tag))
+    output_lines = []
+    add = output_lines.append
+
+    biggest_amount = max(abs(v) for v in sumdict.values())
+
+    amount_width = len('{:,}'.format(biggest_amount)) + 1
+    date_width = 10
+    gutter = 2
+    category_indent = ' ' * (amount_width + 1)
+    description_width = (
+        screen_width -  # content from left to right:
+        gutter - date_width - gutter - # (description goes here)
+        gutter - amount_width - gutter)
+    description_indent = ' ' * (gutter + date_width + gutter)
+
+    def f(amount):
+        """Format `amount`, putting parentheses around a negative value."""
+        if amount < 0:
+            return t.red('{:{},}-'.format(-amount, amount_width - 1))
+        else:
+            return t.green('{:{},} '.format(amount, amount_width - 1))
+
+
+    add('{} Assets'.format(f(assets)))
 
     for category in sorted(categories):
         csum = sumdict[category]
-        tag = 'pos' if csum >= 0 else 'neg'
-        lines.append('<{}>{:>12}</{}>  <strong>{}</strong>'.format(
-            tag, qformat(csum), tag, category))
+        depth = category.count('.')
+        add('{}{} {}'.format(category_indent * depth, f(csum), category))
+        if not be_verbose:
+            continue
         transaction_list = catdict.get(category, None)
         if not transaction_list:
             continue
-        for t in transaction_list:
-            tag = 'pos' if t.amount >= 0 else 'neg'
-            lines.append('{}{} <{}>{:>12}</{}> {}'.format(
-                u' ' * 14, t.date, tag, qformat(t.amount), tag, t.description))
+        add('')
+        for tr in transaction_list:
+            lines = wrap(tr.description, description_width)
+            add('  {}  {:<{}}  {}'.format(
+                tr.date, lines[0], description_width, f(tr.amount)))
+            for line in lines[1:]:
+                add(description_indent + line)
+        add('')
 
-    return u'\n'.join(lines)
-
-def qformat(quantity):
-    """Stringify `quantity`, putting parentheses around a negative value."""
-    if quantity < 0:
-        return '{:,}-'.format(-quantity)
-    else:
-        return '{:,} '.format(quantity)
-
-def main():
-    run(host='localhost', port=8080, reloader=True, interval=0.2)
-
-if __name__ == '__main__':
-    main()
+    return u'\n'.join(output_lines)

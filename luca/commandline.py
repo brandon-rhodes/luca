@@ -5,8 +5,11 @@ Usage:
   luca form <name> <version>
   luca complete <tax-filing.json>
   luca check <directory-of-json-filings>
-  luca tally <rules.yaml> <statement-path>...
+  luca tally [-v] <rules.yaml> <statement-path>...
   luca (-h | --help)
+
+Options:
+  -v    Verbose: display the transactions that make up each category.
 
 """
 import os
@@ -32,7 +35,8 @@ def main():
         luca.forms.actions.check(args['<directory-of-json-filings>'])
     elif args['tally']:
         from luca.tally import run_yaml_file
-        print run_yaml_file(args['<rules.yaml>'], args['<statement-path>'])
+        print run_yaml_file(args['<rules.yaml>'], args['<statement-path>'],
+                            args['-v'])
 
 
 def old_download_command(args):

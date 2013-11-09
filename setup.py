@@ -16,7 +16,7 @@ setup(name='luca',
         ],
       packages=['luca'],
       install_requires=[
-        'bottle',
+        'blessings',
         'docopt',
         'fdfgen',
         'pyyaml',
