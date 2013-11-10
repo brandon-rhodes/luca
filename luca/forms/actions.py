@@ -43,11 +43,9 @@ def print_defaults(form_name, form_version):
         raise ValueError('cannot find a Luca form named {!r}'.format(
                 form_module_name))
 
-    if form_version is None and len(form_module.versions) == 1:
-        form_version = form_module.versions[0]
-
     if form_version is None or form_version not in form_module.versions:
-        print 'Please specify a particular version of this form:'
+        print ('Please specify a particular version of this form'
+               ' with a command like:')
         for version in form_module.versions:
             print '   luca form {} {}'.format(form_name, version)
         return
