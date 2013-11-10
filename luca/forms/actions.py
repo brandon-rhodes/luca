@@ -62,16 +62,31 @@ def print_defaults(form_name, form_version):
     print formlib.dump_json(form).encode('utf-8').strip()
 
 
-def check(dirpath):
+def complete(paths, should_produce_pdfs):
     forms = defaultdict(list)
     tuples = []
 
-    for filename, path, json_data in forms_inside_directory(dirpath):
-        form, form_module = process(json_data)
-        forms[form.form_name].append(form)
-        tuples.append((filename, form, form_module))
+    for json_path in paths:
+        print json_path,
+        sys.stdout.flush()
+        form_module, form = complete_form(json_path)
 
-    #print [f.form for f in forms]
+        forms[form.form_name].append(form)
+        tuples.append((json_path, form_module, form))
+
+        if not should_produce_pdfs:
+            print
+            continue
+        try:
+            pdf_path = save_pdf(json_path, form_module, form)
+        except IOError as e:
+            print '->', 'PDF rendering failed:', str(e)
+            continue
+        print '->', pdf_path
+
+    if len(paths) < 2:
+        return
+
     n = [0]
 
     def eq(name, value):
@@ -79,10 +94,10 @@ def check(dirpath):
         form  # necessary to establish scoping for the following eval
         actual = eval('form.' + name)
         if actual != value:
-            print filename, name, '=', actual, 'but should be', dstr(value)
+            print json_path, name, '=', actual, 'but should be', dstr(value)
         # TODO: add --verbose and print in that case too
 
-    for filename, form, form_module in tuples:
+    for json_path, form_module, form, in tuples:
         form_check = getattr(form_module, 'check', None)
         if form_check is not None:
             form_check(form, forms, eq)
@@ -90,42 +105,29 @@ def check(dirpath):
     print 'Ran', n[0], 'check{}'.format('' if n[0] == 1 else 's')
 
 
-def complete(path):
-    if os.path.isfile(path):
-        return complete_form(path)
-
-    for filename, jsonpath, json_data in forms_inside_directory(path):
-        complete_form(jsonpath)
-
-
-def complete_form(jsonpath):
-    with open(jsonpath) as f:
+def complete_form(json_path):
+    with open(json_path) as f:
         json_data = f.read()
 
     form, form_module = process(json_data)
     json_string = formlib.dump_json(form).encode('utf-8')
-    print('Updating {}'.format(jsonpath))
-    with open(jsonpath, 'w') as f:
+
+    with open(json_path, 'w') as f:
         f.write(json_string)
 
     if not os.path.isdir('out'):
         os.mkdir('out')
 
+    return form_module, form
+
+
+def save_pdf(json_path, form_module, form):
+    basename, ext = os.path.splitext(os.path.basename(json_path))
+    pdf_path = os.path.join('out', basename + '.pdf')
     pdf = PDF()
     form_module.fill_out(form, pdf)
-    basename, ext = os.path.splitext(os.path.basename(jsonpath))
-    outputpath = os.path.join('out', basename + '.pdf')
-    pdf.save(outputpath)
-
-
-def forms_inside_directory(dirpath):
-    for filename in os.listdir(dirpath):
-        if not filename.endswith('.json'):
-            continue
-        path = os.path.join(dirpath, filename)
-        with open(path) as f:
-            json_data = f.read()
-        yield filename, path, json_data
+    pdf.save(pdf_path)
+    return pdf_path
 
 
 def load(json_data):
@@ -231,8 +233,6 @@ class PDF(object):
     # The finale.
 
     def save(self, path):
-        print 'Saving', path
-
         fdf = fdfgen.forge_fdf('', self.fdf_fields, [], [], [])
         pages = [str(p) for p in self.pages]
 

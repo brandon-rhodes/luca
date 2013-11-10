@@ -3,13 +3,13 @@
 Usage:
   luca forms
   luca form <name> [<version>]
-  luca complete <tax-filing.json>
-  luca check <directory-of-json-filings>
+  luca complete [-j] <tax-filing.json>...
   luca tally [-bv] <rules.yaml> <statement-path>...
   luca (-h | --help)
 
 Options:
-  -b    Balances: display a running balance for each account, by date
+  -b    Display a running balance for each account, by date
+  -j    Only update JSON files; do not produce new PDF printouts
   -v    Verbose: display the transactions that make up each category
 
 """
@@ -54,10 +54,7 @@ def main():
         luca.forms.actions.print_defaults(args['<name>'], args['<version>'])
 
     elif args['complete']:
-        luca.forms.actions.complete(args['<tax-filing.json>'])
-
-    elif args['check']:
-        luca.forms.actions.check(args['<directory-of-json-filings>'])
+        luca.forms.actions.complete(args['<tax-filing.json>'], not args['-j'])
 
     elif args['tally']:
         from luca.tally import run_yaml_file
