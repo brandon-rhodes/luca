@@ -21,6 +21,20 @@ integer_re = re.compile(r'\d+$')
 decimal_re = re.compile(r'\d+\.\d+$')
 
 
+def list_forms():
+    d = os.path.dirname(__file__)
+    for name in os.listdir(d):
+        full = os.path.join(d, name)
+        if os.path.isdir(full):
+            for name2 in os.listdir(full):
+                if name2.endswith('.py') and not name2.startswith('_'):
+                    name2 = name2[:-3]
+                    form_name = '{}.{}'.format(name, name2)
+                    module_name = 'luca.forms.' + form_name
+                    module = importlib.import_module(module_name)
+                    yield form_name, module.title, module.versions
+
+
 def print_defaults(form_name, form_version):
     form_module_name = 'luca.forms.' + form_name
     try:
@@ -29,10 +43,13 @@ def print_defaults(form_name, form_version):
         raise ValueError('cannot find a Luca form named {!r}'.format(
                 form_module_name))
 
+    if form_version is None and len(form_module.versions) == 1:
+        form_version = form_module.versions[0]
+
     if form_version is None or form_version not in form_module.versions:
-        print 'Form versions supported:'
+        print 'Please specify a particular version of this form:'
         for version in form_module.versions:
-            print '   ', version
+            print '   luca form {} {}'.format(form_name, version)
         return
 
     form = formlib.Form()
@@ -42,7 +59,7 @@ def print_defaults(form_name, form_version):
     if hasattr(form_module, 'defaults'):
         form_module.defaults(form)
 
-    print formlib.dump_json(form).encode('utf-8')
+    print formlib.dump_json(form).encode('utf-8').strip()
 
 
 def check(dirpath):

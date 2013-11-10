@@ -1,6 +1,6 @@
 from luca.kit import Decimal, cents, zero, zzstr
 
-title = u'Schedule SE (Form 1040): Self-Employment Tax'
+title = u'Form 1040 Schedule SE: Self-Employment Tax'
 versions = '2012',
 
 # TODO: someday also support Section B (Long Schedule SE)

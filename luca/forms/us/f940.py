@@ -5,7 +5,7 @@ sevenk = Decimal('7000.00')
 eighthpercent = Decimal('.008')
 sixthpercent = Decimal('.006')
 
-title = u"Employer's Annual Federal Unemployment (FUTA) Tax Return"
+title = u"Form 940: Employer's Annual Federal Unemployment (FUTA) Tax Return"
 versions = u'2012',
 
 

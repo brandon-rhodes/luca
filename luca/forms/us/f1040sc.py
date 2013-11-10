@@ -1,6 +1,6 @@
 from luca.kit import dsum, zero, zzstr
 
-title = u'Schedule C (Form 1040): Profit or Loss From Business'
+title = u'Form 1040 Schedule C: Profit or Loss From Business'
 versions = u'2012',
 
 def defaults(form):

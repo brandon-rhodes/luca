@@ -1,6 +1,6 @@
 from luca.kit import cents, zzstr
 
-title = u'Schedule B (Form 1040): Interest and Ordinary Dividends'
+title = u'Form 1040 Schedule B: Interest and Ordinary Dividends'
 versions = '2012',
 zero = cents(0)
 

@@ -1,7 +1,7 @@
 from luca.forms.formlib import Form
 from luca.kit import cents, zzstr
 
-title = u"Supplemental Income and Loss"
+title = u"Form 1040 Schedule E: Supplemental Income and Loss"
 versions = '2012',
 zero = cents(0)
 

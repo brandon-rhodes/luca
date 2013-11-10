@@ -1,7 +1,6 @@
-"""Form W-9 Request for Taxpayer Identification Number and Certification"""
-
-
-versions = '2011',
+title = (u'Form W-9: Request for Taxpayer Identification Number'
+         ' and Certification')
+versions = u'2011',
 
 
 def defaults(form):

@@ -1,13 +1,11 @@
-"""Form 1120S: U.S. Income Tax Return for an S Corporation
-
-TODO: Table 4a and 4b
-TODO: Schedule L
-TODO: Schedule M-1
-
-"""
+# TODO: Table 4a and 4b
+# TODO: Schedule L
+# TODO: Schedule M-1
 from luca.forms.formlib import Form
 from luca.kit import validate, zero, zstr, zzstr
 
+
+title = u'Form 1120S: U.S. Income Tax Return for an S Corporation'
 versions = u'2012',
 
 

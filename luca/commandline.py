@@ -2,7 +2,7 @@
 
 Usage:
   luca forms
-  luca form <name> <version>
+  luca form <name> [<version>]
   luca complete <tax-filing.json>
   luca check <directory-of-json-filings>
   luca tally [-bv] <rules.yaml> <statement-path>...
@@ -15,6 +15,9 @@ Options:
 """
 import os
 import sys
+import textwrap
+
+import blessings
 from docopt import docopt
 
 import luca.forms.actions
@@ -27,13 +30,35 @@ from .ofx import io
 
 def main():
     args = docopt(__doc__)
+    t = blessings.Terminal()
 
-    if args['form']:
+    if args['forms']:
+        indent = 14
+
+        if t.width:
+            fill = textwrap.TextWrapper(
+                width=t.width - 2,
+                initial_indent=' ' * indent,
+                subsequent_indent=' ' * indent,
+                ).fill
+        else:
+            indent_spaces = ' ' * indent
+            fill = lambda s: indent_spaces + s
+
+        form_seq = luca.forms.actions.list_forms()
+        for module_name, title, versions in sorted(form_seq):
+            print t.green('{:<{}}').format(module_name, indent - 1),
+            print t.blue(fill(title)[14:])
+
+    elif args['form']:
         luca.forms.actions.print_defaults(args['<name>'], args['<version>'])
+
     elif args['complete']:
         luca.forms.actions.complete(args['<tax-filing.json>'])
+
     elif args['check']:
         luca.forms.actions.check(args['<directory-of-json-filings>'])
+
     elif args['tally']:
         from luca.tally import run_yaml_file
         print run_yaml_file(args['<rules.yaml>'], args['<statement-path>'],

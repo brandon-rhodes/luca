@@ -1,7 +1,7 @@
 from decimal import Decimal
 from luca.kit import cents, validate, zero, zzstr
 
-
+title = u"Form 941: Employer's QUARTERLY Federal Tax Return"
 versions = u'2012',
 
 

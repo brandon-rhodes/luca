@@ -1,6 +1,6 @@
 from luca.kit import cents, zero, zzstr
 
-title = u'Schedule A (Form 1040): Itemized Deductions'
+title = u'Form 1040 Schedule A: Itemized Deductions'
 versions = u'2012',
 
 def defaults(form):

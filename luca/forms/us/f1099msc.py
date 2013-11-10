@@ -2,7 +2,7 @@ from luca.forms.formlib import Form
 from luca.kit import zero, zstr
 
 
-title = u'Miscellaneous Income'
+title = u'Form 1099-MISC: Miscellaneous Income'
 versions = u'2012',
 
 

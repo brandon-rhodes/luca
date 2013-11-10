@@ -1,6 +1,6 @@
 from luca.kit import Decimal, dollars, zero
 
-title = u'Individual Income Tax Return'
+title = u'Ohio Form SD-100: Individual Income Tax Return'
 versions = '2012',
 
 deductions = ('35a 35b 36 37a 37b 38a 38b 38c 39 '

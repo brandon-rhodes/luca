@@ -1,8 +1,8 @@
 from luca.forms.formlib import Form
 from luca.kit import cents, zstr
 
+title = u'Form 8949: Sales and Other Dispositions of Capital Assets'
 versions = '2011', '2012'
-title = u''
 zero = cents(0)
 
 def defaults(form):

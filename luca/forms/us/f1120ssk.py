@@ -1,8 +1,9 @@
-"""Form 1120S Schedule K-1: Shareholder's Share of Income, Deductions,\
- Credits, etc."""
 from luca.forms.formlib import Form
 from luca.kit import zero, zstr
 
+
+title = ("Form 1120S Schedule K-1: Shareholder's Share of Income, Deductions,"
+         " Credits, etc.")
 
 versions = u'2012',
 first_nine_lines = '1 2 3 4 5a 5b 6 7 8a 8b 9'.split()

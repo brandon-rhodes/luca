@@ -1,6 +1,6 @@
 from luca.kit import Decimal, dollars
 
-title = u'Individual Income Tax Return'
+title = u'Ohio Form IT-1040: Individual Income Tax Return'
 versions = '2012',
 
 zero = Decimal('0')

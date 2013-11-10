@@ -1,8 +1,9 @@
 from decimal import Decimal
 from luca.forms.formlib import Form
-from luca.kit import dollars, zero, znstr
+from luca.kit import dollars, zero
 
 
+title = u'Georgia Form 600S: Corporation Tax Return'
 versions = u'2012',
 
 
