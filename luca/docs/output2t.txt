@@ -1,0 +1,33 @@
+  398.20  Accounts
+              0.06  Accounts.ID 0001 SAVINGS
+            400.14  Accounts.ID 0070 CHECKING
+              2.00- Accounts.Visa
+                      302.00- Accounts.Visa.Card 1234
+1,200.20- Income
+              0.20- Income.Interest
+
+ 2013-10-31 Deposit Dividend 0.100%       0.14 
+ 2013-10-31 Deposit Dividend 0.150%       0.06 
+
+          1,200.00- Income.Sales
+
+ 2013-10-15 Deposit at ATM #123       1,200.00 
+
+  802.00  Unknown
+
+ 2013-09-10 RESTAURANT TORONTO CA        55.00-
+ 2013-09-11 Foreign Transaction Fee -     2.00-
+            Date 09/10/13
+ 2013-09-11 VIA RAIL MONTREAL CA        100.00-
+ 2013-09-12 DETROIT WINDSOR TUNNEL        5.00-
+ 2013-09-13 DELTA TORONTO EAST           60.00-
+ 2013-09-13 PUB IN TORONTO CA            45.00-
+ 2013-10-09 SOUL CAFE BUADPEST HU        35.00-
+ 2013-10-30 Withdrawal PAYCHECK - To    500.00-
+            SMITH, SANDRA A XXXXXXXXXX
+
+    0.00  Zero
+
+ 2013-10-01 Payment From Share 0070     300.00 
+ 2013-10-01 Withdrawal To Loan          300.00-
+

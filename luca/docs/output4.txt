@@ -1,0 +1,16 @@
+  398.20  Accounts
+              0.06  ID 0001 SAVINGS
+            400.14  ID 0070 CHECKING
+              2.00- Visa
+                      302.00- Card 1234
+  802.00  Expenses
+            500.00  7
+                      500.00  Payroll
+            302.00  19
+                        2.00  Bank fees
+                      135.00  Meals
+                      165.00  Travel
+1,200.20- Income
+              0.20- Interest
+          1,200.00- Sales
+    0.00  Zero

@@ -1,0 +1,17 @@
+- 2013:
+  - Zero:
+    - /Withdrawal To Loan/
+    - /Payment From Share 0070/
+  - Income.Interest:
+    - /Deposit Dividend/
+  - Income.Sales:
+    - /Deposit at ATM/
+  - Expenses.7.Payroll:
+    - /PAYCHECK/
+  - Expenses.19.Bank fees:
+    - /Transaction Fee/
+  - Expenses.19.Travel:
+    - /DELTA TORONTO EAST/
+    - /DETROIT WINDSOR TUNNEL/
+    - /VIA RAIL/
+  - Unknown
