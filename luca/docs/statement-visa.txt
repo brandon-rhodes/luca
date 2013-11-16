@@ -1,0 +1,35 @@
+      Visa® Business Credit Card Statement
+P.O. Box 20541
+ATLANTA, GA 30320-2541
+www.DeltaCommunityCU.com
+
+  Statement Closing Date              10/10/2013
+  Days in Billing Cycle                       30
+
+ 09/10  09/11  RESTAURANT TORONTO CA   ** $55.00
+               Card 1234
+ 09/13  09/13  PUB IN TORONTO CA          $45.00
+               Card 1234
+ 09/11  09/12  VIA RAIL MONTREAL CA      $100.00
+               Card 1234
+ 09/13  09/13  DELTA TORONTO EAST         $60.00
+               Card 1234
+ 09/12  09/14  DETROIT WINDSOR TUNNEL      $5.00
+               Card 1234
+ 10/01  10/01  Payment From Share 0070 ($300.00)
+ 10/09  10/10  SOUL CAFE BUADPEST HU      $35.00
+               Card 1234
+
+ FEES
+ 09/11  09/11  Card Fee                    $2.00
+               Foreign Transaction Fee
+               Date 09/10/13
+               Card 1234
+
+ TOTAL FEES FOR THIS PERIOD                $2.00
+
+ INTEREST CHARGED
+
+ Interest Charged On Purchases             $0.00
+ Interest Charged On Cash Advances         $0.00
+ TOTAL INTEREST FOR THIS PERIOD            $0.00

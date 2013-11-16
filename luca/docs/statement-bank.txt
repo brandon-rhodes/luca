@@ -1,0 +1,26 @@
+P.O. Box 20541 Atlanta, GA 30320-2541
+
+     www.DeltaCommunityCU.com
+
+ EXAMPLE DOT COM, INC
+ SANDRA A SMITH       STATEMENT   FROM      THRU
+                        PERIOD
+ 123 MAIN STREET              10/01/13  10/31/13
+
+ BLUFFTON OH 45817
+
+ 10/01 ID 0001 SAVINGS Balance Forward    500.00
+ 10/31    Deposit Dividend 0.150%  0.06   500.06
+          Annual Percentage Yield Earned 0.17%
+ 10/31    Ending Balance                  500.06
+          Dividends Paid Year to Date       0.60
+
+ 10/01 ID 0070 CHECKING Balance Forward  2000.00
+ 10/01    Withdrawal To Loan     300.00- 1700.00
+ 10/15    Deposit at ATM #123   1200.00  2900.00
+ 10/30    Withdrawal PAYCHECK    500.00- 2400.00
+          To SMITH, SANDRA A XXXXXXXXXX
+ 10/31    Deposit Dividend 0.100%  0.14  2400.14
+          Annual Percentage Yield Earned 0.10%
+ 10/31    Ending Balance                 2400.14
+          Dividends Paid Year to Date       1.40
