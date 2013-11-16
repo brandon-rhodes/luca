@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Trial of rule-driven accounting."""
+"""Tally expenses by category, driven by bank statements and YAML rules."""
 
 from collections import defaultdict
 from decimal import Decimal
@@ -34,8 +34,10 @@ def group_transactions_by_category(transactions):
     return {category: list(iterator) for category, iterator
             in groupby(tlist, lambda tr: tr.category)}
 
-def run_yaml_file(path, statement_paths, show_balances, be_verbose,
-                  force_styling):
+def run_yaml_file(terminal, path, statement_paths, show_balances, be_verbose):
+
+    t = terminal
+    screen_width = t.width or 80
 
     with open(path) as f:
         rule_tree = yaml.safe_load(f)
@@ -68,9 +70,6 @@ def run_yaml_file(path, statement_paths, show_balances, be_verbose,
         new_balances, new_transactions = importer(text)
         balances.extend(new_balances)
         transactions.extend(new_transactions)
-
-    t = Terminal(force_styling=force_styling)
-    screen_width = t.width or 80
 
     verify_balances(balances, transactions, show_balances, t)
 

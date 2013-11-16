@@ -26,9 +26,17 @@ import luca.importer.yodlee
 from . import files
 from .ofx import io
 
+
 def main():
     args = docopt(__doc__)
-    t = blessings.Terminal()
+    force_styling = None if args['-C'] else True if args['-c'] else False
+    terminal=blessings.Terminal(force_styling=force_styling)
+    _main(args, terminal)
+
+
+def _main(args, terminal):
+
+    t = terminal
 
     if args['forms']:
         indent = 14
@@ -56,9 +64,8 @@ def main():
 
     elif args['tally']:
         from luca.tally import run_yaml_file
-        force_styling = None if args['-C'] else True if args['-c'] else False
-        print run_yaml_file(args['<rules.yaml>'], args['<statement-path>'],
-                            args['-b'], args['-t'], force_styling)
+        print run_yaml_file(terminal, args['<rules.yaml>'],
+                            args['<statement-path>'], args['-b'], args['-t'])
 
 
 def old_download_command(args):
