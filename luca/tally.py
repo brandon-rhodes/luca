@@ -17,16 +17,29 @@ from luca import rules
 def sum_categories(transactions):
     sums = defaultdict(Decimal)
     for tr in transactions:
-        sums['Accounts'] += tr.amount
-        sums['Accounts.' + tr.account] += tr.amount
-        c = tr.category
-        sums[c] += tr.amount
-        pieces = c.rsplit('.', 1)
-        while len(pieces) == 2:
-            c = pieces[0]
+        for a in category_and_ancestors('Accounts.' + tr.account):
+            sums[a] += tr.amount
+        for c in category_and_ancestors(tr.category):
             sums[c] += tr.amount
-            pieces = c.rsplit('.', 1)
     return sums
+
+def category_and_ancestors(category):
+    """Generate a list of strings: a category and all its ancestors.
+
+    >>> for c in category_and_ancestors('Expenses.Travel.PyCon'):
+    ...     c
+    ...
+    'Expenses.Travel.PyCon'
+    'Expenses.Travel'
+    'Expenses'
+
+    """
+    i = category.rfind('.')
+    while i != -1:
+        yield category
+        category = category[:i]
+        i = category.rfind('.')
+    yield category
 
 def group_transactions_by_category(transactions):
     """Return a new list [(category, [transaction, ...], ...]."""
