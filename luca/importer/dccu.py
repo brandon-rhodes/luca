@@ -135,7 +135,7 @@ def import_dccu_visa_pdf(text):
         if match:
             group = match.group
             t = Transaction()
-            t.account = 'Credit cards'
+            t.account = 'Visa'
             month = int(group(2))
             day = int(group(3))
             year = closing_year - 1 if month > closing_month else closing_year
@@ -159,6 +159,7 @@ def import_dccu_visa_pdf(text):
             del t.description[0]
         last = t.description[-1]
         if last.startswith('Card ') and last[5:].isdigit():
+            t.account = ''.join((t.account, '.', last))
             del t.description[-1]
         t.description = ' - '.join(t.description)
 
