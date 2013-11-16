@@ -4,11 +4,13 @@ Usage:
   luca forms
   luca form <name> [<version>]
   luca complete [-j] <tax-filing.json>...
-  luca tally [-bt] <rules.yaml> <statement-path>...
+  luca tally [-bcCt] <rules.yaml> <statement-path>...
   luca (-h | --help)
 
 Options:
   -b    Show a running balance for each account, by date
+  -c    Force ANSI color codes even if output is not a tty
+  -C    Force off ANSI color codes and output plain text
   -j    Only update JSON files; do not produce new PDF printouts
   -t    Show the transactions that have been sorted into every category
 
@@ -54,8 +56,9 @@ def main():
 
     elif args['tally']:
         from luca.tally import run_yaml_file
+        force_styling = None if args['-C'] else True if args['-c'] else False
         print run_yaml_file(args['<rules.yaml>'], args['<statement-path>'],
-                            args['-b'], args['-t'])
+                            args['-b'], args['-t'], force_styling)
 
 
 def old_download_command(args):

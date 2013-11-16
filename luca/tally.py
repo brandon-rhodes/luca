@@ -34,7 +34,8 @@ def group_transactions_by_category(transactions):
     return {category: list(iterator) for category, iterator
             in groupby(tlist, lambda tr: tr.category)}
 
-def run_yaml_file(path, statement_paths, show_balances, be_verbose):
+def run_yaml_file(path, statement_paths, show_balances, be_verbose,
+                  force_styling):
 
     with open(path) as f:
         rule_tree = yaml.safe_load(f)
@@ -68,7 +69,7 @@ def run_yaml_file(path, statement_paths, show_balances, be_verbose):
         balances.extend(new_balances)
         transactions.extend(new_transactions)
 
-    t = Terminal()
+    t = Terminal(force_styling=force_styling)
     screen_width = t.width or 80
 
     verify_balances(balances, transactions, show_balances, t)
@@ -156,10 +157,12 @@ def verify_balances(balances, transactions, show_balances, t):
 
             equal = (amounts[e.account] == e.amount)
 
-            if show_balances:
-                print e.date, ('==' if equal else '!='), e.amount
+            if not equal:
+                print e.date, amounts[e.account], '!=', e.amount
+            elif show_balances:
+                print e.date, '==', e.amount
 
-            assert equal
+            #assert equal
 
         elif e.event_type == 'transaction':
             if e.account not in amounts:
