@@ -20,7 +20,7 @@ def sum_categories(transactions):
         for a in category_and_ancestors('Accounts.' + tr.account):
             sums[a] += tr.amount
         for c in category_and_ancestors(tr.category):
-            sums[c] += tr.amount
+            sums[c] -= tr.amount
     return sums
 
 def category_and_ancestors(category):
