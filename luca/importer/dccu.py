@@ -56,6 +56,7 @@ def import_dccu_checking_pdf(text):
             b.date = date(year=2013, month=int(group(1)), day=int(group(2)))
             b.amount = Decimal(group(4))
             balances.append(b)
+            indent = 0
             continue
         match = _checking_ending_re.match(line)
         if match:
@@ -66,6 +67,7 @@ def import_dccu_checking_pdf(text):
             b.date = end_date + one_day
             b.amount = Decimal(group(3))
             balances.append(b)
+            indent = 0
             continue
         match = _checking_transaction_re.match(line)
         if match:
@@ -82,6 +84,8 @@ def import_dccu_checking_pdf(text):
         elif (indent and line[:indent].isspace()
               and not line[indent:indent+1].isspace()):
             more = line.strip()
+            if more.startswith('Annual Percentage Yield Earned'):
+                continue
             if more.startswith('Based on Average Daily Balance'):
                 continue
             if len(more) > id_minimum_len:
