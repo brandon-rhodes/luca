@@ -33,7 +33,7 @@ _checking_transaction_re = re.compile(ur"""
 
 @can_import_texts_containing(
     u'www.DeltaCommunityCU.com',
-    u'ACCOUNTS ARE NON-TRANSFERABLE EXCEPT ON THE BOOKS',
+    u'P.O. Box 20541 Atlanta, GA 30320-2541',
     )
 def import_dccu_checking_pdf(text):
     """Parse a Delta Community Credit Union checking account statement."""
