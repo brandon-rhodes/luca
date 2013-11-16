@@ -31,7 +31,8 @@ def main():
     args = docopt(__doc__)
     force_styling = None if args['-C'] else True if args['-c'] else False
     terminal=blessings.Terminal(force_styling=force_styling)
-    _main(args, terminal)
+    for line in _main(args, terminal):
+        print line
 
 
 def _main(args, terminal):
@@ -64,8 +65,10 @@ def _main(args, terminal):
 
     elif args['tally']:
         from luca.tally import run_yaml_file
-        print run_yaml_file(terminal, args['<rules.yaml>'],
-                            args['<statement-path>'], args['-b'], args['-t'])
+        lines = run_yaml_file(terminal, args['<rules.yaml>'],
+                              args['<statement-path>'], args['-b'], args['-t'])
+        for line in lines:
+            yield line
 
 
 def old_download_command(args):
