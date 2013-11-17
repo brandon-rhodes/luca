@@ -1,8 +1,7 @@
 # rules.yaml
 
 - 2013:
-  - /Withdrawal To Loan/:
-    - Zero
-  - /Payment From Share 0070/:
-    - Zero
+  - Zero:
+    - /Withdrawal To Loan/
+    - /Payment From Share 0070/
   - Unknown
