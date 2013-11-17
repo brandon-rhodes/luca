@@ -1,16 +1,45 @@
-  398.20  Accounts
-              0.06  ID 0001 SAVINGS
-            400.14  ID 0070 CHECKING
-              2.00- Visa
-                      302.00- Card 1234
-  802.00  Expenses
-            500.00  7
-                      500.00  Payroll
-            302.00  19
-                        2.00  Bank fees
-                      135.00  Meals
-                      165.00  Travel
-1,200.20- Income
-              0.20- Interest
-          1,200.00- Sales
-    0.00  Zero
+[32m  398.20 [0;10m [1mAccounts[0;10m
+          [32m    0.06 [0;10m [1mAccounts.ID 0001 SAVINGS[0;10m
+          [32m  400.14 [0;10m [1mAccounts.ID 0070 CHECKING[0;10m
+          [31m    2.00-[0;10m [1mAccounts.Visa[0;10m
+                    [31m  302.00-[0;10m [1mAccounts.Visa.Card 1234[0;10m
+[32m  802.00 [0;10m [1mExpenses[0;10m
+          [32m  500.00 [0;10m [1mExpenses.7[0;10m
+                    [32m  500.00 [0;10m [1mExpenses.7.Payroll[0;10m
+
+ 2013-10-30 Withdrawal PAYCHECK - To    [31m500.00-[0;10m
+            SMITH, SANDRA A XXXXXXXXXX
+
+          [32m  302.00 [0;10m [1mExpenses.19[0;10m
+                    [32m    2.00 [0;10m [1mExpenses.19.Bank fees[0;10m
+
+ 2013-09-11 Foreign Transaction Fee -     [31m2.00-[0;10m
+            Date 09/10/13
+
+                    [32m  135.00 [0;10m [1mExpenses.19.Meals[0;10m
+
+ 2013-09-10 RESTAURANT TORONTO CA        [31m55.00-[0;10m
+ 2013-09-13 PUB IN TORONTO CA            [31m45.00-[0;10m
+ 2013-10-09 SOUL CAFE BUADPEST HU        [31m35.00-[0;10m
+
+                    [32m  165.00 [0;10m [1mExpenses.19.Travel[0;10m
+
+ 2013-09-11 VIA RAIL MONTREAL CA        [31m100.00-[0;10m
+ 2013-09-12 DETROIT WINDSOR TUNNEL      [31m  5.00-[0;10m
+ 2013-09-13 DELTA TORONTO EAST          [31m 60.00-[0;10m
+
+[31m1,200.20-[0;10m [1mIncome[0;10m
+          [31m    0.20-[0;10m [1mIncome.Interest[0;10m
+
+ 2013-10-31 Deposit Dividend 0.100%       [32m0.14 [0;10m
+ 2013-10-31 Deposit Dividend 0.150%       [32m0.06 [0;10m
+
+          [31m1,200.00-[0;10m [1mIncome.Sales[0;10m
+
+ 2013-10-15 Deposit at ATM #123       [32m1,200.00 [0;10m
+
+[32m    0.00 [0;10m [1mZero[0;10m
+
+ 2013-10-01 Payment From Share 0070     [32m300.00 [0;10m
+ 2013-10-01 Withdrawal To Loan          [31m300.00-[0;10m
+
