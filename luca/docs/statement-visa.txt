@@ -12,7 +12,7 @@ www.DeltaCommunityCU.com
                Card 1234
  09/11  09/12  VIA RAIL MONTREAL CA      $100.00
                Card 1234
- 09/13  09/13  DELTA TORONTO EAST         $60.00
+ 09/13  09/13  DELTA TORONTO EAST         $90.00
                Card 1234
  09/12  09/14  DETROIT WINDSOR TUNNEL      $5.00
                Card 1234

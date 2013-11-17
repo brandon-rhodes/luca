@@ -1,16 +1,16 @@
-[32m398.20 [0;10m [1mAccounts[0;10m
+[32m368.20 [0;10m [1mAccounts[0;10m
         [32m  0.06 [0;10m [1mAccounts.ID 0001 SAVINGS[0;10m
         [32m400.14 [0;10m [1mAccounts.ID 0070 CHECKING[0;10m
-        [31m  2.00-[0;10m [1mAccounts.Visa[0;10m
-                [31m302.00-[0;10m [1mAccounts.Visa.Card 1234[0;10m
-[31m398.20-[0;10m [1mUnknown[0;10m
+        [31m 32.00-[0;10m [1mAccounts.Visa[0;10m
+                [31m332.00-[0;10m [1mAccounts.Visa.Card 1234[0;10m
+[31m368.20-[0;10m [1mUnknown[0;10m
 
  2013-09-10 RESTAURANT TORONTO CA     [31m   55.00-[0;10m
  2013-09-11 Foreign Transaction Fee - [31m    2.00-[0;10m
             Date 09/10/13
  2013-09-11 VIA RAIL MONTREAL CA      [31m  100.00-[0;10m
  2013-09-12 DETROIT WINDSOR TUNNEL    [31m    5.00-[0;10m
- 2013-09-13 DELTA TORONTO EAST        [31m   60.00-[0;10m
+ 2013-09-13 DELTA TORONTO EAST        [31m   90.00-[0;10m
  2013-09-13 PUB IN TORONTO CA         [31m   45.00-[0;10m
  2013-10-01 Payment From Share 0070   [32m  300.00 [0;10m
  2013-10-01 Withdrawal To Loan        [31m  300.00-[0;10m

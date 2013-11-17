@@ -3,32 +3,46 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Luca's documentation!
-================================
+Welcome to Luca
+===============
 
-As an independent consultant,
-I sustain a very simple business structure:
-an S-Corporation of which I am the sole employee.
-In the ``luca`` command line tool,
-I am slowly collecting commands and scripts
-that help me automate the production
-of business tax forms and other obligations
-that my business must meet each quarter.
+*A command-line accounting utility*
 
-Luca is prounounced “Lew-cha” and is named after Luca Pacioli,
-the Italian friend of Leonardo's who invented modern accounting.
+Luca currently supports two exciting use cases!
 
-You can find the source code itself at:
+1. You download your **bank statements,**
+   and want to use **regular expressions**
+   for automatically classifing transactions
+   to produce income and expense balances.
 
-    `Luca project on GitHub <https://github.com/brandon-rhodes/luca>`_
+   (See the chapter on “Tallying” below.)
 
-Installation instructions are also maintained there.
+2. You want to version control your **tax forms** as JSON data,
+   with Luca performing all of the necessary math
+   and then **rendering PDFs**
+   that you can print and send the government.
 
-Table of Contents:
+   (See the other chapters listed below.)
+
+Luca is prounounced *Lew-cha* and is named after Luca Pacioli,
+the Italian friend of Leonardo da Vinci's
+who invented modern accounting.
+
+Luca is easy to install with standard Python tools::
+
+    pip install luca
+
+All project resources are maintained at:
+
+* `Source code on GitHub <https://github.com/brandon-rhodes/luca>`_
+* `Issue tracker on GitHub <https://github.com/brandon-rhodes/luca/issues>`_
+
+Documentation
+-------------
 
 .. toctree::
    :maxdepth: 2
 
-   s-corporation
+   tally
    completing-forms
-   implementing-forms
+   s-corporation
