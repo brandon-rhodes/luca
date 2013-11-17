@@ -1,5 +1,4 @@
 *.pyc
 *.egg-info
 luca/docs/_build
-luca/docs/output*.html
 venv
