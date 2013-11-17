@@ -2,18 +2,6 @@
 Accounting For My S-Corporation
 ===============================
 
-The Luca tool does not actually compute my taxes.
-I discovered that an already existing tool,
-the `Ledger command-line accounting system <http://www.ledger-cli.org/>`_,
-works great for tallying up the tax consequences of my business.
-It works so well that it has completely defeated my usual instinct
-to re-implement everything in Python!
-
-So this documentation chapter really has nothing to do with Luca,
-which only becomes involved when I am ready to submit tax forms.
-Instead, these are my notes about setting up an annual ``ledger.dat``
-file for my S-corporation so that I can easily determine my taxes.
-
 .. note::
 
    I have written this Luca documentation
