@@ -1,0 +1,14 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>{{ title|striptags|e }}</title>
+    <link rel="stylesheet" type="text/css" href="_static/style.css" />
+  </head>
+  <body>
+    {% if pagename != 'index' %}
+    <p><i><a href=".">← return to the Luca home page</a></i></p>
+    {% endif %}
+    {{ body }}
+  </body>
+</html>
