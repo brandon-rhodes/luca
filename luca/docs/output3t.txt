@@ -1,8 +1,7 @@
 [32m  368.20 [0;10m [1mAccounts[0;10m
+          [31m   32.00-[0;10m [1mAccounts.DCCU Business Visa[0;10m
           [32m    0.06 [0;10m [1mAccounts.ID 0001 SAVINGS[0;10m
           [32m  400.14 [0;10m [1mAccounts.ID 0070 CHECKING[0;10m
-          [31m   32.00-[0;10m [1mAccounts.Visa[0;10m
-                    [31m  332.00-[0;10m [1mAccounts.Visa.Card 1234[0;10m
 [32m  697.00 [0;10m [1mExpenses[0;10m
           [32m  500.00 [0;10m [1mExpenses.7[0;10m
                     [32m  500.00 [0;10m [1mExpenses.7.Payroll[0;10m
@@ -18,9 +17,9 @@
 
                     [32m  195.00 [0;10m [1mExpenses.19.Travel[0;10m
 
- 2013-09-11 VIA RAIL MONTREAL CA        [31m100.00-[0;10m
- 2013-09-12 DETROIT WINDSOR TUNNEL      [31m  5.00-[0;10m
+ 2013-09-12 VIA RAIL MONTREAL CA        [31m100.00-[0;10m
  2013-09-13 DELTA TORONTO EAST          [31m 90.00-[0;10m
+ 2013-09-14 DETROIT WINDSOR TUNNEL      [31m  5.00-[0;10m
 
 [31m1,200.20-[0;10m [1mIncome[0;10m
           [31m    0.20-[0;10m [1mIncome.Interest[0;10m
@@ -34,12 +33,12 @@
 
 [32m  135.00 [0;10m [1mUnknown[0;10m
 
- 2013-09-10 RESTAURANT TORONTO CA        [31m55.00-[0;10m
+ 2013-09-11 RESTAURANT TORONTO CA        [31m55.00-[0;10m
  2013-09-13 PUB IN TORONTO CA            [31m45.00-[0;10m
- 2013-10-09 SOUL CAFE BUADPEST HU        [31m35.00-[0;10m
+ 2013-10-10 SOUL CAFE BUADPEST HU        [31m35.00-[0;10m
 
 [32m    0.00 [0;10m [1mZero[0;10m
 
- 2013-10-01 Payment From Share 0070     [32m300.00 [0;10m
+ 2013-10-01 Payment From Share 0070 (   [32m300.00 [0;10m
  2013-10-01 Withdrawal To Loan          [31m300.00-[0;10m
 

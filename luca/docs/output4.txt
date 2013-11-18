@@ -1,8 +1,7 @@
 [32m  368.20 [0;10m Accounts
+          [31m   32.00-[0;10m DCCU Business Visa
           [32m    0.06 [0;10m ID 0001 SAVINGS
           [32m  400.14 [0;10m ID 0070 CHECKING
-          [31m   32.00-[0;10m Visa
-                    [31m  332.00-[0;10m Card 1234
 [32m  832.00 [0;10m Expenses
           [32m  500.00 [0;10m 7
                     [32m  500.00 [0;10m Payroll
