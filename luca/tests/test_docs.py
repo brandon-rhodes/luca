@@ -40,7 +40,7 @@ def test_docs_input_output(rules_statements_output):
 
     rules_path, statement_paths, output_path = rules_statements_output
 
-    terminal = Terminal(force_styling=None)
+    terminal = Terminal(kind='ansi', force_styling=True)
     terminal._height_and_width = lambda: (24, 48)
 
     argv = ['tally', rules_path] + statement_paths
