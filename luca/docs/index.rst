@@ -6,18 +6,18 @@
 Welcome to Luca
 ===============
 
-*A command-line accounting utility*
+*Do accounting with YAML, fill out tax forms with JSON!*
 
-Luca currently supports two exciting use cases!
+Luca currently supports two exciting use cases:
 
-1. You download your **bank statements,**
-   and want to use **regular expressions**
-   for automatically classifing transactions
-   to produce income and expense balances.
+1. If you download your **bank statements,**
+   Luca lets you build a YAML tree of **regular expressions**
+   to automatically classify transactions
+   and tally your income and expenses.
 
    (See the chapter on “Tallying” below.)
 
-2. You want to version control your **tax forms** as JSON data,
+2. You can version control your **tax forms** as JSON data,
    with Luca performing all of the necessary math
    and then **rendering PDFs**
    that you can print and send the government.
@@ -32,8 +32,9 @@ Luca is easy to install with standard Python tools::
 
     pip install luca
 
-All project resources are maintained at:
+Project resources:
 
+* `Entry on PyPI <https://pypi.python.org/pypi/luca>`_
 * `Source code on GitHub <https://github.com/brandon-rhodes/luca>`_
 * `Issue tracker on GitHub <https://github.com/brandon-rhodes/luca/issues>`_
 
