@@ -90,7 +90,11 @@ def run_yaml_file(terminal, path, statement_paths,
         balances.extend(new_balances)
         transactions.extend(new_transactions)
 
-    verify_balances(balances, transactions, show_balances, t)
+    output_lines = []
+    add = output_lines.append
+
+    for line in verify_balances(balances, transactions, show_balances, t):
+        add(line)
 
     for tr in transactions:
         tr.category = rule_tree_function(tr)
@@ -99,9 +103,6 @@ def run_yaml_file(terminal, path, statement_paths,
     catdict = group_transactions_by_category(transactions)
     sumdict = sum_categories(transactions)
     categories = set(catdict) | set(sumdict)
-
-    output_lines = []
-    add = output_lines.append
 
     max_amount = max(abs(v) for v in sumdict.values())
     amount_width = len('{:,}'.format(max_amount)) + 1
@@ -205,7 +206,8 @@ def verify_balances(balances, transactions, show_balances, t):
             if e.account not in amounts:
                 if show_balances:
                     yield ''
-                    yield e.account
+                    yield '{} opening balance {} on {}'.format(
+                        e.account, e.amount, e.date)
                     yield ''
                 amounts[e.account] = e.amount
                 continue
@@ -214,9 +216,10 @@ def verify_balances(balances, transactions, show_balances, t):
             equal = (amount == e.amount)
 
             if not equal:
-                yield '{} {} != {}'.format(e.date, amount, e.amount)
+                yield t.red('{} balance {} != {}'.format(
+                    e.date, amount, e.amount))
             elif show_balances:
-                yield '{} == {}'.format(e.date, amount)
+                yield t.green('{} balance == {}'.format(e.date, amount))
 
             #assert equal
 
@@ -224,10 +227,11 @@ def verify_balances(balances, transactions, show_balances, t):
             if e.account not in amounts:
                 continue
 
-            amounts[e.account] += e.amount
+            amount = e.amount
+            amounts[e.account] += amount
 
             if show_balances:
-                yield '{} {}'.format(e.date, amounts[e.account])
+                yield '{} {:+} = {}'.format(e.date, amount, amounts[e.account])
 
     if show_balances:
         yield ''

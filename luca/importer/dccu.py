@@ -104,12 +104,23 @@ def import_dccu_checking_pdf(text):
     return balances, transactions
 
 
+_visa_balances_re = re.compile(ur"""
+    \s*
+    Previous\ Balance
+    \s+
+    \$(?P<previous_balance>[\d,]+\.\d\d)
+    \s+
+    New\ Balance
+    \s+
+    \$(?P<new_balance>[\d,]+\.\d\d)$
+    """, re.VERBOSE)
+
 _visa_transaction_re = re.compile(ur"""
     \s*
     (\d+\s+)?                  # "Reference Number"
     (\d\d)/(\d\d)\s+           # "Trans Date"
     (\d\d)/(\d\d)\s+           # "Post Date"
-    ([^($]*)                   # "Description"
+    (.*)                       # "Description"
     \(?\$([\d,]+\.\d\d)(\)?)$  # "Amount"
     """, re.VERBOSE)
 
@@ -120,6 +131,8 @@ _visa_transaction_re = re.compile(ur"""
 def import_dccu_visa_pdf(text):
     """Parse a Delta Community Credit Union Visa statement."""
 
+    account = 'DCCU Business Visa'
+    balances = []
     transactions = []
     lines = iter(text.splitlines())
     i = 0
@@ -127,17 +140,31 @@ def import_dccu_visa_pdf(text):
     for line in lines:
         line = line.rstrip()
         stripped_line = line.lstrip()
+
+        match = _visa_balances_re.match(line)
+        if match:
+            b = Balance()
+            b.account = account
+            b.amount = - Decimal(match.group('new_balance').replace(',', ''))
+            continue
+
         if stripped_line.startswith('Statement Closing Date'):
             closing = stripped_line.split()[3].split('/')  # '01/10/2013'
             closing_year = int(closing[2])
             closing_month = int(closing[0])
+            closing_day = int(closing[1])
+            closing_date = date(closing_year, closing_month, closing_day)
+            b.date = closing_date + one_day
+            balances.append(b)
+            continue
+
         match = _visa_transaction_re.match(line)
         if match:
             group = match.group
             t = Transaction()
-            t.account = 'Visa'
-            month = int(group(2))
-            day = int(group(3))
+            t.account = account
+            month = int(group(4))
+            day = int(group(5))
             year = closing_year - 1 if month > closing_month else closing_year
             t.date = date(year, month, day)
             description = group(6).strip()
@@ -159,11 +186,10 @@ def import_dccu_visa_pdf(text):
             del t.description[0]
         last = t.description[-1]
         if last.startswith('Card ') and last[5:].isdigit():
-            t.account = ''.join((t.account, '.', last))
             del t.description[-1]
         t.description = ' - '.join(t.description)
 
-    return [], transactions
+    return balances, transactions
 
 
 importers = [import_dccu_checking_pdf, import_dccu_visa_pdf]
