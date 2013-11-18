@@ -6,8 +6,13 @@ If Luca knows how to parse your bank statements,
 then all you have to do is write a quick YAML tree of rules,
 and Luca will categorize your transactions
 and tally all of your income and expenses!
-If your bank statements are not yet supported,
-please let us know the format
+The currently supported statement formats are:
+
+* Delta Community Credit Union checking
+* Delta Community Credit Union Visa Business
+
+If your bank statements are **not yet supported,**
+please **let us know** the format
 so that we can add a module to the ``luca.importer`` sub-package.
 
 Quick reference to rules
