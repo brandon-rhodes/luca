@@ -121,7 +121,7 @@ _visa_transaction_re = re.compile(ur"""
     (\d\d)/(\d\d)\s+           # "Trans Date"
     (\d\d)/(\d\d)\s+           # "Post Date"
     (.*)                       # "Description"
-    \(?\$([\d,]+\.\d\d)(\)?)$  # "Amount"
+    \$([\d,]+\.\d\d)(\)?)$     # "Amount"
     """, re.VERBOSE)
 
 @can_import_texts_containing(
@@ -167,7 +167,7 @@ def import_dccu_visa_pdf(text):
             day = int(group(5))
             year = closing_year - 1 if month > closing_month else closing_year
             t.date = date(year, month, day)
-            description = group(6).strip()
+            description = group(6).strip().rstrip('(').strip()
             if description.endswith(' **'):
                 description = description[:-3].strip()
             t.description = [description]
