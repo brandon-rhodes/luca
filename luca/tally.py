@@ -216,8 +216,8 @@ def verify_balances(balances, transactions, show_balances, t):
             equal = (amount == e.amount)
 
             if not equal:
-                yield t.red('{} balance {} != {}'.format(
-                    e.date, amount, e.amount))
+                yield t.red('{} actual balance {} != statement balance {}'
+                            .format(e.date, amount, e.amount))
             elif show_balances:
                 yield t.green('{} balance == {}'.format(e.date, amount))
 
