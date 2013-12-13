@@ -194,6 +194,7 @@ def verify_balances(balances, transactions, show_balances, t):
 
     events = list(balances)
     events.extend(transactions)
+    events.sort(key=attrgetter('sort_key'))
     events.sort(key=attrgetter('date'))
     if show_balances:
         events.sort(key=attrgetter('account'))

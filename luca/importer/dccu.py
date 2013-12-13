@@ -3,7 +3,8 @@
 import re
 from datetime import date, timedelta
 from decimal import Decimal
-from .model import Balance, Transaction, can_import_texts_containing
+from .model import (StartOfDayBalance, EndOfDayBalance, Transaction,
+                    can_import_texts_containing)
 
 one_day = timedelta(days=1)
 
@@ -51,7 +52,7 @@ def import_dccu_checking_pdf(text):
         if match:
             group = match.group
             account = group(3).strip()
-            b = Balance()
+            b = StartOfDayBalance()
             b.account = account
             b.date = date(year=2013, month=int(group(1)), day=int(group(2)))
             b.amount = Decimal(group(4))
@@ -61,10 +62,10 @@ def import_dccu_checking_pdf(text):
         match = _checking_ending_re.match(line)
         if match:
             group = match.group
-            b = Balance()
+            b = EndOfDayBalance()
             b.account = account
             end_date = date(year=2013, month=int(group(1)), day=int(group(2)))
-            b.date = end_date + one_day
+            b.date = end_date
             b.amount = Decimal(group(3))
             balances.append(b)
             indent = 0
@@ -143,7 +144,7 @@ def import_dccu_visa_pdf(text):
 
         match = _visa_balances_re.match(line)
         if match:
-            b = Balance()
+            b = EndOfDayBalance()
             b.account = account
             b.amount = - Decimal(match.group('new_balance').replace(',', ''))
             continue
@@ -154,7 +155,7 @@ def import_dccu_visa_pdf(text):
             closing_month = int(closing[0])
             closing_day = int(closing[1])
             closing_date = date(closing_year, closing_month, closing_day)
-            b.date = closing_date + one_day
+            b.date = closing_date
             balances.append(b)
             continue
 
