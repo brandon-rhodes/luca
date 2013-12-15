@@ -3,9 +3,10 @@
 import re
 from datetime import date, timedelta
 from decimal import Decimal
-from .model import (StartOfDayBalance, EndOfDayBalance, Transaction,
-                    can_import_texts_containing)
+from .model import Balance, Transaction, can_import_texts_containing
 
+start_of_day = -1
+end_of_day = 1
 one_day = timedelta(days=1)
 
 _checking_beginning_re = re.compile(ur"""
@@ -52,7 +53,8 @@ def import_dccu_checking_pdf(text):
         if match:
             group = match.group
             account = group(3).strip()
-            b = StartOfDayBalance()
+            b = Balance()
+            b.sort_key = start_of_day
             b.account = account
             b.date = date(year=2013, month=int(group(1)), day=int(group(2)))
             b.amount = Decimal(group(4))
@@ -62,7 +64,7 @@ def import_dccu_checking_pdf(text):
         match = _checking_ending_re.match(line)
         if match:
             group = match.group
-            b = EndOfDayBalance()
+            b.sort_key = end_of_day
             b.account = account
             end_date = date(year=2013, month=int(group(1)), day=int(group(2)))
             b.date = end_date
@@ -130,8 +132,20 @@ _visa_transaction_re = re.compile(ur"""
     u'Business Credit Card Statement',
     )
 def import_dccu_visa_pdf(text):
-    """Parse a Delta Community Credit Union Visa statement."""
+    """Parse a Delta Community Credit Union Visa statement.
 
+    Note the sort key used by balances and transactions: by making the
+    statement closing date the primary criterion, we successfully handle
+    the situation where statement A's last transaction falls on its
+    closing date, yet the following statement B includes yet another
+    transaction on that same date.  All three items have the same date,
+    yet the only correct ordering is:
+
+    * Last transaction from A
+    * Closing balance from A
+    * First transaction from B
+
+    """
     account = 'DCCU Business Visa'
     balances = []
     transactions = []
@@ -144,7 +158,7 @@ def import_dccu_visa_pdf(text):
 
         match = _visa_balances_re.match(line)
         if match:
-            b = EndOfDayBalance()
+            b = Balance()
             b.account = account
             b.amount = - Decimal(match.group('new_balance').replace(',', ''))
             continue
@@ -155,6 +169,7 @@ def import_dccu_visa_pdf(text):
             closing_month = int(closing[0])
             closing_day = int(closing[1])
             closing_date = date(closing_year, closing_month, closing_day)
+            b.sort_key = (closing_date, end_of_day)
             b.date = closing_date
             balances.append(b)
             continue
@@ -163,6 +178,7 @@ def import_dccu_visa_pdf(text):
         if match:
             group = match.group
             t = Transaction()
+            t.sort_key = (closing_date, 0)
             t.account = account
             month = int(group(4))
             day = int(group(5))

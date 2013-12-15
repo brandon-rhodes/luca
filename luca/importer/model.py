@@ -1,9 +1,10 @@
 """Models that importers can use for representing financial data."""
 
-class _Balance(object):
+class Balance(object):
     """An assertion of an account's balance at a point in time."""
 
     __slots__ = [
+        'sort_key',
         'account',
         'date',
         'amount',
@@ -15,23 +16,11 @@ class _Balance(object):
         return '<%s %r %s %s>' % (type(self).__name__, self.account,
                                   self.date, self.amount)
 
-class StartOfDayBalance(_Balance):
-    """An assertion of an account's balance at the end of ``date``."""
-
-    event_type = 'balance'
-    sort_key = -1               # before today's transactions
-
-class EndOfDayBalance(_Balance):
-    """An assertion of an account's balance at the end of ``date``."""
-
-    event_type = 'balance'
-    sort_key = 1                # after today's transactions
-
-
 class Transaction(object):
     """A record stating that that money moved in or out of an account."""
 
     __slots__ = [
+        'sort_key',
         'account',
         'category',  # TODO: remove
         'date',
@@ -41,9 +30,9 @@ class Transaction(object):
         ]
 
     event_type = 'transaction'
-    sort_key = 0  # between start-of-day balances and end-of-day balances
 
     def __init__(self):
+        self.sort_key = 0
         self.category = None
 
 
