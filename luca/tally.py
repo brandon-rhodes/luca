@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Tally expenses by category, driven by bank statements and YAML rules."""
 
+import os
 import re
 from collections import defaultdict
 from decimal import Decimal
@@ -56,7 +57,7 @@ def run_yaml_file(terminal, path, statement_paths,
                   show_balances, show_transactions):
 
     t = terminal
-    screen_width = t.width or 80
+    screen_width = int(os.environ.get('COLUMNS', '0')) or t.width or 80
 
     with open(path) as yaml_file:
         rule_tree = yaml.safe_load(yaml_file)
