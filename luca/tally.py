@@ -98,6 +98,7 @@ def run_yaml_file(terminal, path, statement_paths,
         add(line)
 
     for tr in transactions:
+        tr.set_full_text()
         tr.category = rule_tree_function(tr)
 
     transactions = [tr for tr in transactions if tr.category is not None]

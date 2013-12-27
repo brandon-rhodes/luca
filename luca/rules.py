@@ -91,9 +91,9 @@ def analyze_rule(rule):
 
     if isinstance(rule, str):
         if rule.startswith('/') and rule.endswith('/'):
-            return eparse('search(%r, t.description)' % rule[1:-1])
+            return eparse('search(%r, t.full_text)' % rule[1:-1])
         elif rule.startswith('~/') and rule.endswith('/'):
-            return eparse('not search(%r, t.description)' % rule[2:-1])
+            return eparse('not search(%r, t.full_text)' % rule[2:-1])
         else:
             match = _month_day_re.match(rule)
             if match:

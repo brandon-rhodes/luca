@@ -27,6 +27,7 @@ class Transaction(object):
         'posting_date',
         'description',
         'amount',
+        'full_text',
         ]
 
     event_type = 'transaction'
@@ -34,6 +35,13 @@ class Transaction(object):
     def __init__(self):
         self.sort_key = 0
         self.category = None
+
+    def set_full_text(self):
+        self.full_text = '{}  {}  {}{}'.format(
+            self.date.strftime('%d/%m'),
+            self.description,
+            abs(self.amount),
+            '-' if self.amount < 0 else '')
 
 
 def can_import_texts_containing(*substrings):
