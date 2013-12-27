@@ -11,7 +11,7 @@
  2013-09-13 DELTA TORONTO EAST        [31m   90.00-[0;10m
  2013-09-13 PUB IN TORONTO CA         [31m   45.00-[0;10m
  2013-09-14 DETROIT WINDSOR TUNNEL    [31m    5.00-[0;10m
- 2013-10-01 Payment From Share 0070 ( [32m  300.00 [0;10m
+ 2013-10-01 Payment From Share 0070   [32m  300.00 [0;10m
  2013-10-01 Withdrawal To Loan        [31m  300.00-[0;10m
  2013-10-10 SOUL CAFE BUADPEST HU     [31m   35.00-[0;10m
  2013-10-15 Deposit at ATM #123       [32m1,200.00 [0;10m

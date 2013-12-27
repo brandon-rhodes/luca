@@ -27,6 +27,6 @@
 
 [32m    0.00 [0;10m [1mZero[0;10m
 
- 2013-10-01 Payment From Share 0070 (   [32m300.00 [0;10m
+ 2013-10-01 Payment From Share 0070     [32m300.00 [0;10m
  2013-10-01 Withdrawal To Loan          [31m300.00-[0;10m
 
