@@ -60,6 +60,7 @@ def analyze_tree(tree, category):
             test = r
             return If(test, [analyze_tree(subtree, category)], [])
         else:
+            dueling_category_check(category, r)
             category = r
             return analyze_tree(subtree, category)
 
@@ -72,8 +73,17 @@ def analyze_tree(tree, category):
                 raise ValueError('bottomed out without category')
             return If(test, [Return(Str(category))], [])
         else:
+            dueling_category_check(category, r)
             category = r
             return Return(Str(category))
+
+
+def dueling_category_check(old_category, new_category):
+    if old_category is not None:
+        raise ValueError(
+            'dueling categories: within a rule that has already set the'
+            ' category to {!r}, you are trying to switch it to {!r}'
+            .format(old_category, new_category))
 
 
 def analyze_rule(rule):
