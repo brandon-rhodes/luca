@@ -2,11 +2,13 @@ from decimal import Decimal
 from luca.kit import cents, validate, zero, zzstr
 
 title = u"Form 941: Employer's QUARTERLY Federal Tax Return"
-versions = u'2012',
+versions = u'2012', u'2013'
 
 
 def defaults(form):
     f = form
+    f.year = 2013
+    f.quarter = 1
     f.name = u''
     f.trade_name = u''
     f.address = u''
