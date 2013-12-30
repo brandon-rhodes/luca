@@ -6,17 +6,38 @@ from decimal import Decimal, ROUND_HALF_UP
 
 zero = Decimal('0.00')
 cent = Decimal('0.01')
-one = Decimal('1')
+percent = Decimal('0.01')
+one = Decimal('1.00')
+whole = Decimal('1')
+infinity = Decimal('Infinity')
 
 def cents(value):
+    """Return a Decimal rounded to two decimal places.  Round half-cents up.
+
+    >>> cents(Decimal('123.456'))
+    Decimal('123.46')
+    >>> cents(100)
+    Decimal('100.00')
+    >>> cents(infinity)
+    Decimal('Infinity')
+
+    """
+    if value == infinity:
+        return value
     if not isinstance(value, Decimal):
         value = Decimal(value)
     return value.quantize(cent, rounding=ROUND_HALF_UP)
 
 def dollars(value):
+    """Return a Decimal rounded to a whole number.  Round half-cents up.
+
+    >>> dollars('10.50')
+    Decimal('11')
+
+    """
     if not isinstance(value, Decimal):
         value = Decimal(value)
-    return value.quantize(one, rounding=ROUND_HALF_UP)
+    return value.quantize(whole, rounding=ROUND_HALF_UP)
 
 def dsum(sequence=()):
     """Return the sum of a sequence of Decimals.
