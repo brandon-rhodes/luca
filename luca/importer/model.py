@@ -37,7 +37,7 @@ class Transaction(object):
         self.category = None
 
     def set_full_text(self):
-        self.full_text = '{}  {}  {}{}'.format(
+        self.full_text = '{}  {}  {:,}{}'.format(
             self.date.strftime('%d/%m'),
             self.description,
             abs(self.amount),
