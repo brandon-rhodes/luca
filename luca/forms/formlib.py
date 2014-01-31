@@ -95,9 +95,25 @@ class Form(object):
 
 
 def load_json(text):
-    """Parse JSON in the unicode string `text` and return a Form."""
+    """Parse JSON in the unicode string `text` and return a Form.
+
+    This only returns the fields inside of the 'inputs' key of the
+    top-level JSON object, throwing away everything else.
+
+    """
     outer = json.loads(text, object_pairs_hook=_form_from_pairs)
     return outer.inputs
+
+def load_whole_json(text):
+    """Parse JSON in the unicode string `text` and return a Form.
+
+    The result, if `text` represents a typical form, will have two
+    attributes `input` and `output` providing the inputs and computed
+    outputs of the form.
+
+    """
+    outer = json.loads(text, object_pairs_hook=_form_from_pairs)
+    return outer
 
 _decimal_re = re.compile(ur'^-?[\d,]+\.[\d,]+$')
 
