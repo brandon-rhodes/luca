@@ -4,6 +4,7 @@
 import os
 import re
 from collections import defaultdict
+from copy import copy
 from decimal import Decimal
 from itertools import groupby
 from operator import attrgetter
@@ -97,9 +98,23 @@ def run_yaml_file(terminal, path, statement_paths,
     for line in verify_balances(balances, transactions, show_balances, t):
         add(line)
 
+    new_splits = []
+
     for tr in transactions:
         tr.set_full_text()
-        tr.category = rule_tree_function(tr)
+        category = rule_tree_function(tr)
+        if category is not None and category.startswith('Split '):
+            pieces = [piece.strip() for piece in category[6:].split(';')]
+            for piece in pieces[:-1]:
+                tr2 = copy(tr)
+                tr2.category, amount_str = piece.split()
+                tr2.amount = Decimal(amount_str.replace(',', ''))
+                new_splits.append(tr2)
+                tr.amount -= tr2.amount
+            category = pieces[-1]
+        tr.category = category
+
+    transactions.extend(new_splits)
 
     transactions = [tr for tr in transactions if tr.category is not None]
     catdict = group_transactions_by_category(transactions)
