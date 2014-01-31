@@ -123,4 +123,10 @@ def analyze_rule(rule):
         return eparse('t.date.month == %r' % n)
 
     category = rule
+
+    if ' - ' in category:
+        raise ValueError(
+            'your category name looks suspiciously like malformed YAML'
+            ' resulting from a forgotten colon: {}'.format(category))
+
     return category
