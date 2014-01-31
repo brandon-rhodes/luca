@@ -13,6 +13,7 @@ from textwrap import wrap
 import yaml
 
 from luca.importer.dccu import importers
+from luca.kit import cents
 from luca.pdf import extract_text_from_pdf_file
 from luca import rules
 
@@ -108,7 +109,11 @@ def run_yaml_file(terminal, path, statement_paths,
             for piece in pieces[:-1]:
                 tr2 = copy(tr)
                 tr2.category, amount_str = piece.split()
-                tr2.amount = Decimal(amount_str.replace(',', ''))
+                if amount_str.endswith('%'):
+                    percent = Decimal(amount_str[:-1])
+                    tr2.amount = cents(tr.amount * percent / 100)
+                else:
+                    tr2.amount = Decimal(amount_str.replace(',', ''))
                 new_splits.append(tr2)
                 tr.amount -= tr2.amount
             category = pieces[-1]
