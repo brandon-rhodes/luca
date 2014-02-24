@@ -5,13 +5,16 @@ other functions exist to support it.  See the documentation for more
 information about writing YAML rules.
 
 """
+import datetime
 import re
 from ast import (AST, If, Name, Return, Str, Param, FunctionDef, Interactive,
                  arguments, fix_missing_locations, parse)
-from datetime import date
 
 _month_day_re = re.compile('\d\d/\d\d$')
 _month_day_to_month_day_re = re.compile('\d\d/\d\d-\d\d/\d\d$')
+
+class ParseError(Exception):
+    """Luca cannot understand your YAML."""
 
 
 def compile_tree(tree):
@@ -28,7 +31,7 @@ def compile_tree(tree):
     fixed = fix_missing_locations(node)
     code = compile(fixed, '<luca rule compiler>', 'single')
 
-    globals_dict = {'date': date, 'search': re.search}
+    globals_dict = {'datetime': datetime, 'search': re.search}
     eval(code, globals_dict)
     run_rules = globals_dict['run_rules']
     return run_rules
@@ -89,6 +92,9 @@ def dueling_category_check(old_category, new_category):
 def analyze_rule(rule):
     """Return (new_category, None) or (None, test)."""
 
+    if isinstance(rule, datetime.date):
+        return eparse('t.date == %r' % (rule,))
+
     if isinstance(rule, str):
         if rule.startswith('/') and rule.endswith('/'):
             return eparse('search(%r, t.full_text)' % rule[1:-1])
@@ -108,9 +114,10 @@ def analyze_rule(rule):
                     day1 = int(rule[3:5])
                     month2 = int(rule[6:8])
                     day2 = int(rule[9:11])
-                    return eparse('date(t.date.year, %r, %r) <= t.date and '
-                                 't.date <= date(t.date.year, %r, %r)'
-                                 % (month1, day1, month2, day2))
+                    return eparse(
+                        'datetime.date(t.date.year, %r, %r) <= t.date and '
+                        't.date <= datetime.date(t.date.year, %r, %r)'
+                        % (month1, day1, month2, day2))
 
     if isinstance(rule, str):
         n = int(rule) if rule.isdigit() else None
@@ -124,8 +131,13 @@ def analyze_rule(rule):
 
     category = rule
 
+    if category is None:
+        raise ParseError(
+            'your YAML contains a ":" that is not followed by further text'
+            ' and which therefore cannot be parsed'.format(category))
+
     if ' - ' in category:
-        raise ValueError(
+        raise ParseError(
             'your category name looks suspiciously like malformed YAML'
             ' resulting from a forgotten colon: {}'.format(category))
 

@@ -67,7 +67,11 @@ def run_yaml_file(terminal, path, statement_paths,
     with open(path) as yaml_file:
         rule_tree = yaml.safe_load(yaml_file)
 
-    rule_tree_function = rules.compile_tree(rule_tree)
+    try:
+        rule_tree_function = rules.compile_tree(rule_tree)
+    except rules.ParseError as e:
+        sys.stderr.write('ERROR: {}\n'.format(e))
+        sys.exit(1)
 
     balances = []
     transactions = []
