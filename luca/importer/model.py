@@ -36,6 +36,7 @@ class Transaction(object):
         self.sort_key = 0
         self.category = None
 
+
     def set_full_text(self):
         self.full_text = '{}  {}  {:,}{}'.format(
             self.date.strftime('%d/%m'),

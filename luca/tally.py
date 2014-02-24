@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 """Tally expenses by category, driven by bank statements and YAML rules."""
 
+import csv
 import os
 import re
+import sys
+from StringIO import StringIO
 from collections import defaultdict
 from copy import copy
 from decimal import Decimal
@@ -56,7 +59,7 @@ def group_transactions_by_category(transactions):
 
 
 def run_yaml_file(terminal, path, statement_paths,
-                  show_balances, show_transactions):
+                  show_balances, show_data, show_transactions):
 
     t = terminal
     screen_width = int(os.environ.get('COLUMNS', '0')) or t.width or 80
@@ -120,8 +123,18 @@ def run_yaml_file(terminal, path, statement_paths,
         tr.category = category
 
     transactions.extend(new_splits)
-
     transactions = [tr for tr in transactions if tr.category is not None]
+
+    if show_data:
+        sio = StringIO()
+        w = csv.writer(sio)
+        w.writerow(['date', 'amount', 'category', 'account', 'description'])
+        for t in transactions:
+            w.writerow([
+                t.date, t.amount, t.category, t.account, t.description,
+                ])
+        return sio.getvalue().splitlines()
+
     catdict = group_transactions_by_category(transactions)
     sumdict = sum_categories(transactions)
     categories = set(catdict) | set(sumdict)
