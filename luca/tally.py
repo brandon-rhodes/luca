@@ -14,6 +14,7 @@ from operator import attrgetter
 from textwrap import wrap
 
 import yaml
+from .fix_PyYAML import Loader
 
 from luca.importer.dccu import importers
 from luca.kit import cents
@@ -65,7 +66,7 @@ def run_yaml_file(terminal, path, statement_paths,
     screen_width = int(os.environ.get('COLUMNS', '0')) or t.width or 80
 
     with open(path) as yaml_file:
-        rule_tree = yaml.safe_load(yaml_file)
+        rule_tree = yaml.load(yaml_file, Loader=Loader)
 
     try:
         rule_tree_function = rules.compile_tree(rule_tree)

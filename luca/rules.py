@@ -10,8 +10,9 @@ import re
 from ast import (AST, If, Name, Return, Str, Param, FunctionDef, Interactive,
                  arguments, fix_missing_locations, parse)
 
-_month_day_re = re.compile('\d\d/\d\d$')
-_month_day_to_month_day_re = re.compile('\d\d/\d\d-\d\d/\d\d$')
+_year_month_re = re.compile(u'\d\d\d\d-\d\d$')
+_month_day_re = re.compile(u'\d\d/\d\d$')
+_month_day_to_month_day_re = re.compile(u'\d\d/\d\d-\d\d/\d\d$')
 
 class ParseError(Exception):
     """Luca cannot understand your YAML."""
@@ -83,24 +84,39 @@ def analyze_tree(tree, category):
 
 def dueling_category_check(old_category, new_category):
     if old_category is not None:
-        raise ValueError(
+        raise ParseError(
             'dueling categories: within a rule that has already set the'
             ' category to {!r}, you are trying to switch it to {!r}'
             .format(old_category, new_category))
 
 
 def analyze_rule(rule):
-    """Return (new_category, None) or (None, test)."""
+    """Return an AST if `rule` looks like a test, else `rule` itself."""
 
     if isinstance(rule, datetime.date):
         return eparse('t.date == %r' % (rule,))
 
+    if isinstance(rule, tuple) and len(rule) == 2:
+        a, b = rule
+        if isinstance(a, datetime.date) and isinstance(b, datetime.date):
+            return eparse('t.date >= %r and t.date <= %r' % (a, b))
+
     if isinstance(rule, str):
-        if rule.startswith('/') and rule.endswith('/'):
+        rule = rule.decode('ascii')
+
+    if isinstance(rule, unicode):
+        if rule.startswith(u'/') and rule.endswith(u'/'):
             return eparse('search(%r, t.full_text)' % rule[1:-1])
-        elif rule.startswith('~/') and rule.endswith('/'):
+        elif rule.startswith(u'~/') and rule.endswith(u'/'):
             return eparse('not search(%r, t.full_text)' % rule[2:-1])
         else:
+            match = _year_month_re.match(rule)
+            if match:
+                year = int(rule[:4])
+                month = int(rule[5:])
+                return eparse('t.date.year == %r and t.date.month == %r'
+                             % (year, month))
+
             match = _month_day_re.match(rule)
             if match:
                 month = int(rule[:2])
@@ -119,7 +135,7 @@ def analyze_rule(rule):
                         't.date <= datetime.date(t.date.year, %r, %r)'
                         % (month1, day1, month2, day2))
 
-    if isinstance(rule, str):
+    if isinstance(rule, unicode):
         n = int(rule) if rule.isdigit() else None
     else:
         n = rule if isinstance(rule, int) else None
