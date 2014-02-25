@@ -48,6 +48,13 @@ def import_dccu_checking_pdf(text):
     lines = iter(text.splitlines())
     indent = 0
 
+    line = next(lines)
+    while line.count('/') != 4:
+        line = next(lines)
+
+    # '  ADDRESS    01/01/14    01/31/14'
+    year = 2000 + int(line[-2:])
+
     for line in lines:
         match = _checking_beginning_re.match(line)
         if match:
@@ -56,7 +63,7 @@ def import_dccu_checking_pdf(text):
             b = Balance()
             b.sort_key = start_of_day
             b.account = account
-            b.date = date(year=2013, month=int(group(1)), day=int(group(2)))
+            b.date = date(year=year, month=int(group(1)), day=int(group(2)))
             b.amount = Decimal(group(4))
             balances.append(b)
             indent = 0
@@ -66,7 +73,7 @@ def import_dccu_checking_pdf(text):
             group = match.group
             b.sort_key = end_of_day
             b.account = account
-            end_date = date(year=2013, month=int(group(1)), day=int(group(2)))
+            end_date = date(year=year, month=int(group(1)), day=int(group(2)))
             b.date = end_date
             b.amount = Decimal(group(3))
             balances.append(b)
@@ -77,7 +84,7 @@ def import_dccu_checking_pdf(text):
             group = match.group
             t = Transaction()
             t.account = account
-            t.date = date(year=2013, month=int(group(1)), day=int(group(2)))
+            t.date = date(year=year, month=int(group(1)), day=int(group(2)))
             t.description = [group(5).strip()]
             t.amount = Decimal(group(6))
             if group(7) == u'-':
