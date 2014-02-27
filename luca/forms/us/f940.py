@@ -1,5 +1,5 @@
 from decimal import Decimal
-from luca.kit import cents
+from luca.kit import cents, zero
 
 sevenk = Decimal('7000.00')
 eighthpercent = Decimal('.008')
@@ -7,6 +7,28 @@ sixthpercent = Decimal('.006')
 
 title = u"Form 940: Employer's Annual Federal Unemployment (FUTA) Tax Return"
 versions = u'2012',
+
+
+def defaults(form):
+    f = form
+    f.year = 2013
+    f.ein = ''
+    f.name = ''
+    f.address = ''
+    f.city = ''
+    f.state = ''
+    f.zip = ''
+    f.line1a = '  '
+    f.line3 = zero
+    f.line5 = zero
+    f.all_wages_excluded_from_state_unemployment_tax = False
+    f.line10 = zero
+    f.line11 = zero
+    f.line13 = zero
+    f.part6_no = 'X'
+    f.sign_name = ''
+    f.sign_title = ''
+    f.sign_phone = ''
 
 
 def compute(form):
