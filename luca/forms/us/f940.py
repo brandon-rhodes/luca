@@ -21,11 +21,20 @@ def defaults(form):
     f.line1a = '  '
     f.line3 = zero
     f.line4 = zero
+    f.line4a = False
+    f.line4b = False
+    f.line4c = False
+    f.line4d = False
+    f.line4e = False
     f.line5 = zero
     f.all_wages_excluded_from_state_unemployment_tax = False
     f.line10 = zero
     f.line11 = zero
     f.line13 = zero
+    f.line16a = zero
+    f.line16b = zero
+    f.line16c = zero
+    f.line16d = zero
     f.part6 = False
     f.sign_name = ''
     f.sign_title = ''
@@ -34,7 +43,7 @@ def defaults(form):
 
 def compute(form):
     f = form
-    f.line6 = f.line5
+    f.line6 = f.line4 + f.line5
     f.line7 = f.line3 - f.line6
     f.line8 = cents(f.line7 * Decimal('0.006'))
 
@@ -52,9 +61,9 @@ def compute(form):
         f.line14 = zero
         f.line15 = f.line13 - f.line12
 
-    if f.line12 > Decimal('500.00'):
+    if f.line12 > cents('500.00'):
         f.line17 = f.line16a + f.line16b + f.line16c + f.line16d
-        assert f.line12 == f.line17
+        # Make this a warning?  assert f.line12 == f.line17
     else:
         f.line16a = f.line16b = f.line16c = f.line16d = ''
         f.line17 = zero
@@ -81,6 +90,14 @@ def fill_out(form, pdf):
     pdf[9] = f.state
     pdf[10] = f.zip
     # TODO: Foreign address
+
+    pdf.pattern = 'topmostSubform[0].Page1[0].#subform[{}].Check_Box{}[0]'
+    pdf[5, 23] = '1' if f.line4a else 'Off'
+    pdf[5, 24] = '1' if f.line4b else 'Off'
+    pdf[6, 25] = '1' if f.line4c else 'Off'
+    pdf[6, 26] = '1' if f.line4d else 'Off'
+    pdf.pattern = 'topmostSubform[0].Page1[0].Check_Box{}[0]'
+    pdf[23] = '1' if f.line4e else 'Off'
 
     pdf.pattern = 'topmostSubform[0].Page1[0].Text{}[0]'
     pdf[16] = f.line1a[0]
