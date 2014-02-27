@@ -1,31 +1,32 @@
 from decimal import Decimal
-from luca.kit import cents, zero
+from luca.kit import cents, zero, zzstr
 
 sevenk = Decimal('7000.00')
 eighthpercent = Decimal('.008')
 sixthpercent = Decimal('.006')
 
 title = u"Form 940: Employer's Annual Federal Unemployment (FUTA) Tax Return"
-versions = u'2012',
+versions = u'2012', u'2013'
 
 
 def defaults(form):
     f = form
-    f.year = 2013
     f.ein = ''
     f.name = ''
+    f.trade_name = ''
     f.address = ''
     f.city = ''
     f.state = ''
     f.zip = ''
     f.line1a = '  '
     f.line3 = zero
+    f.line4 = zero
     f.line5 = zero
     f.all_wages_excluded_from_state_unemployment_tax = False
     f.line10 = zero
     f.line11 = zero
     f.line13 = zero
-    f.part6_no = 'X'
+    f.part6 = False
     f.sign_name = ''
     f.sign_title = ''
     f.sign_phone = ''
@@ -46,9 +47,9 @@ def compute(form):
 
     if f.line12 > f.line13:
         f.line14 = f.line12 - f.line13
-        f.line15 = ''
+        f.line15 = zero
     else:
-        f.line14 = ''
+        f.line14 = zero
         f.line15 = f.line13 - f.line12
 
     if f.line12 > Decimal('500.00'):
@@ -56,7 +57,7 @@ def compute(form):
         assert f.line12 == f.line17
     else:
         f.line16a = f.line16b = f.line16c = f.line16d = ''
-        f.line17 = ''
+        f.line17 = zero
 
 
 def fill_out(form, pdf):
@@ -65,6 +66,57 @@ def fill_out(form, pdf):
     pdf.load('us.f940--{}.pdf'.format(f.form_version))
     pdf.pages = 1, 2
 
+    if form.form_version == '2012':
+        return _old_2012_fill_out(f, pdf)
+
+    pdf.pattern = 'topmostSubform[0].Page1[0].EntityArea[0].Text3{}[0]'
+    for letter, digit in zip(' abcdefgh', f.ein.replace('-', '')):
+        pdf[letter.strip()] = digit
+
+    pdf.pattern = 'topmostSubform[0].Page1[0].EntityArea[0].Text{}[0]'
+    pdf[5] = f.name
+    pdf[6] = f.trade_name
+    pdf[7] = f.address
+    pdf[8] = f.city
+    pdf[9] = f.state
+    pdf[10] = f.zip
+    # TODO: Foreign address
+
+    pdf.pattern = 'topmostSubform[0].Page1[0].Text{}[0]'
+    pdf[16] = f.line1a[0]
+    pdf[17] = f.line1a[1]
+    # TODO: check marks on lines 1b and 2
+
+    pdf['21'], pdf['21a'] = zzstr(f.line3)
+    pdf['22'], pdf['22a'] = zzstr(f.line4)
+    # TODO: check boxes on line 4
+    pdf['28'], pdf['28a'] = zzstr(f.line5)
+    pdf['29'], pdf['29a'] = zzstr(f.line6)
+    pdf['500'], pdf['500a'] = zzstr(f.line7)
+    pdf['31'], pdf['31a'] = zzstr(f.line8)
+
+    pdf['32'], pdf['32a'] = zzstr(f.line9)
+    pdf['33'], pdf['33a'] = zzstr(f.line10)
+    pdf['34'], pdf['34a'] = zzstr(f.line11)
+
+    pdf['35'], pdf['35a'] = zzstr(f.line12)
+    pdf['36'], pdf['36a'] = zzstr(f.line13)
+    pdf['37'], pdf['37a'] = zzstr(f.line14)
+    pdf['38'], pdf['38a'] = zzstr(f.line15)
+
+    # TODO: Part 5
+    # TODO: Part 6 designee
+
+    pdf.pattern = 'topmostSubform[0].Page2[0].p2-cb1[{}]'
+    pdf[1] = 'Off' if f.part6 else '2'
+
+    pdf.pattern = 'topmostSubform[0].Page2[0].Text{}[0]'
+    pdf['59'] = f.sign_name
+    pdf['61'] = f.sign_title
+    pdf['64'] = f.sign_phone
+
+
+def _old_2012_fill_out(f, pdf):
     canvas = pdf.get_canvas(1)
     canvas.setFont('Helvetica', 12)
 
