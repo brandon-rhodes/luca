@@ -6,7 +6,7 @@ from luca.kit import validate, zero, zstr, zzstr
 
 
 title = u'Form 1120S: U.S. Income Tax Return for an S Corporation'
-versions = u'2012',
+versions = u'2012', u'2013'
 
 
 def defaults(form):
@@ -20,8 +20,9 @@ def defaults(form):
     f.street = ''
     f.city_state_zip = ''
 
-    f.lineA = f.lineB = f.lineE = ''
+    f.lineA = f.lineB = ''
     f.lineC = False
+    f.lineE = ''
     f.lineF = zero
     f.lineG = False
     f.lineH = '12345'
@@ -40,7 +41,7 @@ def defaults(form):
     f.B = Form()
     f.B.line1 = 'a'
     f.B.line2_activity = ''
-    f.B.line2_service = ''
+    f.B.line2_product_or_service = ''
     f.B.line3 = False
     # 4a and 4b tables go here if we ever implement them
     f.B.line4a = []
@@ -152,7 +153,7 @@ def fill_out(form, pdf):
             j = i + 1
         pdf[i], pdf[j] = zzstr(value)
 
-    pdf.pattern = 'p1-t{}[0]'
+    pdf.pattern = '.p1-t{}[0]'
 
     pdf[1] = f.beginning_date
     pdf[2] = f.ending_date
@@ -161,21 +162,14 @@ def fill_out(form, pdf):
     pdf[4] = f.name
     pdf[5] = f.street
     pdf[6] = f.city_state_zip
-
     pdf[7] = f.lineA
     pdf[8] = f.lineB
-    pdf['c1_01_0_[0]'] = 'Yes' if f.lineC else 'Off'
+
     pdf[9] = f.ein
     pdf[11] = f.lineE
     split(12, f.lineF)
 
-    pdf['c1_02_0_[0]'] = 'Yes' if f.lineG else 'Off'
-    pdf['c1_02_0_[1]'] = 'Off' if f.lineG else 'No'
-    for i in range(1, 5+1):
-        checked = str(i) in f.lineH
-        pdf['c1_0{}_0_[0]'.format(i + 2)] = 'Yes' if checked else 'Off'
     pdf[14] = str(f.lineI)
-
     split(15, f.line1a)
     split(17, f.line1b)
     split(19, f.line1c)
@@ -193,19 +187,30 @@ def fill_out(form, pdf):
     split(79, f.line26)
     split(81, f.line27_credited)
     split(83, f.line27)
-    pdf['p1_t85'] = f.signer_title  # note the underscore!
+
+    pdf.pattern = 'topmostSubform[0].Page1[0].{}'
+
+    pdf['ABC[0].c1_01_0_[0]'] = 'Yes' if f.lineC else 'Off'
+    pdf['c1_02_0_[0]'] = 'Yes' if f.lineG else 'Off'
+    pdf['c1_02_0_[1]'] = 'Off' if f.lineG else 'No'
+
+    for i in range(1, 5+1):
+        checked = str(i) in f.lineH
+        pdf['c1_0{}_0_[0]'.format(i + 2)] = 'Yes' if checked else 'Off'
+
+    pdf['p1_t85[0]'] = f.signer_title  # note the underscore!
     pdf['c1_9_0_[0]'] = 'Yes' if f.discuss else 'Off'
     pdf['c1_9_0_[1]'] = 'Off' if f.discuss else 'No'
 
-    pdf.pattern = 'p2-t{}[0]'
+    pdf.pattern = 'topmostSubform[0].Page2[0].{}'
 
     pdf['c2_01_0_[0]'] = 'A' if f.B.line1 == 'a' else 'Off'
     pdf['c2_01_0_[1]'] = 'B' if f.B.line1 == 'b' else 'Off'
     if f.B.line1 not in ('a', 'b'):
         pdf['c2_01_0_[2]'] = 'C'
-        pdf[19] = f.B.line1
-    pdf[20] = f.B.line2_activity
-    pdf[21] = f.B.line2_product
+        pdf['p2-t19[0]'] = f.B.line1
+    pdf['p2-t20'] = f.B.line2_activity
+    pdf['p2-t21'] = f.B.line2_product_or_service
     pdf['c2_04_0_[0]'] = 'Yes' if f.B.line3 else 'Off'
     pdf['c2_04_0_[1]'] = 'Off' if f.B.line3 else 'No'
     pdf['c2_06_0_[0]'] = 'Yes' if f.B.line4a else 'Off'
@@ -219,12 +224,12 @@ def fill_out(form, pdf):
     pdf['c2_15_0_[0]'] = 'Yes' if f.B.line6 else 'Off'
     pdf['c2_15_0_[1]'] = 'Off' if f.B.line6 else 'No'
     pdf['c2_11_0_[0]'] = 'Yes' if f.B.line7 else 'Off'
-    pdf[22] = zstr(f.B.line8)
-    pdf[23] = zstr(f.B.line9)
+    pdf['p2-t22[0]'] = zstr(f.B.line8)
+    pdf['p2-t23[0]'] = zstr(f.B.line9)
     pdf['c2_100_0_[0]'] = 'Yes' if f.B.line10 else 'Off'
     pdf['c2_101_0_[0]'] = 'Yes' if f.B.line11 else 'Off'
     pdf['c2_101_0_[1]'] = 'Off' if f.B.line11 else 'No'
-    pdf[22] = zstr(f.B.line11)
+    pdf['p2-t22[1]'] = zstr(f.B.line11)
     pdf['c2_13_0_[0]'] = 'Yes' if f.B.line12 else 'Off'
     pdf['c2_13_0_[1]'] = 'Off' if f.B.line12 else 'No'
     pdf['c2_80_0_[0]'] = 'Yes' if f.B.line13a else 'Off'
@@ -232,7 +237,7 @@ def fill_out(form, pdf):
     pdf['c2_07_0_[0]'] = 'Yes' if f.B.line13b else 'Off'
     pdf['c2_07_0_[1]'] = 'Off' if f.B.line13b else 'No'
 
-    pdf.pattern = 'p3-t{}[0]'
+    pdf.pattern = '.p3-t{}[0]'
 
     split(100, f.K.line1)
     split(102, f.K.line2)
@@ -287,9 +292,6 @@ def fill_out(form, pdf):
     split(182, f.K.line14k)
     split(184, f.K.line14l)
     split(186, f.K.line14m)
-    if f.K.line14l:
-        pdf['c3_01_0_[0]'] = 'A' if f.K.line14n_accounting == 'a' else 'Off'
-        pdf['c3_01_0_[1]'] = 'B' if f.K.line14n_accounting == 'b' else 'Off'
 
     split(188, f.K.line15a)
     split(190, f.K.line15b)
@@ -303,6 +305,12 @@ def fill_out(form, pdf):
     split(204, f.K.line16c) # penalties, fines; half of meals
     split(206, f.K.line16d)
     split(208, f.K.line16e)
+
+    pdf.pattern = '{}'
+
+    if f.K.line14l:
+        pdf['c3_01_0_[0]'] = 'A' if f.K.line14n_accounting == 'a' else 'Off'
+        pdf['c3_01_0_[1]'] = 'B' if f.K.line14n_accounting == 'b' else 'Off'
 
     pdf.pattern = 'p4-t{}[0]'
 
