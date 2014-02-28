@@ -121,11 +121,15 @@ def fill_out(form, pdf):
     pdf['37'], pdf['37a'] = zzstr(f.line14)
     pdf['38'], pdf['38a'] = zzstr(f.line15)
 
+    pdf.pattern = 'topmostSubform[0].Page2[0].{}'
+
+    pdf['Text41[0]'] = f.name
+    pdf['Text42[0]'] = f.ein
+
     # TODO: Part 5
     # TODO: Part 6 designee
 
-    pdf.pattern = 'topmostSubform[0].Page2[0].p2-cb1[{}]'
-    pdf[1] = 'Off' if f.part6 else '2'
+    pdf['p2-cb1[1]'] = 'Off' if f.part6 else '2'
 
     pdf.pattern = 'topmostSubform[0].Page2[0].Text{}[0]'
     pdf['59'] = f.sign_name
