@@ -8,6 +8,13 @@ from luca.kit import validate, zero, zstr, zzstr
 title = u'Form 1120S: U.S. Income Tax Return for an S Corporation'
 versions = u'2012', u'2013'
 
+# Note that only a bare minimum of fields are supported for 2010: those
+# I needed for a quick filing of an amended return.  If you also need to
+# make emergency use of the form for that year, comment out the
+# following line:
+#
+versions = versions + (u'2010',)
+
 
 def defaults(form):
     f = form
@@ -241,116 +248,139 @@ def fill_out(form, pdf):
     pdf['c2_07_0_[0]'] = 'Yes' if f.B.line13b else 'Off'
     pdf['c2_07_0_[1]'] = 'Off' if f.B.line13b else 'No'
 
-    pdf.pattern = '.p3-t{}[0]'
+    if f.form_version == u'2010':
+        pdf.pattern = '.p2-t{}[0]'
 
-    split(100, f.K.line1)
-    split(102, f.K.line2)
+        split(24, f.K.line1)
+        split(34, f.K.line4)
+        split(55, f.K.line11)
+        split(125, f.K.line16c)
+        split(127, f.K.line16d)
+        split(131, f.K.line17a)
+        split(137, f.K.line18)
 
-    split(104, f.K.line3a)
-    split(106, f.K.line3b)
+        pdf.pattern = '.p4-t{}[0]'
 
-    split(108, f.K.line3c)
-    split(110, f.K.line4)
-    split(112, f.K.line5a)
+        pdf[87] = zstr(f.M2.line1a)
+        pdf[90] = zstr(f.M2.line2a)
+        pdf[91] = zstr(f.M2.line3a)
+        pdf[93] = zstr(f.M2.line4a)
+        pdf[94] = zstr(f.M2.line5a)
+        pdf[96] = zstr(f.M2.line6a)
+        pdf[99] = zstr(f.M2.line7a)
+        pdf[102] = zstr(f.M2.line8a)
 
-    split(114, f.K.line5b)
+    else:
+        pdf.pattern = '.p3-t{}[0]'
 
-    split(116, f.K.line6)
-    split(118, f.K.line7)
-    split(120, f.K.line8a)
+        split(100, f.K.line1)
+        split(102, f.K.line2)
 
-    split(122, f.K.line8b)
-    split(124, f.K.line8c)
+        split(104, f.K.line3a)
+        split(106, f.K.line3b)
 
-    split(126, f.K.line9)
-    pdf[128] = zstr(f.K.line10_type)
-    split(129, f.K.line10)
-    split(131, f.K.line11)
-    split(133, f.K.line12a)
-    split(135, f.K.line12b)
-    pdf[137] = zstr(f.K.line12c_type)
-    split(138, f.K.line12c)
-    pdf[140] = zstr(f.K.line12d_type)
-    split(141, f.K.line12d, j=145)
-    split(146, f.K.line13a)
-    split(148, f.K.line13b)
-    split(150, f.K.line13c)
-    pdf[152] = zstr(f.K.line13d_type)
-    split(153, f.K.line13d)
-    pdf[155] = zstr(f.K.line13e_type)
-    split(156, f.K.line13e)
-    split(158, f.K.line13f)
-    pdf[160] = zstr(f.K.line13g_type)
-    split(161, f.K.line13g)
+        split(108, f.K.line3c)
+        split(110, f.K.line4)
+        split(112, f.K.line5a)
 
-    pdf[163] = zstr(f.K.line14a)
-    split(164, f.K.line14b)
-    split(166, f.K.line14c)
-    split(168, f.K.line14d)
-    split(170, f.K.line14e)
-    split(172, f.K.line14f)
-    split(174, f.K.line14g)
-    split(176, f.K.line14h)
-    split(178, f.K.line14i)
-    split(180, f.K.line14j)
-    split(182, f.K.line14k)
-    split(184, f.K.line14l)
-    split(186, f.K.line14m)
+        split(114, f.K.line5b)
 
-    split(188, f.K.line15a)
-    split(190, f.K.line15b)
-    split(192, f.K.line15c)
-    split(194, f.K.line15d)
-    split(196, f.K.line15e)
-    split(198, f.K.line15f)
+        split(116, f.K.line6)
+        split(118, f.K.line7)
+        split(120, f.K.line8a)
 
-    split(200, f.K.line16a)
-    split(202, f.K.line16b)
-    split(204, f.K.line16c) # penalties, fines; half of meals
-    split(206, f.K.line16d)
-    split(208, f.K.line16e)
+        split(122, f.K.line8b)
+        split(124, f.K.line8c)
 
-    pdf.pattern = '{}'
+        split(126, f.K.line9)
+        pdf[128] = zstr(f.K.line10_type)
+        split(129, f.K.line10)
+        split(131, f.K.line11)
+        split(133, f.K.line12a)
+        split(135, f.K.line12b)
+        pdf[137] = zstr(f.K.line12c_type)
+        split(138, f.K.line12c)
+        pdf[140] = zstr(f.K.line12d_type)
+        split(141, f.K.line12d, j=145)
+        split(146, f.K.line13a)
+        split(148, f.K.line13b)
+        split(150, f.K.line13c)
+        pdf[152] = zstr(f.K.line13d_type)
+        split(153, f.K.line13d)
+        pdf[155] = zstr(f.K.line13e_type)
+        split(156, f.K.line13e)
+        split(158, f.K.line13f)
+        pdf[160] = zstr(f.K.line13g_type)
+        split(161, f.K.line13g)
 
-    if f.K.line14l:
-        pdf['c3_01_0_[0]'] = 'A' if f.K.line14n_accounting == 'a' else 'Off'
-        pdf['c3_01_0_[1]'] = 'B' if f.K.line14n_accounting == 'b' else 'Off'
+        pdf[163] = zstr(f.K.line14a)
+        split(164, f.K.line14b)
+        split(166, f.K.line14c)
+        split(168, f.K.line14d)
+        split(170, f.K.line14e)
+        split(172, f.K.line14f)
+        split(174, f.K.line14g)
+        split(176, f.K.line14h)
+        split(178, f.K.line14i)
+        split(180, f.K.line14j)
+        split(182, f.K.line14k)
+        split(184, f.K.line14l)
+        split(186, f.K.line14m)
 
-    pdf.pattern = 'p4-t{}[0]'
+        split(188, f.K.line15a)
+        split(190, f.K.line15b)
+        split(192, f.K.line15c)
+        split(194, f.K.line15d)
+        split(196, f.K.line15e)
+        split(198, f.K.line15f)
 
-    split(100, f.K.line17a)
-    split(102, f.K.line17b)
-    split(104, f.K.line17c)
+        split(200, f.K.line16a)
+        split(202, f.K.line16b)
+        split(204, f.K.line16c) # penalties, fines; half of meals
+        split(206, f.K.line16d)
+        split(208, f.K.line16e)
 
-    split(106, f.K.line18)
+        pdf.pattern = '{}'
 
-    # TODO: Schedule L
-    # TODO: Schedule M-1
+        if f.K.line14l:
+            pdf['c3_01_0_[0]'] = 'A' if f.K.line14n_accounting == 'a' else 'Off'
+            pdf['c3_01_0_[1]'] = 'B' if f.K.line14n_accounting == 'b' else 'Off'
 
-    pdf.pattern = 'p5-t{:03}[0]'
+        pdf.pattern = 'p4-t{}[0]'
 
-    pdf[116] = zstr(f.M2.line1a)
-    pdf[117] = zstr(f.M2.line1b)
-    pdf[118] = zstr(f.M2.line1c)
+        split(100, f.K.line17a)
+        split(102, f.K.line17b)
+        split(104, f.K.line17c)
 
-    pdf[119] = zstr(f.M2.line2a)
+        split(106, f.K.line18)
 
-    pdf[120] = zstr(f.M2.line3a)
-    pdf[121] = zstr(f.M2.line3b)
+        # TODO: Schedule L
+        # TODO: Schedule M-1
 
-    pdf[122] = zstr(f.M2.line4a)
+        pdf.pattern = 'p5-t{:03}[0]'
 
-    pdf[123] = zstr(f.M2.line5a)
-    pdf[124] = zstr(f.M2.line5b)
+        pdf[116] = zstr(f.M2.line1a)
+        pdf[117] = zstr(f.M2.line1b)
+        pdf[118] = zstr(f.M2.line1c)
 
-    pdf[125] = zstr(f.M2.line6a)
-    pdf[126] = zstr(f.M2.line6b)
-    pdf[127] = zstr(f.M2.line6c)
+        pdf[119] = zstr(f.M2.line2a)
 
-    pdf[128] = zstr(f.M2.line7a)
-    pdf[129] = zstr(f.M2.line7b)
-    pdf[130] = zstr(f.M2.line7c)
+        pdf[120] = zstr(f.M2.line3a)
+        pdf[121] = zstr(f.M2.line3b)
 
-    pdf[131] = zstr(f.M2.line8a)
-    pdf[132] = zstr(f.M2.line8b)
-    pdf[133] = zstr(f.M2.line8c)
+        pdf[122] = zstr(f.M2.line4a)
+
+        pdf[123] = zstr(f.M2.line5a)
+        pdf[124] = zstr(f.M2.line5b)
+
+        pdf[125] = zstr(f.M2.line6a)
+        pdf[126] = zstr(f.M2.line6b)
+        pdf[127] = zstr(f.M2.line6c)
+
+        pdf[128] = zstr(f.M2.line7a)
+        pdf[129] = zstr(f.M2.line7b)
+        pdf[130] = zstr(f.M2.line7c)
+
+        pdf[131] = zstr(f.M2.line8a)
+        pdf[132] = zstr(f.M2.line8b)
+        pdf[133] = zstr(f.M2.line8c)
