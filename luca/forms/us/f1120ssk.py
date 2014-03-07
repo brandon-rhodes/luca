@@ -63,6 +63,8 @@ def fill_out(form, pdf):
 
     pdf[27] = zstr(f.line11)
 
+    pdf.pattern = '{}'
+
     def write_lines(line_number, n):
         lines = f['line', line_number]
         for line in lines:
