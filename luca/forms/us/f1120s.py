@@ -232,8 +232,12 @@ def fill_out(form, pdf):
     pdf['p2-t22[1]'] = zstr(f.B.line11)
     pdf['c2_13_0_[0]'] = 'Yes' if f.B.line12 else 'Off'
     pdf['c2_13_0_[1]'] = 'Off' if f.B.line12 else 'No'
-    pdf['c2_80_0_[0]'] = 'Yes' if f.B.line13a else 'Off'
-    pdf['c2_80_0_[1]'] = 'Off' if f.B.line13a else 'No'
+    if f.form_version == u'2012':
+        pdf['c2_80_0_[0]'] = 'Yes' if f.B.line13a else 'Off'
+        pdf['c2_80_0_[1]'] = 'Off' if f.B.line13a else 'No'
+    else:
+        pdf['c2_13a_0_[0]'] = 'Yes' if f.B.line13a else 'Off'
+        pdf['c2_13a_0_[1]'] = 'Off' if f.B.line13a else 'No'
     pdf['c2_07_0_[0]'] = 'Yes' if f.B.line13b else 'Off'
     pdf['c2_07_0_[1]'] = 'Off' if f.B.line13b else 'No'
 
