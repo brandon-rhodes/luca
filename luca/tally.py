@@ -116,7 +116,8 @@ def run_yaml_file(terminal, path, statement_paths,
             pieces = [piece.strip() for piece in category[6:].split(';')]
             for piece in pieces[:-1]:
                 tr2 = copy(tr)
-                tr2.category, amount_str = piece.split()
+                #tr2.category, amount_str = piece.split()
+                tr2.category, amount_str = piece.rsplit(None, 1)
                 if amount_str.endswith('%'):
                     percent = Decimal(amount_str[:-1])
                     tr2.amount = cents(tr.amount * percent / 100)
