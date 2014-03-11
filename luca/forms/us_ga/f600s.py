@@ -78,6 +78,12 @@ def defaults(form):
     s9.line4 = Decimal('1.00')
     s9.line6 = zero
 
+    # Fields added in 2013:
+
+    f.email = u''
+    f.email_authorization = False
+    f.title = u''
+
 def compute(form):
     f = form
     d = dollars
@@ -114,6 +120,60 @@ def compute(form):
     s9.line7 = s9.line5 + d(s9.line6)
 
 def fill_out(form, pdf):
+    f = form
+    pdf.load('us_ga.f600s--{}.pdf'.format(f.form_version))
+    if f.form_version == u'2012':
+        return fill_out_2012(form, pdf)
+
+    pdf['FEIN'] = f.ein
+    pdf['Title'] = pdf['Title2'] = f.name
+
+    pdf['begin01'] = f.income_beginning
+    pdf['end01'] = f.income_ending
+    pdf['begin02'] = f.net_worth_beginning
+    pdf['end02'] = f.net_worth_ending
+    # TODO: Boolean type-of-return fields
+    pdf['Date1'] = f.incorporation_date
+    pdf['WHLD.0'] = f.withholding_number
+    pdf['WHLD.1'] = f.nonresident_withholding_number
+    pdf['Address1'] = f.address.upper()
+    pdf['State'] = f.incorporation_state
+    pdf['Sales'] = f.sales_tax_number
+    pdf['City'] = f.city.upper()
+    pdf['State2'] = f.state
+    pdf['Zip'] = f.zip
+    pdf['Date2'] = f.date_admitted
+    pdf['NAICS'] = f.naics_code
+    pdf['Location.0'] = f.books_city.upper()
+    pdf['Location.1'] = f.books_state
+    pdf['Telephone'] = f.books_phone
+    pdf['Business'] = f.kind_of_business.upper()
+    pdf['#Non'] = f.total_shareholders  # yes, they got these two backwards
+    pdf['#Share'] = f.nonresident_shareholders
+    pdf['Federal Ordinary Income'] = str(dollars(f.federal_ordinary_income))
+    pdf['email'] = f.email
+    pdf['Email Authorization'] = 'Yes' if f.email_authorization else 'Off'
+    pdf['Title5'] = f.title
+
+    replacements = {'Sch4-1b': 'SCh4-1b', 'Sch4-9b': 'Sch-4-9b'}
+
+    for sname in 's1 s3 s4 s8 s9'.split():
+        s = getattr(form, sname)
+        schno = sname[1:]
+        for attr, value in s.__dict__.items():
+            if not attr.startswith('line'):
+                continue
+            lineno = attr[4:]
+            fieldname = 'Sch{}-{}'.format(schno, lineno)
+            fieldname = replacements.get(fieldname, fieldname)
+            if isinstance(value, Decimal):
+                value = str(dollars(value))
+            pdf[fieldname] = value
+
+    # pdf.pattern = '{}'
+    # pdf['CREDITCODE'] = u''  # clean up pre-filled values on last page
+
+def fill_out_2012(form, pdf):
     f = form
     pdf.load('us_ga.f600s--{}.pdf'.format(f.form_version))
     pdf.pattern = None
