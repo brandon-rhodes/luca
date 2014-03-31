@@ -1,7 +1,8 @@
 from luca.kit import Decimal, dsum, zero, zzstr
+from luca.taxes import TaxSchedule
 
 title = u'Form 1040: U.S. Individual Income Tax Return'
-versions = u'2012',
+versions = u'2012', u'2013'
 
 filing_statuses = 'S MJ MS HoH QW'.split()
 
@@ -97,7 +98,11 @@ def compute(form):
     f.line41 = f.line38 - f.line40
     f.line42 = f.line6d * Decimal('3800.00')
     f.line43 = max(f.line41 - f.line42, zero)
-    f.line44 = tax_from_tax_table(f.line43, f.filing_status)
+    if form.form_version == u'2012':
+        f.line44 = tax_from_tax_table(f.line43, f.filing_status)
+    else:
+        schedule = schedules[form.form_version][f.filing_status]
+        f.line44 = schedule.compute_tax_on(f.line43)
     f.line46 = f.line44 + f.line45
     f.line54 = dsum(getattr(f, line) for line in credits)
     f.line55 = f.line46 - f.line54
@@ -168,30 +173,40 @@ def fill_out(form, pdf):
                  + other_taxes + lines('61') + payments + lines('72 73 74a')
                  + lines(range(75, 78))):
         pdf[n], pdf[n+1] = zzstr(getattr(f, line, zero)) # todo: remove default
-        if n == 1:
-            n = 4
-        elif n == 20:
-            n = 24
-        elif n == 32:
-            n = 37
-        elif n == 45 and pdf.pattern == 'p2-t{}[0]':
-            pdf.pattern = 'p2-t{}[1]'
-        elif n == 45 and pdf.pattern == 'p2-t{}[1]':
-            pdf.pattern = 'p2-t{}[2]'
-        elif n == 45 and pdf.pattern == 'p2-t{}[2]':
-            pdf.pattern = 'p2-t{}[0]'
-            n = 47
-        elif n == 49:
-            n = 53
-        elif n == 69 and pdf.pattern == 'p2-t{}[0]':
-            pdf.pattern = 'p2-t{}[1]'
-        elif n == 69 and pdf.pattern == 'p2-t{}[1]':
-            pdf.pattern = 'p2-t{}[0]'
-            n = 71
-        elif n == 77:
-            n = 105
-        else:
-            n += 2
+        if f.form_version == u'2013':
+            if n == 1:
+                n = 4
+            elif n == 60:
+                n = 65
+            elif n == 65:  # TODO: more fields are wrong here; look for [1]'s
+                n = 62
+            else:
+                n += 2
+        elif f.form_version == u'2012':
+            if n == 1:
+                n = 4
+            if n == 20:
+                n = 24
+            elif n == 32:
+                n = 37
+            elif n == 45 and pdf.pattern == 'p2-t{}[0]':
+                pdf.pattern = 'p2-t{}[1]'
+            elif n == 45 and pdf.pattern == 'p2-t{}[1]':
+                pdf.pattern = 'p2-t{}[2]'
+            elif n == 45 and pdf.pattern == 'p2-t{}[2]':
+                pdf.pattern = 'p2-t{}[0]'
+                n = 47
+            elif n == 49:
+                n = 53
+            elif n == 69 and pdf.pattern == 'p2-t{}[0]':
+                pdf.pattern = 'p2-t{}[1]'
+            elif n == 69 and pdf.pattern == 'p2-t{}[1]':
+                pdf.pattern = 'p2-t{}[0]'
+                n = 71
+            elif n == 77:
+                n = 105
+            else:
+                n += 2
 
 
 def tax_from_tax_table(taxable_income, filing_status):
@@ -205,4 +220,45 @@ def tax_from_tax_table(taxable_income, filing_status):
             if minimum <= taxable_income < maximum:
                 return Decimal(row[filing_status] + '.00')
         else:
-            return Decimal('1.23')
+            raise ValueError('not found in tax table')
+
+schedules = {
+    u'2013': {
+        u'S': TaxSchedule(one_allowance=3900, brackets = [
+            (0, 10),
+            (8925, 15),
+            (36250, 25),
+            (87850, 28),
+            (183250, 33),
+            (398350, 35),
+            (400000, '39.6'),
+        ]),
+        u'MJ': TaxSchedule(one_allowance=3900, brackets = [
+            (0, 10),
+            (17850, 15),
+            (72500, 25),
+            (146400, 28),
+            (223050, 33),
+            (398350, 35),
+            (450000, '39.6'),
+        ]),
+        u'MS': TaxSchedule(one_allowance=3900, brackets = [
+            (0, 10),
+            (8925, 15),
+            (36250, 25),
+            (73200, 28),
+            (111525, 33),
+            (199175, 35),
+            (225000, '39.6'),
+        ]),
+        u'HH': TaxSchedule(one_allowance=3900, brackets = [
+            (10, 0),
+            (12750, 15),
+            (48600, 25),
+            (125450, 28),
+            (203150, 33),
+            (398350, 35),
+            (425000, '39.6'),
+        ]),
+    },
+}
