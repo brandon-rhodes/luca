@@ -5,6 +5,10 @@ title = u'Form 1040: U.S. Individual Income Tax Return'
 versions = u'2012', u'2013'
 
 filing_statuses = 'S MJ MS HoH QW'.split()
+exemptions = {
+    u'2012': Decimal('3800.00'),
+    u'2013': Decimal('3900.00'),
+    }
 
 def lines(seq):
     if isinstance(seq, str):
@@ -79,10 +83,16 @@ def check(form, forms, eq):
     if f1040se:
         eq('line17', f1040se.line41)
 
-    f1040sse = forms.get('us.f1040sse', nothing)[0]
-    if f1040sse:
-        eq('line56', f1040sse.line5)
-        eq('line27', f1040sse.line6)
+    line56 = zero
+    line27 = zero
+    for f in forms.get('us.f1040sse', ()):
+        line56 += f.line5
+        line27 += f.line6
+    for f in forms.get('us.f1040sse_long', ()):
+        line56 += f.line12
+        line27 += f.line13
+    eq('line56', line56)
+    eq('line27', line27)
 
 
 def compute(form):
@@ -96,7 +106,8 @@ def compute(form):
     f.line38 = f.line37
     # TODO: standard deduction
     f.line41 = f.line38 - f.line40
-    f.line42 = f.line6d * Decimal('3800.00')
+    exemption = exemptions[f.form_version]
+    f.line42 = f.line6d * exemption
     f.line43 = max(f.line41 - f.line42, zero)
     if form.form_version == u'2012':
         f.line44 = tax_from_tax_table(f.line43, f.filing_status)
@@ -158,7 +169,10 @@ def fill_out(form, pdf):
         if n == 82:
             n = 85
         elif n == 103:
-            n = 108
+            if f.form_version <= u'2012':
+                n = 108
+            else:
+                n = 106
         else:
             n += 2
 

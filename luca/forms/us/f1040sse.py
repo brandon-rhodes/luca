@@ -1,7 +1,7 @@
 from luca.kit import Decimal, cents, zero, zzstr
 
 title = u'Form 1040 Schedule SE: Self-Employment Tax'
-versions = '2012',
+versions = u'2012', u'2013'
 
 # TODO: someday also support Section B (Long Schedule SE)
 
@@ -25,6 +25,11 @@ def compute(form):
     f = form
     f.line3 = f.line1a + f.line1b + f.line2
     f.line4 = cents(Decimal('.9235') * f.line3)
+
+    if f.line4 < Decimal('400.00'):
+        f.line5 = zero
+        f.line6 = zero
+        return
 
     if f.line4 <= Decimal('110100.00'):
         f.line5 = Decimal('.133') * f.line4

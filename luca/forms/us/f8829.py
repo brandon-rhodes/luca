@@ -1,7 +1,7 @@
 from luca.kit import Decimal, cents, zero, zstr, zzstr, ROUND_HALF_UP
 
 title = u'Form 8829: Expenses for Business Use of Your Home'
-versions = u'2012',
+versions = u'2012', u'2013'
 hundred = Decimal('100')
 
 def defaults(form):

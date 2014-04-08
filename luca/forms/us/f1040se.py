@@ -2,7 +2,7 @@ from luca.forms.formlib import Form
 from luca.kit import cents, zzstr
 
 title = u"Form 1040 Schedule E: Supplemental Income and Loss"
-versions = '2012',
+versions = u'2012', u'2013'
 zero = cents(0)
 
 def defaults(form):
@@ -115,7 +115,10 @@ def fill_out(form, pdf):
             for s in subforms
             )
 
-    pdf.pattern = 'Pg1Table2[0].Line{}[0]'
+    if f.form_version <= u'2012':
+        pdf.pattern = 'Pg1Table2[0].Line{}[0]'
+    else:
+        pdf.pattern = 'Pg1Table2[0].#subform[1].Line{}[1]'
 
     for j in range(3, 5):
         attr = 'line{}'.format(j)
@@ -150,7 +153,11 @@ def fill_out(form, pdf):
         for s in subforms
         )
 
-    pdf['Line28TableF-J[0]'] = concat(
+    if f.form_version <= u'2012':
+        key = 'Line28TableF-J[0]'
+    else:
+        key = 'Pt2PassiveNonPassive[0]'
+    pdf[key] = concat(
         concat([zzstr(s.f), zzstr(s.g), zzstr(s.h), zzstr(s.i), zzstr(s.j)])
         for s in subforms
         )

@@ -1,7 +1,7 @@
 from luca.kit import dsum, zero, zzstr
 
 title = u'Form 1040 Schedule C: Profit or Loss From Business'
-versions = u'2012',
+versions = u'2012', u'2013'
 
 def defaults(form):
     f = form

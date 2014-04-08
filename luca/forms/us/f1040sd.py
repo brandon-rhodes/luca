@@ -2,7 +2,7 @@ from luca.forms.formlib import Form
 from luca.kit import Decimal, dsum, zero, zstr
 
 title = u'Form 1040 Schedule D: Capital Gains and Losses'
-versions = u'2011', u'2012'
+versions = u'2011', u'2012', u'2013'
 
 def defaults(form):
     f = form
@@ -67,7 +67,7 @@ def compute(form):
 
     cw = f.carryover_worksheet
     cw.line1 = cw.previous_f1040_line41
-    cw.line2 = max(zero, - cw.previous_f1040sd_line21)
+    cw.line2 = max(zero, cw.previous_f1040sd_line21)
     cw.line3 = max(zero, cw.line1 + cw.line2)
     cw.line4 = min(cw.line2, cw.line3)
     cw.line5 = max(zero, - cw.previous_f1040sd_line7)

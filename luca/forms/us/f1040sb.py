@@ -1,7 +1,7 @@
 from luca.kit import cents, zzstr
 
 title = u'Form 1040 Schedule B: Interest and Ordinary Dividends'
-versions = '2012',
+versions = u'2012', u'2013'
 zero = cents(0)
 
 def defaults(form):
