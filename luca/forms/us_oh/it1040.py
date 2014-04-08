@@ -209,6 +209,8 @@ def fill_out(form, pdf):
     pdf.load('us_oh.it1040--{}.pdf'.format(f.form_version))
     pdf.pages = [1, 2]
 
+    pdf.pattern = None
+
     if f.form_version == u'2012':
         return fill_out_2012(form, pdf)
 
@@ -222,8 +224,6 @@ def fill_out(form, pdf):
             ], 10):
         pdf[n] = field
 
-    for n in range(21, 25 + 1):
-        pdf[n] = ''
     pdf[26] = f.email
 
     def yes(value1, value2):
@@ -241,8 +241,6 @@ def fill_out(form, pdf):
     pdf[31] = (1 if f.filing_status == 'single' else
                2 if f.filing_status == 'jointly' else
                3)
-    for n in range(32, 34 + 1):
-        pdf[n] = ''
 
     pdf[36] = 1 if f.political_party_fund else 2
     pdf[37] = 1 if f.spouse_political_party_fund else 2
@@ -267,10 +265,6 @@ def fill_out(form, pdf):
 
     pdf[50] = f.line10a
     pdf[51] = f.line11_percent
-
-    pdf['mber'] = pdf[81] = pdf[83] = ''  # date and preparer fields
-    for n in range(68, 71 + 2):
-        pdf[n] = ''  # fund donation fields
 
 def fill_out_2012(form, pdf):
     f = form

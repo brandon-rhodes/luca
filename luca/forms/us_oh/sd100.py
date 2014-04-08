@@ -1,7 +1,7 @@
 from luca.kit import Decimal, dollars, zero
 
 title = u'Ohio Form SD-100: Individual Income Tax Return'
-versions = '2012',
+versions = u'2012', u'2013'
 
 deductions = ('35a 35b 36 37a 37b 38a 38b 38c 39 '
               '40 41a 41b 42 43a 43b 43c 44 45').split()
@@ -35,6 +35,20 @@ def defaults(form):
     f.filing_status = 'single'
     f.tax_type = 'traditional'
 
+    if f.form_version == u'2012':
+        return defaults_2012(form)
+
+    f.line1 = zero
+    f.line2_rate = zero
+    f.line3 = zero
+    f.line5 = zero
+    f.line7 = zero
+    f.line8 = zero
+    f.line11 = zero
+    f.line14 = zero
+
+def defaults_2012(form):
+    f = form
     f.line1 = zero
     f.line2 = zero
     f.line4_rate = zero
@@ -50,6 +64,29 @@ def defaults(form):
     f.line22 = ''
 
 def compute(form):
+    f = form
+
+    if f.form_version == u'2012':
+        return compute_2012(form)
+
+    f.line2 = dollars(f.line1 * f.line2_rate / 100)
+    f.line4 = f.line2 - f.line3
+    f.line6 = f.line4 + f.line5
+    f.line9 = f.line7 + f.line8
+    if f.line9 > f.line6:
+        f.line10 = f.line9 - f.line6
+        f.line12 = f.line10 - f.line11
+        f.line13 = zero
+        f.line15 = zero
+        f.line16 = f.line12 - f.line14
+    else:
+        f.line10 = zero
+        f.line12 = zero
+        f.line13 = f.line6 - f.line9
+        f.line15 = f.line13 + f.line14
+        f.line16 = zero
+
+def compute_2012(form):
     f = form
     d = dollars
     f.line3 = d(f.line1) - d(f.line2)
@@ -76,6 +113,57 @@ def fill_out(form, pdf):
     f = form
     pdf.load('us_oh.sd100--{}.pdf'.format(f.form_version))
     pdf.pages = 1, 2
+
+    if f.form_version == u'2012':
+        return fill_out_2012(form, pdf)
+
+    pdf.pattern = None
+
+    pdf[1], pdf[2], pdf[3] = f.ssn.split('-')
+    pdf[5], pdf[6], pdf[7] = f.spouse_ssn.split('-')
+    pdf[9] = f.school_district_number
+
+    for n, value in enumerate([
+            f.first_name, f.middle_initial, f.last_name,
+            f.spouse_first_name, f.spouse_middle_initial, f.spouse_last_name,
+            f.address, f.city, f.state, f.zip, f.county.upper()[:4],
+            ], 10):
+        pdf[n] = value
+
+    pdf[26] = (1 if f.residency == 'full-year' else
+               2 if f.residency == 'part-year' else
+               3)
+    pdf[29] = (1 if f.spouse_residency == 'full-year' else
+               2 if f.spouse_residency == 'part-year' else
+               3)
+
+    pdf[32] = (1 if f.filing_status == 'single' else
+               2 if f.filing_status == 'jointly' else
+               3)
+    pdf[36] = (1 if f.tax_type == 'traditional' else 2)
+
+    pdf[38] = f.line2_rate
+
+    starts = {1: 37, 2: 39, 7: 46}
+    lines = [attr for attr in dir(f)
+             if attr.startswith('line') and attr[-1].isdigit()]
+    lines.sort(key=lambda attr: int(attr[4:]))
+
+    for attr in lines:
+        n = int(attr[4:])
+        if n in starts:
+            m = starts[n]
+        else:
+            m += 1
+        value = getattr(f, attr)
+        if isinstance(value, Decimal):
+            value = str(value).replace('.00', '')
+        pdf[m] = value
+
+    pdf[45] = str(f.line6).replace('.00', '')
+
+def fill_out_2012(form, pdf):
+    f = form
 
     # Fields on both page 1 and page 2
 
