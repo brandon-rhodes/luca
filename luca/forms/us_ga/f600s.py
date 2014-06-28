@@ -1,4 +1,4 @@
-from decimal import Decimal
+from decimal import Decimal, localcontext
 from luca.forms.formlib import Form
 from luca.kit import dollars, zero
 
@@ -61,6 +61,11 @@ def defaults(form):
     s4.line3c = zero  # TODO: implement Schedule 10?
     s4.line4c = zero
 
+    if f.form_version >= u'2013':
+        f.s7 = s7 = Form()
+        s7.line1a = dollars(100)
+        s7.line1b = dollars(100)
+
     s8.line1 = zero
     s8.line2 = zero
     s8.line3a = zero
@@ -106,6 +111,12 @@ def compute(form):
     s4.line10c = s4.line5c # + penalties
     # TODO: refund
 
+    if f.form_version >= u'2013':
+        s7 = f.s7
+        with localcontext() as ctx:
+            ctx.prec = 6
+            s7.line2c = s7.line1a / s7.line1b
+
     s8.line3c = d(s8.line3a) - d(s8.line3b)
     s8.line7 = sum(d(s8['line', n]) for n
                    in '1 2 3c 4a 4b 4c 4d 4e 4f 5 6'.split())
@@ -116,7 +127,7 @@ def compute(form):
 
     s9.line1 = s8.line11
     s9.line3 = s9.line1 - d(s9.line2)
-    s9.line5 = d(s9.line3 * s9.line4)
+    s9.line5 = d(s9.line3 * s7.line2c)
     s9.line7 = s9.line5 + d(s9.line6)
 
 def fill_out(form, pdf):
@@ -157,7 +168,7 @@ def fill_out(form, pdf):
 
     replacements = {'Sch4-1b': 'SCh4-1b', 'Sch4-9b': 'Sch-4-9b'}
 
-    for sname in 's1 s3 s4 s8 s9'.split():
+    for sname in 's1 s3 s4 s7 s8 s9'.split():
         s = getattr(form, sname)
         schno = sname[1:]
         for attr, value in s.__dict__.items():
@@ -166,7 +177,9 @@ def fill_out(form, pdf):
             lineno = attr[4:]
             fieldname = 'Sch{}-{}'.format(schno, lineno)
             fieldname = replacements.get(fieldname, fieldname)
-            if isinstance(value, Decimal):
+            if fieldname == 'Sch7-2c':
+                value = str(value)
+            elif isinstance(value, Decimal):
                 value = str(dollars(value))
             pdf[fieldname] = value
 
