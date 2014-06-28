@@ -174,7 +174,7 @@ def run_yaml_file(terminal, path, statement_paths,
         add('')
 
         max_amount2 = max(abs(tr.amount) for tr in transaction_list)
-        amount_width2 = len('{:,}'.format(max_amount2)) + 1
+        amount_width2 = max(10, len('{:,}'.format(max_amount2)) + 1)
         f2 = _make_formatter(terminal, amount_width2)
 
         description_width = (
