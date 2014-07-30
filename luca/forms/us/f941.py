@@ -28,7 +28,7 @@ def defaults(form):
     f.line7 = zero
     f.line8 = zero
     f.line9 = zero
-    f.line11 = zero
+    f.line11 = None  # in which case we compute it from other information
     if f.form_version < u'2014':
         f.line12a = zero
         f.line12b = 0
@@ -69,15 +69,20 @@ def compute(form):
         f.line6 = f.line3 + f.line5d + getattr(f, 'line5e', zero)
     f.line10 = f.line6 + f.line7 + f.line8 + f.line9
     if f.form_version >= u'2014':
+        f.line14_total = f.line14_month1 + f.line14_month2 + f.line14_month3
+        if f.line11 is None:
+            f.line11 = f.line14_total
         if f.line10 > f.line11:
             f.line12 = f.line10 - f.line11
             f.line13 = zero
         else:
             f.line12 = zero
             f.line13 = f.line11 - f.line10
-        f.line14_total = f.line14_month1 + f.line14_month2 + f.line14_month3
     else:
         f.line13 = f.line11 + f.line12a
+        f.line16_total = f.line16_month1 + f.line16_month2 + f.line16_month3
+        if f.line11 is None:
+            f.line11 = f.line16_total
         if f.line10 > f.line13:
             f.line14 = f.line10 - f.line13
             f.line15 = zero
@@ -85,7 +90,6 @@ def compute(form):
             f.line14 = zero
             f.line15 = f.line13 - f.line10
         # TODO: refuse to let them check box 1 on line16 if they do not qualify
-        f.line16_total = f.line16_month1 + f.line16_month2 + f.line16_month3
 
 
 def fill_out(form, pdf):
