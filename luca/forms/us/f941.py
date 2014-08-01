@@ -79,10 +79,10 @@ def compute(form):
             f.line12 = zero
             f.line13 = f.line11 - f.line10
     else:
-        f.line13 = f.line11 + f.line12a
         f.line16_total = f.line16_month1 + f.line16_month2 + f.line16_month3
         if f.line11 is None:
             f.line11 = f.line16_total
+        f.line13 = f.line11 + f.line12a
         if f.line10 > f.line13:
             f.line14 = f.line10 - f.line13
             f.line15 = zero
@@ -98,8 +98,9 @@ def fill_out(form, pdf):
     pdf.load('us.f941--{}.pdf'.format(f.year))
     pdf.pages = 1, 2
 
-    if f.form_version < u'2013':
+    if f.form_version <= u'2013':
         fill_out_2013_and_earlier(form, pdf)
+        return
 
     pdf['f_01_0_[0]'] = f.name
     pdf['f2_02_0_[0]'] = f.ein
