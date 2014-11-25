@@ -41,6 +41,8 @@ def defaults(form):
         f.line14_month1 = zero
         f.line14_month2 = zero
         f.line14_month3 = zero
+        f.line15 = False
+        f.line15_date = ''
     f.Part_4 = False
     f.signer_name = u''
     f.signer_title = u''
@@ -126,7 +128,7 @@ def fill_out(form, pdf):
     pdf[14] = f.state
     pdf[15] = f.zip
 
-    pdf[19] = str(f.line1 or '')
+    pdf[19] = str(f.line1)
 
     pair(20, f.line2)
     pair(22, f.line3)
@@ -155,6 +157,9 @@ def fill_out(form, pdf):
     pdf['c2_01_0_[0]'] = 'Chck1' if f.line14 == 'a' else 'Off'
     pdf['c2_01_0_[1]'] = 'Chck2' if f.line14 == 'b' else 'Off'
     pdf['c2_01_0_[2]'] = 'Chck3' if f.line14 == 'c' else 'Off'
+
+    pdf['Page2[0].c2_04_0_[0]'] = '1' if f.line15 else 'Off'
+    pdf['Page2[0].f2_11_0_[0]'] = f.line15_date.replace('/', ' ')
 
     pdf.pattern = 'f2_{:02}_0_[0]'
 
@@ -193,7 +198,7 @@ def fill_out_2013_and_earlier(form, pdf):
     for i in range(9):
         pdf[name(i + 1)] = f.ein.replace('-', '')[i : i+1]
 
-    pdf[name(16)] = str(f.line1 or '')
+    pdf[name(16)] = str(f.line1)
     pdf[name(10)] = f.name
     pdf[name(11)] = f.trade_name
     pdf[name(12)] = f.address
