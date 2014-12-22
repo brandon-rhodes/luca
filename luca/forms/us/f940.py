@@ -18,7 +18,10 @@ def defaults(form):
     f.city = ''
     f.state = ''
     f.zip = ''
+    f.type = False
     f.line1a = '  '
+    f.line1b = False
+    f.line2 = False
     f.line3 = zero
     f.line4 = zero
     f.line4a = False
@@ -75,9 +78,81 @@ def fill_out(form, pdf):
     pdf.load('us.f940--{}.pdf'.format(f.form_version))
     pdf.pages = 1, 2
 
+    if form.form_version == '2013':
+        return _old_2013_fill_out(f, pdf)
+
     if form.form_version == '2012':
         return _old_2012_fill_out(f, pdf)
 
+    pdf.pattern = '.TypeReturn[0].c1_{:02}[0]'
+
+    pdf[1] = 'Report1' if f.type == 'a' else 'Off'
+    pdf[2] = 'Report2' if f.type == 'b' else 'Off'
+    pdf[3] = 'Report3' if f.type == 'c' else 'Off'
+    pdf[4] = 'Report4' if f.type == 'd' else 'Off'
+
+    pdf.pattern = '.c1_{:02}[0]'
+
+    pdf[5] = '1' if f.line1b else 'Off'
+    pdf[6] = '1' if f.line2 else 'Off'
+    pdf[7] = '1' if f.line4a else 'Off'
+    pdf[8] = '1' if f.line4b else 'Off'
+    pdf[9] = '1' if f.line4c else 'Off'
+    pdf[10] = '1' if f.line4d else 'Off'
+    pdf[11] = '1' if f.line4e else 'Off'
+
+    pdf.pattern = '.f1_{:02}[0]'
+
+    for n, digit in enumerate(f.ein.replace('-', ''), 1):
+        pdf[n] = digit
+
+    pdf[10] = f.name
+    pdf[11] = f.trade_name
+    pdf[12] = f.address
+    pdf[13] = f.city
+    pdf[14] = f.state
+    pdf[15] = f.zip
+    # TODO: foreign address
+
+    # pdf[23] = '1' if f.line4e else 'Off'  # delete?
+
+    pdf[19] = f.line1a[0]
+    pdf[20] = f.line1a[1]
+
+    pdf[21], pdf[22] = zzstr(f.line3)
+    pdf[23], pdf[24] = zzstr(f.line4)
+    pdf[25], pdf[26] = zzstr(f.line5)
+    pdf[27], pdf[28] = zzstr(f.line6)
+    pdf[29], pdf[30] = zzstr(f.line7)
+    pdf[31], pdf[32] = zzstr(f.line8)
+
+    pdf[33], pdf[34] = zzstr(f.line9)
+    pdf[35], pdf[36] = zzstr(f.line10)
+    pdf[37], pdf[38] = zzstr(f.line11)
+
+    pdf[39], pdf[40] = zzstr(f.line12)
+    pdf[41], pdf[42] = zzstr(f.line13)
+    pdf[43], pdf[44] = zzstr(f.line14)
+    pdf[45], pdf[46] = zzstr(f.line15)
+
+    pdf.pattern = '.f2_{:02}[0]'
+
+    pdf[1] = f.name
+    pdf[2] = f.ein
+
+    # TODO: Part 5
+    # TODO: Part 6 designee (but "No" checkbox is implemented below)
+
+    pdf[16] = f.sign_name
+    pdf[17] = f.sign_title
+    pdf[18] = f.sign_phone
+
+    pdf.pattern = '{}'
+
+    pdf['.c2_01[1]'] = '2' if (not f.part6) else 'Off'
+
+
+def _old_2013_fill_out(f, pdf):
     pdf.pattern = 'topmostSubform[0].Page1[0].EntityArea[0].Text3{}[0]'
     for letter, digit in zip(' abcdefgh', f.ein.replace('-', '')):
         pdf[letter.strip()] = digit
