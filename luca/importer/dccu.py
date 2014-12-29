@@ -214,6 +214,3 @@ def import_dccu_visa_pdf(text):
         t.description = ' - '.join(t.description)
 
     return balances, transactions
-
-
-importers = [import_dccu_checking_pdf, import_dccu_visa_pdf]

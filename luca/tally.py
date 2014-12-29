@@ -16,10 +16,12 @@ from textwrap import wrap
 import yaml
 from .fix_PyYAML import Loader
 
-from luca.importer.dccu import importers
+from luca.importer.dccu import import_dccu_checking_pdf, import_dccu_visa_pdf
 from luca.kit import cents
 from luca.pdf import extract_text_from_pdf_file
 from luca import rules
+
+importers = [import_dccu_checking_pdf, import_dccu_visa_pdf]
 
 def sum_categories(transactions):
     sums = defaultdict(Decimal)
