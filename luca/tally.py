@@ -17,6 +17,7 @@ import yaml
 from .fix_PyYAML import Loader
 
 from luca.importer.dccu import import_dccu_checking_pdf, import_dccu_visa_pdf
+from luca.importer import autocsv
 from luca.kit import cents
 from luca.pdf import extract_text_from_pdf_file
 from luca import rules
@@ -82,24 +83,32 @@ def run_yaml_file(terminal, path, statement_paths,
     for path in statement_paths:
         if path.lower().endswith('.pdf'):
             text = extract_text_from_pdf_file(path)
+
         elif path.lower().endswith('.txt'):
             with open(path) as text_file:
                 text = text_file.read().decode('utf-8')
+
+            matching_importers = [importer for importer in importers
+                                  if importer.does_this_match(text)]
+
+            if len(matching_importers) == 0:
+                raise RuntimeError('cannot find an importer for file: {}'
+                                   .format(path))
+            elif len(matching_importers) > 1:
+                raise RuntimeError('found too many importers for file: {}'
+                                   .format(path))
+            else:
+                importer = matching_importers[0]
+
+            new_balances, new_transactions = importer(text)
+
+        elif path.lower().endswith('.csv'):
+            with open(path) as csv_file:
+                new_balances, new_transactions = autocsv.importer(csv_file)
+
         else:
             raise ValueError('no idea what to do with file {!r}'.format(path))
 
-        matching_importers = [importer for importer in importers
-                              if importer.does_this_match(text)]
-
-        if len(matching_importers) == 0:
-            raise RuntimeError('cannot find an importer for file: {}'
-                               .format(path))
-        elif len(matching_importers) > 1:
-            raise RuntimeError('found too many importers for file: {}'
-                               .format(path))
-
-        importer = matching_importers[0]
-        new_balances, new_transactions = importer(text)
         balances.extend(new_balances)
         transactions.extend(new_transactions)
 
