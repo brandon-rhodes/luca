@@ -6,14 +6,14 @@ from luca.kit import validate, zero, zstr, zzstr
 
 
 title = u'Form 1120S: U.S. Income Tax Return for an S Corporation'
-versions = u'2012', u'2013'
+versions = u'2012', u'2013', u'2014'
 
 # Note that only a bare minimum of fields are supported for 2010: those
 # I needed for a quick filing of an amended return.  If you also need to
-# make emergency use of the form for that year, comment out the
-# following line:
+# make emergency use of the form for that year, uncomment the following
+# line:
 #
-versions = versions + (u'2010',)
+# versions = versions + (u'2010',)
 
 
 def defaults(form):
@@ -216,8 +216,12 @@ def fill_out(form, pdf):
     if f.B.line1 not in ('a', 'b'):
         pdf['c2_01_0_[2]'] = 'C'
         pdf['p2-t19[0]'] = f.B.line1
-    pdf['p2-t20'] = f.B.line2_activity
-    pdf['p2-t21'] = f.B.line2_product_or_service
+    if f.form_version >= u'2014':
+        pdf['f2_2[0]'] = f.B.line2_activity
+        pdf['f2_3[0]'] = f.B.line2_product_or_service
+    else:
+        pdf['p2-t20'] = f.B.line2_activity
+        pdf['p2-t21'] = f.B.line2_product_or_service
     pdf['c2_04_0_[0]'] = 'Yes' if f.B.line3 else 'Off'
     pdf['c2_04_0_[1]'] = 'Off' if f.B.line3 else 'No'
     pdf['c2_06_0_[0]'] = 'Yes' if f.B.line4a else 'Off'
