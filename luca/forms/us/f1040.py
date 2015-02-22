@@ -199,7 +199,7 @@ def fill_out(form, pdf):
         elif f.form_version == u'2012':
             if n == 1:
                 n = 4
-            if n == 20:
+            elif n == 20:
                 n = 24
             elif n == 32:
                 n = 37
