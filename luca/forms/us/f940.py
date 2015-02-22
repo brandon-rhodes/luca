@@ -6,7 +6,7 @@ eighthpercent = Decimal('.008')
 sixthpercent = Decimal('.006')
 
 title = u"Form 940: Employer's Annual Federal Unemployment (FUTA) Tax Return"
-versions = u'2012', u'2013'
+versions = u'2012', u'2013', u'2014'
 
 
 def defaults(form):
@@ -64,12 +64,7 @@ def compute(form):
         f.line14 = zero
         f.line15 = f.line13 - f.line12
 
-    if f.line12 > cents('500.00'):
-        f.line17 = f.line16a + f.line16b + f.line16c + f.line16d
-        # Make this a warning?  assert f.line12 == f.line17
-    else:
-        f.line16a = f.line16b = f.line16c = f.line16d = ''
-        f.line17 = zero
+    f.line17 = f.line16a + f.line16b + f.line16c + f.line16d
 
 
 def fill_out(form, pdf):
