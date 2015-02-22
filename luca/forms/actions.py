@@ -238,19 +238,24 @@ class PDF(object):
         # Georgia Form 600S, so we should just skip the step if the PDF
         # fails to specify a list of pages.
 
-        p1 = Popen(
+        p = Popen(
             ['pdftk', self.original_pdf_path, 'fill_form', '-',
              'output', '-', 'flatten'],
-            stdin=PIPE, stdout=PIPE,
+            stdin=PIPE, stdout=PIPE, stderr=PIPE,
             )
-        p2 = Popen(
+        stdout, stderr = p.communicate(fdf)
+        if stderr:
+            sys.stderr.write('pdftk error: {}\n'.format(stderr))
+            sys.exit(1)
+
+        p = Popen(
             ['pdftk', '-', 'cat'] + pages + ['output', path],
-            stdin=p1.stdout,
+            stdin=PIPE, stdout=PIPE, stderr=PIPE,
             )
-        p1.stdout.close()
-        p1.stdin.write(fdf)
-        p1.stdin.close()
-        p2.wait()
+        stdout, stderr = p.communicate(stdout)
+        if stderr:
+            sys.stderr.write('pdftk error: {}\n'.format(stderr))
+            sys.exit(1)
 
         if not self.canvases:
             return
