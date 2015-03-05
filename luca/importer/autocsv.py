@@ -1,5 +1,8 @@
+from __future__ import print_function
+
 import csv
 import re
+import sys
 from datetime import datetime
 from decimal import Decimal
 from .model import Transaction
@@ -21,9 +24,15 @@ def importer(csvfile):
     transactions = []
 
     for row in reader:
+        _parse(row, balances, transactions)
+
+    return balances, transactions
+
+def _parse(row, balances, transactions):
+    try:
         # TODO: better way to detect header line
         if row[0] == 'Type':
-            continue
+            return
 
         # print row
         date = amount = None
@@ -33,19 +42,19 @@ def importer(csvfile):
             m = date_match(field)
             if m:
                 date = datetime.strptime(field, '%m/%d/%Y').date()
-                continue
+                return
             a = amount_match(field)
             if a:
                 amount = Decimal(a.group(1) + a.group(2).replace(',', ''))
-                continue
+                return
             field = field.strip()
             if field:
                 description.append(field)
 
         if date is None:
-            raise ValueError('cannot find date: {}'.format(row))
+            raise ValueError('cannot find date field')
         if amount is None:
-            raise ValueError('cannot find amount: {}'.format(row))
+            raise ValueError('cannot find amount field')
 
         t = Transaction()
         t.account = 'Checking'
@@ -55,4 +64,6 @@ def importer(csvfile):
 
         transactions.append(t)
 
-    return balances, transactions
+    except ValueError as e:
+        print('Ignoring CSV line because luca {0}:\n{1}\n'.format(
+            e, row, file=sys.stderr))
