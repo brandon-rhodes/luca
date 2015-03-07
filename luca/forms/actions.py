@@ -187,8 +187,7 @@ class PDF(object):
 
     def load(self, filename):
         self.original_pdf_path = download_pdf(filename)
-        output = subprocess.check_output(
-            ['pdftk', self.original_pdf_path, 'dump_data_fields'])
+        output = run_pdftk('', [self.original_pdf_path, 'dump_data_fields'])
         lines = [ line.split(None, 1) for line in output.splitlines() ]
         self.names = [ words[1] for words in lines
                        if words[0] == 'FieldName:' ]
@@ -238,24 +237,9 @@ class PDF(object):
         # Georgia Form 600S, so we should just skip the step if the PDF
         # fails to specify a list of pages.
 
-        p = Popen(
-            ['pdftk', self.original_pdf_path, 'fill_form', '-',
-             'output', '-', 'flatten'],
-            stdin=PIPE, stdout=PIPE, stderr=PIPE,
-            )
-        stdout, stderr = p.communicate(fdf)
-        if stderr:
-            sys.stderr.write('pdftk error: {}\n'.format(stderr))
-            sys.exit(1)
-
-        p = Popen(
-            ['pdftk', '-', 'cat'] + pages + ['output', path],
-            stdin=PIPE, stdout=PIPE, stderr=PIPE,
-            )
-        stdout, stderr = p.communicate(stdout)
-        if stderr:
-            sys.stderr.write('pdftk error: {}\n'.format(stderr))
-            sys.exit(1)
+        stdout = run_pdftk(fdf, [
+            self.original_pdf_path, 'fill_form', '-', 'output', '-', 'flatten'])
+        stdout = run_pdftk(stdout, ['-', 'cat'] + pages + ['output', path])
 
         if not self.canvases:
             return
@@ -286,3 +270,11 @@ class PDF(object):
             sys.exit(1)
         with open(path, 'w') as f:
             f.write(output_stream.getvalue())
+
+def run_pdftk(stdin_data, args):
+    p = Popen(['pdftk'] + args, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    stdout, stderr = p.communicate(stdin_data)
+    if p.returncode:
+        sys.stderr.write('pdftk error: {}\n'.format(stderr))
+        sys.exit(1)
+    return stdout
