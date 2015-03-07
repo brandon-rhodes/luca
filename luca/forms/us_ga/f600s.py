@@ -1,6 +1,6 @@
 from decimal import Decimal, localcontext
 from luca.forms.formlib import Form
-from luca.kit import dollars, zero
+from luca.kit import dollars, dstr, zero
 
 
 title = u'Georgia Form 600S: Corporation Tax Return'
@@ -143,7 +143,10 @@ def fill_out(form, pdf):
     pdf['end01'] = f.income_ending
     pdf['begin02'] = f.net_worth_beginning
     pdf['end02'] = f.net_worth_ending
-    # TODO: Boolean type-of-return fields
+
+    # TODO: more Boolean type-of-return fields
+    pdf['Final'] = 'Yes' if f.type == 'final' else 'Off'
+
     pdf['Date1'] = f.incorporation_date
     pdf['WHLD.0'] = f.withholding_number
     pdf['WHLD.1'] = f.nonresident_withholding_number
@@ -180,7 +183,8 @@ def fill_out(form, pdf):
             if fieldname == 'Sch7-2c':
                 value = str(value)
             elif isinstance(value, Decimal):
-                value = str(dollars(value))
+                value = dstr(dollars(value))
+                #value = str(dollars(value))
             pdf[fieldname] = value
 
     # pdf.pattern = '{}'
