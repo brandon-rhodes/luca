@@ -1,7 +1,7 @@
 from luca.kit import dsum, zero, zzstr
 
 title = u'Form 1040 Schedule C: Profit or Loss From Business'
-versions = u'2012', u'2013'
+versions = u'2012', u'2013', u'2014'
 
 def defaults(form):
     f = form
@@ -86,6 +86,79 @@ def fill_out(form, pdf):
     f = form
     pdf.load('us.f1040sc--{}.pdf'.format(f.form_version))
 
+    if f.form_version < u'2014':
+        return fill_out_2013(form, pdf)
+
+    pdf.pattern = 'f1_{:03}['
+
+    pdf[1] = f.name
+    pdf[2] = f.ssn
+
+    pdf[3] = f.A
+    pdf[4] = f.B
+    pdf[5] = f.C
+    pdf[6] = f.D
+
+    pdf[7] = f.E_text1
+    pdf[8] = f.E_text2
+    pdf[9] = f.F_text
+
+    pdf.pattern = '{}'
+
+    pdf['.c1_01['] = '0' if f.F == 'cash' else 'Off'
+    pdf['.c1_02['] = '0' if f.F == 'accrual' else 'Off'
+    pdf['.c1_03['] = '0' if f.F == 'other' else 'Off'
+
+    pdf['.c1_04[0]'] = 'Yes' if f.G else 'Off'
+    pdf['.c1_04[1]'] = 'Off' if f.G else 'No'
+
+    pdf['.c1_05[0]'] = '1' if f.H else 'Off'
+
+    pdf['.c1_06[0]'] = 'Yes' if f.I else 'Off'
+    pdf['.c1_06[1]'] = 'Off' if f.I else 'No'
+
+    pdf['.c1_07[0]'] = 'Yes' if f.J else 'Off'
+    pdf['.c1_07[1]'] = 'Off' if f.J else 'No'
+
+    # Part I: Income
+
+    pdf['.c1_08_0_['] = '1' if f.line1_box else 'Off'
+
+    pdf.pattern = 'f1_{:03}['
+
+    pdf[10], pdf[11] = zzstr(f.line1)
+
+    n = 12
+    for i in range(2, 8):
+        pdf[n], pdf[n+1] = zzstr(getattr(f, 'line{}'.format(i)))
+        n += 2
+
+    # Part II: Expenses
+
+    n = 24
+    for attr in _expense_lines(30):
+        pdf[n], pdf[n+1] = zzstr(getattr(f, attr))
+        # if n == 74:
+        #     n = 84
+        # else:
+        n += 2
+
+    pdf[78], pdf[79] = zzstr(f.line30)
+    pdf[80], pdf[81] = zzstr(f.line31)
+
+    pdf.pattern = '{}'
+
+    if f.line31 < zero:
+        pdf['.c1_08['] = '1' if f.line32 == 'a' else 'Off'
+        pdf['.c1_09['] = '1' if f.line32 == 'b' else 'Off'
+
+    # TODO: adapt 2013 code for 2014 for:
+    # Part III: Cost of Goods Sold
+    # Part IV: Information on Your Vehicle
+    # Part V: Other Expenses
+
+def fill_out_2013(form, pdf):
+    f = form
     pdf.pattern = 'f1_{:03}['
 
     pdf[1] = f.name
@@ -182,8 +255,8 @@ def fill_out(form, pdf):
 
 # Helper functions.
 
-def _expense_lines():
-    for n in range(8, 28):
+def _expense_lines(limit=28):
+    for n in range(8, limit):
         if n in (16, 20, 24, 27):
             yield 'line{}a'.format(n)
             yield 'line{}b'.format(n)

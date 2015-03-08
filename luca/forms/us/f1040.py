@@ -2,12 +2,13 @@ from luca.kit import Decimal, dsum, zero, zzstr
 from luca.taxes import TaxSchedule
 
 title = u'Form 1040: U.S. Individual Income Tax Return'
-versions = u'2012', u'2013'
+versions = u'2012', u'2013', u'2014'
 
 filing_statuses = 'S MJ MS HoH QW'.split()
 exemptions = {
     u'2012': Decimal('3800.00'),
     u'2013': Decimal('3900.00'),
+    u'2014': Decimal('3900.00'),
     }
 
 def lines(seq):
@@ -127,9 +128,57 @@ def compute(form):
 
 
 def fill_out(form, pdf):
-    f = form
-    pdf.load('us.f1040--{}.pdf'.format(f.form_version))
+    pdf.load('us.f1040--{}.pdf'.format(form.form_version))
 
+    if form.form_version < u'2014':
+        return fill_out_2013_and_before(form, pdf)
+
+    f = form
+    pdf.pattern = 'f1_{:02}[0]'
+
+    pdf[4] = f.first_name
+    pdf[5] = f.last_name
+    pdf[6] = f.ssn.replace('-', '')
+    pdf[7] = f.spouse_first_name
+    pdf[8] = f.spouse_last_name
+    pdf[9] = f.spouse_ssn.replace('-', '')
+
+    pdf.pattern = 'f1-{:02}[0]'
+
+    pdf[10] = f.address
+    pdf[11] = f.apartment_number
+    pdf[12] = f.city_state_zip
+    pdf[13] = f.foreign_country
+    pdf[14] = f.foreign_province
+    pdf[15] = f.foreign_postal_code
+
+    pdf.pattern = '{}'
+
+    pdf['Lines1-3[0].c1_03[0]'] = ('S' if f.filing_status == 'S' else 'Off')
+    pdf['Lines1-3[0].c1_03[1]'] = ('MJ' if f.filing_status == 'MJ' else 'Off')
+    pdf['Lines1-3[0].c1_03[2]'] = ('MS' if f.filing_status == 'MS' else 'Off')
+    pdf['Page1[0].c1_03[0]'] = ('HoH' if f.filing_status == 'HoH' else 'Off')
+    pdf['Page1[0].c1_03[1]'] = ('QW' if f.filing_status == 'QW' else 'Off')
+
+    pdf['Lines1-3[0].f1-16[0]'] = f.spouse_ssn
+
+    pdf['c1_04[0]'] = ('1' if f.line6a else 'Off')
+    pdf['c1_05[0]'] = ('1' if f.line6b else 'Off')
+
+    # TODO: Dependents
+
+    pdf.pattern = 'Page1[0].f1_{:02}[0]'
+
+    pdf[30] = f.line6ab
+    pdf[34] = f.line6d
+
+    i = 35
+    for n in '7 8a 8b 9a 9b'.split():
+        pdf[i], pdf[i+1] = zzstr(f['line', n])
+        i += 2
+
+def fill_out_2013_and_before(form, pdf):
+    f = form
     pdf.pattern = 'p1-t{}['
 
     pdf[4] = f.first_name
@@ -273,6 +322,44 @@ schedules = {
             (203150, 33),
             (398350, 35),
             (425000, '39.6'),
+        ]),
+    },
+    u'2014': {
+        u'S': TaxSchedule(one_allowance=3900, brackets = [
+            (0, 10),
+            (9075, 15),
+            (36900, 25),
+            (89350, 28),
+            (186350, 33),
+            (405100, 35),
+            (406750, '39.6'),
+        ]),
+        u'MJ': TaxSchedule(one_allowance=3900, brackets = [
+            (0, 10),
+            (18150, 15),
+            (73800, 25),
+            (148850, 28),
+            (226850, 33),
+            (405100, 35),
+            (457600, '39.6'),
+        ]),
+        u'MS': TaxSchedule(one_allowance=3900, brackets = [
+            (0, 10),
+            (9075, 15),
+            (36900, 25),
+            (74425, 28),
+            (113425, 33),
+            (202550, 35),
+            (228800, '39.6'),
+        ]),
+        u'HH': TaxSchedule(one_allowance=3900, brackets = [
+            (0, 10),
+            (12950, 15),
+            (49400, 25),
+            (127500, 28),
+            (206600, 33),
+            (405100, 35),
+            (432200, '39.6'),
         ]),
     },
 }
