@@ -52,7 +52,7 @@ def check(form, forms, eq):
 
     if form.line31 > 0:
         if not forms.get('us.f1040sse', ()):
-            print ('Error: Schedule C line 41 is more than zero; you need to '
+            print ('Error: Schedule C line 31 is more than zero; you need to '
                    'file Schedule SE')
 
 def compute(form):
