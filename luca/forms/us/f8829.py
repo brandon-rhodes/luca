@@ -1,7 +1,7 @@
 from luca.kit import Decimal, cents, zero, zstr, zzstr, ROUND_HALF_UP
 
 title = u'Form 8829: Expenses for Business Use of Your Home'
-versions = u'2012', u'2013'
+versions = u'2012', u'2013', u'2014'
 hundred = Decimal('100')
 
 def defaults(form):
@@ -67,6 +67,37 @@ def fill_out(form, pdf):
     f = form
     pdf.load('us.f8829--{}.pdf'.format(f.form_version))
 
+    if f.form_version < u'2014':
+        return fill_out_pre_2014(form, pdf)
+
+    pdf.pattern = 'p1-t{}[0]'
+
+    pdf[1] = f.name
+    pdf[2] = f.ssn
+
+    pdf[3] = zstr(f.line1)
+    pdf[4] = zstr(f.line2)
+    pdf[5] = zstr(f.line3 * hundred).rstrip(u'0 ')
+    # pdf[8] = zstr(f.line4)
+    # pdf[9] = zstr(f.line6)
+    pdf[9] = zstr(f.line7 * hundred).rstrip(u'0 ')
+
+    n = 10
+    for seq in (
+          [[8]] + [ab(i) for i in range(9, 13)] + [[13, 14, 15]]
+          + [ab(i) for i in range(16, 23)] + [range(23, 40)]
+          ):
+        for i in seq:
+            pdf[n], pdf[n+1] = zzstr(f['line', i])
+            n += 2
+
+    pdf[96] = zstr(f.line40 * hundred).rstrip(u'0 ')
+    pdf[97], pdf[98] = zzstr(f.line41)
+    pdf[99], pdf[100] = zzstr(f.line42)
+    pdf[101], pdf[102] = zzstr(f.line43)
+
+def fill_out_pre_2014(form, pdf):
+    f = form
     pdf.pattern = 'p1-t{}[0]'
 
     pdf[1] = f.name
