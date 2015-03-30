@@ -84,15 +84,18 @@ def check(form, forms, eq):
     if f1040se:
         eq('line17', f1040se.line41)
 
-    line56 = zero
+    self_employment_tax = zero
     line27 = zero
     for f in forms.get('us.f1040sse', ()):
-        line56 += f.line5
+        self_employment_tax += f.line5
         line27 += f.line6
     for f in forms.get('us.f1040sse_long', ()):
-        line56 += f.line12
+        self_employment_tax += f.line12
         line27 += f.line13
-    eq('line56', line56)
+    if f.form_version <= u'2013':
+        eq('line56', self_employment_tax)
+    else:
+        eq('line57', self_employment_tax)
     eq('line27', line27)
 
 

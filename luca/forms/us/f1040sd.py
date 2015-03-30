@@ -2,7 +2,7 @@ from luca.forms.formlib import Form
 from luca.kit import Decimal, dsum, zero, zstr
 
 title = u'Form 1040 Schedule D: Capital Gains and Losses'
-versions = u'2011', u'2012', u'2013'
+versions = u'2011', u'2012', u'2013', u'2014'
 
 def defaults(form):
     f = form
