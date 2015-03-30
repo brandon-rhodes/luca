@@ -1,7 +1,7 @@
 from luca.kit import Decimal, cents, zero, zzstr
 
 title = u'Form 1040 Schedule SE: Self-Employment Tax'
-versions = u'2012', u'2013'
+versions = u'2012', u'2013', u'2014'
 
 def defaults(form):
     f = form
@@ -29,11 +29,28 @@ def compute(form):
         f.line6 = zero
         return
 
-    if f.line4 <= Decimal('110100.00'):
-        f.line5 = Decimal('.133') * f.line4
+    if f.form_version == u'2014':
+        ss_limit = Decimal('117000.00')
+        combined_rate = Decimal('.153')
+        maximum_ss = Decimal('14508.00')
+        medicare_rate = Decimal('.029')
     else:
-        f.line5 = Decimal('11450.40') + Decimal('.029') * f.line4
+        ss_limit = Decimal('110100.00')
+        combined_rate = Decimal('.133')
+        maximum_ss = Decimal('11450.40')
+        medicare_rate = Decimal('.029')
+
+    if f.line4 <= ss_limit:
+        f.line5 = combined_rate * f.line4
+    else:
+        f.line5 = maximum_ss + medicare_rate * f.line4
     f.line5 = cents(f.line5)
+
+    if f.form_version >= u'2014':
+        f.line6 = cents(f.line5 / 2)
+        return
+
+    # TODO: re-check the following
 
     if f.line5 <= Decimal('14643.30'):
         f.line6 = Decimal('.5751') * f.line5
