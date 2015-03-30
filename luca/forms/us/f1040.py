@@ -231,7 +231,6 @@ def fill_out(form, pdf):
     i = 1
     for n in ([38] + range(40, 60) + '60a 60b'.split() + range(61, 66)
               + '66a 66b'.split() + range(67, 76) + '76a 77 78 79'.split()):
-        print i, n, f['line', n]
         pdf[i], pdf[i+1] = zzstr(f['line', n])
         if n == '76a':
             i += 4
