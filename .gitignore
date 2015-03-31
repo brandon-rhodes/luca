@@ -4,3 +4,6 @@
 dist
 luca/docs/_build
 venv
+data.fdf
+fields.pdf
+fields.txt
