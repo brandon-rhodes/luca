@@ -13,5 +13,5 @@ the Italian friend of Leonardo's who invented modern accounting.
 Luca is not yet on the Python Package Index,
 but can be installed directly from GitHub:
 
-    git checkout https://github.com/brandon-rhodes/luca.git
+    git clone https://github.com/brandon-rhodes/luca.git
     pip install luca/
