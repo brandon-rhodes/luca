@@ -105,24 +105,24 @@ def fill_out(form, pdf):
 
     pdf.pattern = '{}'
 
-    pdf['.c1_01['] = '0' if f.F == 'cash' else 'Off'
-    pdf['.c1_02['] = '0' if f.F == 'accrual' else 'Off'
-    pdf['.c1_03['] = '0' if f.F == 'other' else 'Off'
+    pdf['.c1_01[0]'] = '1' if f.F == 'cash' else 'Off'
+    pdf['.c1_01[1]'] = '2' if f.F == 'accrual' else 'Off'
+    pdf['.c1_01[2]'] = '3' if f.F == 'other' else 'Off'
 
-    pdf['.c1_04[0]'] = 'Yes' if f.G else 'Off'
-    pdf['.c1_04[1]'] = 'Off' if f.G else 'No'
+    pdf['.c1_02[0]'] = 'Yes' if f.G else 'Off'
+    pdf['.c1_02[1]'] = 'Off' if f.G else 'No'
 
-    pdf['.c1_05[0]'] = '1' if f.H else 'Off'
+    pdf['.c1_03[0]'] = '1' if f.H else 'Off'
 
-    pdf['.c1_06[0]'] = 'Yes' if f.I else 'Off'
-    pdf['.c1_06[1]'] = 'Off' if f.I else 'No'
+    pdf['.c1_04[0]'] = 'Yes' if f.I else 'Off'
+    pdf['.c1_04[1]'] = 'Off' if f.I else 'No'
 
-    pdf['.c1_07[0]'] = 'Yes' if f.J else 'Off'
-    pdf['.c1_07[1]'] = 'Off' if f.J else 'No'
+    pdf['.c1_05[0]'] = 'Yes' if f.J else 'Off'
+    pdf['.c1_05[1]'] = 'Off' if f.J else 'No'
 
     # Part I: Income
 
-    pdf['.c1_08_0_['] = '1' if f.line1_box else 'Off'
+    pdf['.c1_06[0]'] = '1' if f.line1_box else 'Off'
 
     pdf.pattern = 'f1_{:03}['
 
