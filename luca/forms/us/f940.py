@@ -96,7 +96,10 @@ def fill_out(form, pdf):
     pdf[10] = '1' if f.line4d else 'Off'
     pdf[11] = '1' if f.line4e else 'Off'
 
-    pdf.pattern = '.f1_{:02}[0]'
+    if form.form_version == '2014':
+        pdf.pattern = '.f1_{:02}[0]'
+    else:
+        pdf.pattern = '.f1_{}[0]'
 
     for n, digit in enumerate(f.ein.replace('-', ''), 1):
         pdf[n] = digit
