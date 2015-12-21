@@ -11,7 +11,7 @@ date_match = re.compile(r'(0?[1-9]|1[012])'
                         r'/(0?[1-9]|[12]\d|3[01])'
                         r'/(19\d\d|20\d\d)$').match
 
-amount_match = re.compile(r'([+-]?)\$?(\d[\d,]*\.\d\d)$').match
+amount_match = re.compile(r'\(?([+-]?)\$?(\d[\d,]*\.\d\d)\)?$').match
 
 def importer(csvfile):
     """Parse a generic CSV containing transaction data."""
@@ -48,7 +48,13 @@ def _parse(row, balances, transactions):
             continue
         a = amount_match(field)
         if a:
+            if amount is not None:
+                # TODO: check whether the second amount is a correct
+                # running balance.
+                continue
             amount = Decimal(a.group(1) + a.group(2).replace(',', ''))
+            if field.startswith('('):
+                amount = -amount
             continue
         field = field.strip()
         if field:
