@@ -147,7 +147,11 @@ def fill_out(form, pdf):
 
     pdf.pattern = '{}'
 
-    pdf['.c2_01[1]'] = '2' if (not f.part6) else 'Off'
+    if form.form_version == '2014':
+        pdf['.c2_01[1]'] = '2' if (not f.part6) else 'Off'
+    else:
+        pdf['.c2_1[0]'] = 'Yes' if f.part6 else 'Off'
+        pdf['.c2_1[1]'] = 'Off' if f.part6 else 'No'
 
 
 def _old_2013_fill_out(f, pdf):
