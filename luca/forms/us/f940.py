@@ -79,14 +79,20 @@ def fill_out(form, pdf):
     if form.form_version == '2012':
         return _old_2012_fill_out(f, pdf)
 
-    pdf.pattern = '.TypeReturn[0].c1_{:02}[0]'
+    if form.form_version == '2014':
+        pdf.pattern = '.TypeReturn[0].c1_{:02}[0]'
+    else:
+        pdf.pattern = '.TypeReturn[0].c1_{}[0]'
 
     pdf[1] = 'Report1' if f.type == 'a' else 'Off'
     pdf[2] = 'Report2' if f.type == 'b' else 'Off'
     pdf[3] = 'Report3' if f.type == 'c' else 'Off'
     pdf[4] = 'Report4' if f.type == 'd' else 'Off'
 
-    pdf.pattern = '.c1_{:02}[0]'
+    if form.form_version == '2014':
+        pdf.pattern = '.c1_{:02}[0]'
+    else:
+        pdf.pattern = '.c1_{}[0]'
 
     pdf[5] = '1' if f.line1b else 'Off'
     pdf[6] = '1' if f.line2 else 'Off'
