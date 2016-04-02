@@ -20,6 +20,9 @@ setup(name='luca',
           'Topic :: Office/Business :: Financial :: Accounting',
           ],
       packages=find_packages(),
+      package_data = {
+          'luca': ['forms/*/*.csv'],
+      },
       install_requires=[
         'blessings',
         'docopt',
