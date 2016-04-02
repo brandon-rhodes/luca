@@ -39,12 +39,12 @@ separate from the idea of a particular instance of a form
 that I have submitted to the government.
 So in Luca I have used separate terms for these ideas:
 
-*Form*
+*“A Form”*
     For example, “Form 1040, U.S. Individual Income Tax Return,”
     which exists over many years in different formats and copies,
     and that has rules that change year to year.
 
-*Filing*
+*“A Filing”*
     A form as filled out and submitted on a particular date,
     like “the Form 1040 for the 2011 tax year
     that I submitted in April of 2012.”
@@ -108,7 +108,7 @@ and wanting to see the result is:
    and (if applicable) quarter
    so that they sort by date when I list the directory. ::
 
-    luca defaults us.f941 > 2012-Q1-f941.json
+    luca form us.f941 > 2012-Q1-f941.json
 
 2. I then edit the form,
    removing all of the default values that I am happy with —
