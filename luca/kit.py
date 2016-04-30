@@ -64,7 +64,7 @@ def dstr(value):
     return (u'({:,})'.format(-value) if value < 0 else u'{:,} '.format(value))
 
 def znstr(value):
-    """Return a Decimal with thousands commas, with a minus sign if negative.
+    """Format a Decimal with thousands commas, with a minus sign if negative.
 
     An empty string is returned if the value is zero.
 
@@ -77,6 +77,26 @@ def znstr(value):
 
     """
     return u'{:,}'.format(value) if value else u''
+
+def nnstr(value):
+    """Return Unicode strings ``(dollars, cents)`` for Decimal `value`.
+
+    >>> zzstr(Decimal('1234567.89'))
+    [u'1,234,567', u'89 ']
+    >>> zzstr(Decimal('-1234567.89'))
+    [u'(1,234,567', u'89)']
+    >>> zzstr(zero)
+    [u'0', u'00']
+
+    This routine is typically used when a form has split up a dollars
+    field and a cents field::
+
+        fields['t57'], fields['t58'] = nnstr(f.line29ag)
+
+    """
+    return (u'{:,} '.format(value).rsplit('.', 1) if value > 0
+            else u'({:,})'.format(-value).rsplit('.', 1) if value < 0
+            else [u'0', u'00'])
 
 def zstr(value):
     """Return u'' for a false `value`, else format it with thousands commas.

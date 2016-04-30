@@ -1,5 +1,5 @@
 from decimal import Decimal
-from luca.kit import cents, validate, zero, zzstr
+from luca.kit import cents, validate, nnstr, zero, zzstr
 
 title = u"Form 941: Employer's QUARTERLY Federal Tax Return"
 versions = u'2012', u'2013', u'2014', u'2015'
@@ -115,8 +115,8 @@ def fill_out(form, pdf):
 
     pdf.pattern = 'f1_{:02}_0_[0]'
 
-    def pair(n, value):
-        pdf[n], pdf[n + 1] = zzstr(value)
+    def pair(n, value, show_zero=False):
+        pdf[n], pdf[n + 1] = nnstr(value) if show_zero else zzstr(value)
 
     for i in range(9):
         pdf[i + 1] = f.ein.replace('-', '')[i : i+1]
@@ -130,8 +130,8 @@ def fill_out(form, pdf):
 
     pdf[19] = str(f.line1)
 
-    pair(20, f.line2)
-    pair(22, f.line3)
+    pair(20, f.line2, True)
+    pair(22, f.line3, True)
 
     pair(24, f.line5a1)
     pair(26, f.line5a2)
@@ -141,14 +141,14 @@ def fill_out(form, pdf):
     pair(34, f.line5c2)
     pair(36, f.line5d1)
     pair(38, f.line5d2)
-    pair(40, f.line5e)
+    pair(40, f.line5e, True)
     pair(42, f.line5f)
-    pair(44, f.line6)
+    pair(44, f.line6, True)
     pair(46, f.line7)
     pair(48, f.line8)
     pair(50, f.line9)
-    pair(52, f.line10)
-    pair(54, f.line11)
+    pair(52, f.line10, True)
+    pair(54, f.line11, True)
     pair(56, f.line12)
     pair(58, f.line13)
 
