@@ -163,10 +163,10 @@ def fill_out(form, pdf):
 
     pdf.pattern = 'f2_{:02}_0_[0]'
 
-    pair(3, f.line14_month1)
-    pair(5, f.line14_month2)
-    pair(7, f.line14_month3)
-    pair(9, f.line14_total)
+    pair(3, f.line14_month1, True)
+    pair(5, f.line14_month2, True)
+    pair(7, f.line14_month3, True)
+    pair(9, f.line14_total, True)
 
     pdf[19] = f.signer_name
     pdf[20] = f.signer_title
