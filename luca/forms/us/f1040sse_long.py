@@ -1,7 +1,7 @@
 from luca.kit import Decimal, cents, zero, zzstr
 
 title = u'Form 1040 Schedule SE: Self-Employment Tax, Long'
-versions = u'2013'
+versions = u'2013',
 
 def defaults(form):
     f = form
