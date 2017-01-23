@@ -246,6 +246,9 @@ def fill_out(form, pdf):
     if f.form_version == u'2012':
         pdf['c2_80_0_[0]'] = 'Yes' if f.B.line13a else 'Off'
         pdf['c2_80_0_[1]'] = 'Off' if f.B.line13a else 'No'
+    elif f.form_version == u'2016':
+        pdf['c2_300[0]'] = 'Yes' if f.B.line13a else 'Off'
+        pdf['c2_300[1]'] = 'Off' if f.B.line13a else 'No'
     else:
         pdf['c2_13a_0_[0]'] = 'Yes' if f.B.line13a else 'Off'
         pdf['c2_13a_0_[1]'] = 'Off' if f.B.line13a else 'No'
