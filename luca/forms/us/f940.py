@@ -1,5 +1,5 @@
 from decimal import Decimal
-from luca.kit import cents, zero, zzstr
+from luca.kit import cents, nnstr, zero, zzstr
 
 sevenk = Decimal('7000.00')
 eighthpercent = Decimal('.008')
@@ -123,19 +123,19 @@ def fill_out(form, pdf):
     pdf[19] = f.line1a[0]
     pdf[20] = f.line1a[1]
 
-    pdf[21], pdf[22] = zzstr(f.line3)
+    pdf[21], pdf[22] = nnstr(f.line3)
     pdf[23], pdf[24] = zzstr(f.line4)
     pdf[25], pdf[26] = zzstr(f.line5)
-    pdf[27], pdf[28] = zzstr(f.line6)
-    pdf[29], pdf[30] = zzstr(f.line7)
-    pdf[31], pdf[32] = zzstr(f.line8)
+    pdf[27], pdf[28] = nnstr(f.line6)
+    pdf[29], pdf[30] = nnstr(f.line7)
+    pdf[31], pdf[32] = nnstr(f.line8)
 
-    pdf[33], pdf[34] = zzstr(f.line9)
+    pdf[33], pdf[34] = nnstr(f.line9)
     pdf[35], pdf[36] = zzstr(f.line10)
     pdf[37], pdf[38] = zzstr(f.line11)
 
-    pdf[39], pdf[40] = zzstr(f.line12)
-    pdf[41], pdf[42] = zzstr(f.line13)
+    pdf[39], pdf[40] = nnstr(f.line12)
+    pdf[41], pdf[42] = nnstr(f.line13)
     pdf[43], pdf[44] = zzstr(f.line14)
     pdf[45], pdf[46] = zzstr(f.line15)
 

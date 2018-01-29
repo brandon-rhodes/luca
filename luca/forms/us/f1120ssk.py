@@ -41,6 +41,57 @@ def compute(form):
 
 def fill_out(form, pdf):
     f = form
+    if f.form_version < u'2017':
+        return old_fill_out(form, pdf)
+
+    pdf.load('us.f1120ssk--{}.pdf'.format(f.form_version))
+    pdf.pages = 1,
+
+    # TODO: these two codes might no longer be correct
+
+    pdf['c1_01_0_[0]'] = 'Yes' if f.final else 'Off'
+    pdf['c1_02_0_[0]'] = 'Yes' if f.amended else 'Off'
+
+    # TODO: specific dates instead of calendar year
+
+    # pdf.pattern = 'p1-t{}[0]'
+
+    # pdf[1] = f.beginning_date
+    # pdf[2] = f.ending_date
+    # pdf[3] = f.ending_year
+
+    pdf.pattern = 'f1_{:02d}[0]'
+
+    n = 6
+    for letter in 'ABCDEF':
+        pdf[n] = f[letter]
+        n += 1
+
+    for number in first_nine_lines:
+        pdf[n] = zstr(f['line', number])
+        n += 1
+
+    pdf[27] = zstr(f.line11)
+
+    pdf.pattern = '{}'
+
+    def write_lines(line_number, n):
+        lines = f['line', line_number]
+        for line in lines:
+            pdf['p1-t{}a'.format(n)] = line.code
+            pdf['p1-t{}[0]'.format(n)] = zstr(line.amount)
+            n += 1
+
+    write_lines(10, 22)
+    write_lines(12, 28)
+    write_lines(13, 36)
+    write_lines(14, 41)
+    write_lines(15, 48)
+    write_lines(16, 53)
+    write_lines(17, 58)
+
+def old_fill_out(form, pdf):
+    f = form
     pdf.load('us.f1120ssk--{}.pdf'.format(f.form_version))
     pdf.pages = 1,
 
