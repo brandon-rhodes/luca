@@ -28,7 +28,14 @@ from . import files
 from .ofx import io
 
 
+# class Args(object):
+#     nickname = 'F'
+#     a = True
+
 def main():
+    # import sys
+    # old_download_command(Args)
+    # return
     args = docopt(__doc__)
     force_styling = None if args['-C'] else True if args['-c'] else False
     terminal=blessings.Terminal(force_styling=force_styling)
