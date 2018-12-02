@@ -31,7 +31,7 @@ setup(name='luca',
         'pyyaml',
         'reportlab',
         'requests',
-        'pyPdf',
+        'PyPDF2',
         ],
       entry_points={'console_scripts': [
             'luca = luca.commandline:main',
