@@ -11,7 +11,7 @@ from subprocess import Popen, PIPE
 
 import fdfgen
 import requests
-from pyPdf import PdfFileWriter, PdfFileReader
+from PyPDF2 import PdfFileWriter, PdfFileReader
 from reportlab.pdfgen.canvas import Canvas
 
 from luca.forms import formlib
@@ -187,10 +187,22 @@ class PDF(object):
 
     def load(self, filename):
         self.original_pdf_path = download_pdf(filename)
-        output = run_pdftk('', [self.original_pdf_path, 'dump_data_fields'])
-        lines = [ line.split(None, 1) for line in output.splitlines() ]
-        self.names = [ words[1] for words in lines
-                       if words[0] == 'FieldName:' ]
+        with open(self.original_pdf_path, 'rb') as fobj:
+            inputdata = fobj.read()
+        pdf = PdfFileReader(StringIO(inputdata))
+        fields = pdf.getFields()
+        self.names = [fully_qualified_field_name(f) for f in fields.values()]
+
+        # f = fields[u'f1_22[0]']
+        # print(name_of(f))
+        # asdf
+        # import pdb; pdb.set_trace()
+        # # f[u'f1_22[0]']
+        # # f[u'f1_22[0]']['/Parent']['/T']
+        # output = run_pdftk('', [self.original_pdf_path, 'dump_data_fields'])
+        # lines = [ line.split(None, 1) for line in output.splitlines() ]
+        # self.names = [ words[1] for words in lines
+        #                if words[0] == 'FieldName:' ]
 
     # How form logic writes data into fields.
 
@@ -230,28 +242,36 @@ class PDF(object):
     # The finale.
 
     def save(self, path):
-        fdf = fdfgen.forge_fdf('', self.fdf_fields, [], [], [])
-        pages = [str(p) for p in self.pages]
+        # fdf = fdfgen.forge_fdf('', self.fdf_fields, [], [], [])
+        # pages = [str(p) for p in self.pages]
 
         # TODO: the "cat" step breaks the JavaScript used to print
         # Georgia Form 600S, so we should just skip the step if the PDF
         # fails to specify a list of pages.
 
-        stdout = run_pdftk(fdf, [
-            self.original_pdf_path, 'fill_form', '-', 'output', '-', 'flatten'])
-        stdout = run_pdftk(stdout, ['-', 'cat'] + pages + ['output', path])
+        # stdout = run_pdftk(fdf, [
+        #     self.original_pdf_path, 'fill_form', '-', 'output', '-', 'flatten'])
+        # stdout = run_pdftk(stdout, ['-', 'cat'] + pages + ['output', path])
 
-        if not self.canvases:
-            return
+        # print('+++++', self.canvases)
+        # if not self.canvases:
+        #     return
 
-        with open(path, 'rb') as f:
+        #with open(path, 'rb') as f:
+        with open(self.original_pdf_path, 'rb') as f:
             inputdata = f.read()
         pdf = PdfFileReader(StringIO(inputdata))
+
+        #pdf.updatePageFormFieldValues(page, fields)
+        print(self.fdf_fields)
+        print('--------')
 
         output = PdfFileWriter()
 
         for i in range(pdf.numPages):
             page = pdf.getPage(i)
+            print(page.keys())
+            #import pdb; pdb.set_trace()
             canvas = self.canvases.get(i + 1)
             if canvas is not None:
                 canvas.showPage()
@@ -271,10 +291,20 @@ class PDF(object):
         with open(path, 'w') as f:
             f.write(output_stream.getvalue())
 
-def run_pdftk(stdin_data, args):
-    p = Popen(['pdftk'] + args, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-    stdout, stderr = p.communicate(stdin_data)
-    if p.returncode:
-        sys.stderr.write('pdftk error: {}\n'.format(stderr))
-        sys.exit(1)
-    return stdout
+# def run_pdftk(stdin_data, args):
+#     p = Popen(['pdftk'] + args, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+#     stdout, stderr = p.communicate(stdin_data)
+#     if p.returncode:
+#         sys.stderr.write('pdftk error: {}\n'.format(stderr))
+#         sys.exit(1)
+#     return stdout
+
+def fully_qualified_field_name(field):
+    names = [field['/T']]
+    while '/Parent' in field:
+        parent = field['/Parent']
+        if parent is None:
+            break
+        field = parent
+        names.append(field['/T'])
+    return '.'.join(reversed(names))
