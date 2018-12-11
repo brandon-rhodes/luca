@@ -261,11 +261,19 @@ class PDF(object):
         with open(self.original_pdf_path, 'rb') as f:
             inputdata = f.read()
         pdf = PdfFileReader(StringIO(inputdata))
+        if "/AcroForm" in pdf.trailer["/Root"]:
+            pdf.trailer["/Root"]["/AcroForm"].update(
+                {NameObject("/NeedAppearances"): BooleanObject(True)})
 
-        print(self.fdf_fields)
+        for k, v in self.fdf_fields:
+            print(repr(k), repr(v))
         print('--------')
 
-        output = PdfFileWriter()
+        output = pdf2 = PdfFileWriter()
+        set_need_appearances_writer(pdf2)
+        if "/AcroForm" in pdf2._root_object:
+            pdf2._root_object["/AcroForm"].update(
+                {NameObject("/NeedAppearances"): BooleanObject(True)})
 
         #for i in range(pdf.numPages):
         for i, page_number in enumerate(self.pages):
@@ -282,8 +290,8 @@ class PDF(object):
             values = {'f1_10[0]': u'Consulting Coders Limited'}
             values = {k.split('.')[-1]: v
                       for k, v in self.fdf_fields
-                      if ('.Page1[0].' in k and i == 0)
-                      or ('.Page2[0].' in k and i == 1)}
+                      if v and (('.Page1[0].' in k and i == 0)
+                                or ('.Page2[0].' in k and i == 1))}
             #values = {'Page1[0].Header[0].EntityArea[0].f1_10[0]': u'Consulting Coders Limited'}
             #values = {'topmostSubform[0].Page1[0].Header[0].EntityArea[0].f1_10[0]': u'Consulting Coders Limited'}
             output.updatePageFormFieldValues(page, values)
@@ -317,3 +325,25 @@ def fully_qualified_field_name(field):
         field = parent
         names.append(field['/T'])
     return '.'.join(reversed(names))
+
+from PyPDF2.generic import BooleanObject, NameObject, IndirectObject
+
+# From https://github.com/mstamy2/PyPDF2/issues/355
+def set_need_appearances_writer(writer):
+    # See 12.7.2 and 7.7.2 for more information: http://www.adobe.com/content/dam/acom/en/devnet/acrobat/pdfs/PDF32000_2008.pdf
+    try:
+        catalog = writer._root_object
+        # get the AcroForm tree
+        if "/AcroForm" not in catalog:
+            writer._root_object.update({
+                NameObject("/AcroForm"): IndirectObject(len(writer._objects), 0, writer)
+            })
+
+        need_appearances = NameObject("/NeedAppearances")
+        writer._root_object["/AcroForm"][need_appearances] = BooleanObject(True)
+        # del writer._root_object["/AcroForm"]['NeedAppearances']
+        return writer
+
+    except Exception as e:
+        print('set_need_appearances_writer() catch : ', repr(e))
+        return writer
