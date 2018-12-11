@@ -280,8 +280,12 @@ class PDF(object):
                 page.mergePage(overlay.getPage(0))
             output.addPage(page)
             values = {'f1_10[0]': u'Consulting Coders Limited'}
-            values = {'Page1[0].Header[0].EntityArea[0].f1_10[0]': u'Consulting Coders Limited'}
-            values = {'topmostSubform[0].Page1[0].Header[0].EntityArea[0].f1_10[0]': u'Consulting Coders Limited'}
+            values = {k.split('.')[-1]: v
+                      for k, v in self.fdf_fields
+                      if ('.Page1[0].' in k and i == 0)
+                      or ('.Page2[0].' in k and i == 1)}
+            #values = {'Page1[0].Header[0].EntityArea[0].f1_10[0]': u'Consulting Coders Limited'}
+            #values = {'topmostSubform[0].Page1[0].Header[0].EntityArea[0].f1_10[0]': u'Consulting Coders Limited'}
             output.updatePageFormFieldValues(page, values)
 
         # We call write() outside of the open() context to avoid
