@@ -243,7 +243,7 @@ class PDF(object):
 
     def save(self, path):
         # fdf = fdfgen.forge_fdf('', self.fdf_fields, [], [], [])
-        # pages = [str(p) for p in self.pages]
+        #page_numbers = [str(p) for p in self.pages]
 
         # TODO: the "cat" step breaks the JavaScript used to print
         # Georgia Form 600S, so we should just skip the step if the PDF
@@ -262,14 +262,15 @@ class PDF(object):
             inputdata = f.read()
         pdf = PdfFileReader(StringIO(inputdata))
 
-        #pdf.updatePageFormFieldValues(page, fields)
         print(self.fdf_fields)
         print('--------')
 
         output = PdfFileWriter()
 
-        for i in range(pdf.numPages):
-            page = pdf.getPage(i)
+        #for i in range(pdf.numPages):
+        for i, page_number in enumerate(self.pages):
+            #page = pdf.getPage(i)
+            page = pdf.getPage(page_number - 1)
             print(page.keys())
             #import pdb; pdb.set_trace()
             canvas = self.canvases.get(i + 1)
@@ -278,6 +279,10 @@ class PDF(object):
                 overlay = PdfFileReader(StringIO(canvas.getpdfdata()))
                 page.mergePage(overlay.getPage(0))
             output.addPage(page)
+            values = {'f1_10[0]': u'Consulting Coders Limited'}
+            values = {'Page1[0].Header[0].EntityArea[0].f1_10[0]': u'Consulting Coders Limited'}
+            values = {'topmostSubform[0].Page1[0].Header[0].EntityArea[0].f1_10[0]': u'Consulting Coders Limited'}
+            output.updatePageFormFieldValues(page, values)
 
         # We call write() outside of the open() context to avoid
         # truncating the file if write() dies with an exception.
