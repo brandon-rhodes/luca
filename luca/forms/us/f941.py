@@ -28,7 +28,7 @@ def defaults(form):
     f.line7 = zero
     f.line8 = zero
     f.line9 = zero
-    if f.form_version in (u'2017', u'2018'):
+    if f.form_version == u'2017':
         f.line11 = zero
         f.line13 = zero
         f.line16 = 'a'
@@ -78,7 +78,7 @@ def compute(form):
         f.line5d = f.line5a2 + f.line5b2 + f.line5c2
         f.line6 = f.line3 + f.line5d + getattr(f, 'line5e', zero)
     f.line10 = f.line6 + f.line7 + f.line8 + f.line9
-    if f.form_version in (u'2017', u'2018'):
+    if f.form_version == u'2017':
         f.line12 = f.line10 - f.line11
         f.line16_total = f.line16_month1 + f.line16_month2 + f.line16_month3
         if f.line12 > f.line13:

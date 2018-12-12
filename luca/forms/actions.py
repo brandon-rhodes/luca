@@ -11,7 +11,7 @@ from subprocess import Popen, PIPE
 
 import fdfgen
 import requests
-from PyPDF2 import PdfFileWriter, PdfFileReader
+from pyPdf import PdfFileWriter, PdfFileReader
 from reportlab.pdfgen.canvas import Canvas
 
 from luca.forms import formlib
@@ -187,22 +187,10 @@ class PDF(object):
 
     def load(self, filename):
         self.original_pdf_path = download_pdf(filename)
-        with open(self.original_pdf_path, 'rb') as fobj:
-            inputdata = fobj.read()
-        pdf = PdfFileReader(StringIO(inputdata))
-        fields = pdf.getFields()
-        self.names = [fully_qualified_field_name(f) for f in fields.values()]
-
-        # f = fields[u'f1_22[0]']
-        # print(name_of(f))
-        # asdf
-        # import pdb; pdb.set_trace()
-        # # f[u'f1_22[0]']
-        # # f[u'f1_22[0]']['/Parent']['/T']
-        # output = run_pdftk('', [self.original_pdf_path, 'dump_data_fields'])
-        # lines = [ line.split(None, 1) for line in output.splitlines() ]
-        # self.names = [ words[1] for words in lines
-        #                if words[0] == 'FieldName:' ]
+        output = run_pdftk('', [self.original_pdf_path, 'dump_data_fields'])
+        lines = [ line.split(None, 1) for line in output.splitlines() ]
+        self.names = [ words[1] for words in lines
+                       if words[0] == 'FieldName:' ]
 
     # How form logic writes data into fields.
 
@@ -242,60 +230,34 @@ class PDF(object):
     # The finale.
 
     def save(self, path):
-        # fdf = fdfgen.forge_fdf('', self.fdf_fields, [], [], [])
-        #page_numbers = [str(p) for p in self.pages]
+        fdf = fdfgen.forge_fdf('', self.fdf_fields, [], [], [])
+        pages = [str(p) for p in self.pages]
 
         # TODO: the "cat" step breaks the JavaScript used to print
         # Georgia Form 600S, so we should just skip the step if the PDF
         # fails to specify a list of pages.
 
-        # stdout = run_pdftk(fdf, [
-        #     self.original_pdf_path, 'fill_form', '-', 'output', '-', 'flatten'])
-        # stdout = run_pdftk(stdout, ['-', 'cat'] + pages + ['output', path])
+        stdout = run_pdftk(fdf, [
+            self.original_pdf_path, 'fill_form', '-', 'output', '-', 'flatten'])
+        stdout = run_pdftk(stdout, ['-', 'cat'] + pages + ['output', path])
 
-        # print('+++++', self.canvases)
-        # if not self.canvases:
-        #     return
+        if not self.canvases:
+            return
 
-        #with open(path, 'rb') as f:
-        with open(self.original_pdf_path, 'rb') as f:
+        with open(path, 'rb') as f:
             inputdata = f.read()
         pdf = PdfFileReader(StringIO(inputdata))
-        if "/AcroForm" in pdf.trailer["/Root"]:
-            pdf.trailer["/Root"]["/AcroForm"].update(
-                {NameObject("/NeedAppearances"): BooleanObject(True)})
 
-        for k, v in self.fdf_fields:
-            print repr(k), repr(v)
-        print('--------')
+        output = PdfFileWriter()
 
-        output = pdf2 = PdfFileWriter()
-        set_need_appearances_writer(pdf2)
-        if "/AcroForm" in pdf2._root_object:
-            pdf2._root_object["/AcroForm"].update(
-                {NameObject("/NeedAppearances"): BooleanObject(True)})
-
-        #for i in range(pdf.numPages):
-        for i, page_number in enumerate(self.pages):
-            #page = pdf.getPage(i)
-            page = pdf.getPage(page_number - 1)
-            print(page.keys())
-            #import pdb; pdb.set_trace()
+        for i in range(pdf.numPages):
+            page = pdf.getPage(i)
             canvas = self.canvases.get(i + 1)
             if canvas is not None:
                 canvas.showPage()
                 overlay = PdfFileReader(StringIO(canvas.getpdfdata()))
                 page.mergePage(overlay.getPage(0))
             output.addPage(page)
-            values = {'f1_10[0]': u'Consulting Coders Limited'}
-            pattern = '.Page{}[0].'.format(i + 1)
-            values = {k.split('.')[-1]: v
-                      for k, v in self.fdf_fields
-                      if v and pattern in k}
-            #values = {'Page1[0].Header[0].EntityArea[0].f1_10[0]': u'Consulting Coders Limited'}
-            #values = {'topmostSubform[0].Page1[0].Header[0].EntityArea[0].f1_10[0]': u'Consulting Coders Limited'}
-            update_checkbox_values(page, values)
-            output.updatePageFormFieldValues(page, values)
 
         # We call write() outside of the open() context to avoid
         # truncating the file if write() dies with an exception.
@@ -309,53 +271,10 @@ class PDF(object):
         with open(path, 'w') as f:
             f.write(output_stream.getvalue())
 
-# def run_pdftk(stdin_data, args):
-#     p = Popen(['pdftk'] + args, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-#     stdout, stderr = p.communicate(stdin_data)
-#     if p.returncode:
-#         sys.stderr.write('pdftk error: {}\n'.format(stderr))
-#         sys.exit(1)
-#     return stdout
-
-# https://stackoverflow.com/questions/35538851/
-def update_checkbox_values(page, fields):
-    for j in range(0, len(page['/Annots'])):
-        writer_annot = page['/Annots'][j].getObject()
-        for field in fields:
-            if writer_annot.get('/T') == field:
-                writer_annot.update({
-                    NameObject("/V"): NameObject(fields[field]),
-                    NameObject("/AS"): NameObject(fields[field])
-                })
-
-def fully_qualified_field_name(field):
-    names = [field['/T']]
-    while '/Parent' in field:
-        parent = field['/Parent']
-        if parent is None:
-            break
-        field = parent
-        names.append(field['/T'])
-    return '.'.join(reversed(names))
-
-from PyPDF2.generic import BooleanObject, NameObject, IndirectObject
-
-# From https://github.com/mstamy2/PyPDF2/issues/355
-def set_need_appearances_writer(writer):
-    # See 12.7.2 and 7.7.2 for more information: http://www.adobe.com/content/dam/acom/en/devnet/acrobat/pdfs/PDF32000_2008.pdf
-    try:
-        catalog = writer._root_object
-        # get the AcroForm tree
-        if "/AcroForm" not in catalog:
-            writer._root_object.update({
-                NameObject("/AcroForm"): IndirectObject(len(writer._objects), 0, writer)
-            })
-
-        need_appearances = NameObject("/NeedAppearances")
-        writer._root_object["/AcroForm"][need_appearances] = BooleanObject(True)
-        # del writer._root_object["/AcroForm"]['NeedAppearances']
-        return writer
-
-    except Exception as e:
-        print('set_need_appearances_writer() catch : ', repr(e))
-        return writer
+def run_pdftk(stdin_data, args):
+    p = Popen(['pdftk'] + args, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    stdout, stderr = p.communicate(stdin_data)
+    if p.returncode:
+        sys.stderr.write('pdftk error: {}\n'.format(stderr))
+        sys.exit(1)
+    return stdout
