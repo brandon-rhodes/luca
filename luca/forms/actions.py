@@ -266,7 +266,7 @@ class PDF(object):
                 {NameObject("/NeedAppearances"): BooleanObject(True)})
 
         for k, v in self.fdf_fields:
-            print(repr(k), repr(v))
+            print repr(k), repr(v)
         print('--------')
 
         output = pdf2 = PdfFileWriter()
@@ -288,12 +288,13 @@ class PDF(object):
                 page.mergePage(overlay.getPage(0))
             output.addPage(page)
             values = {'f1_10[0]': u'Consulting Coders Limited'}
+            pattern = '.Page{}[0].'.format(i + 1)
             values = {k.split('.')[-1]: v
                       for k, v in self.fdf_fields
-                      if v and (('.Page1[0].' in k and i == 0)
-                                or ('.Page2[0].' in k and i == 1))}
+                      if v and pattern in k}
             #values = {'Page1[0].Header[0].EntityArea[0].f1_10[0]': u'Consulting Coders Limited'}
             #values = {'topmostSubform[0].Page1[0].Header[0].EntityArea[0].f1_10[0]': u'Consulting Coders Limited'}
+            update_checkbox_values(page, values)
             output.updatePageFormFieldValues(page, values)
 
         # We call write() outside of the open() context to avoid
@@ -315,6 +316,17 @@ class PDF(object):
 #         sys.stderr.write('pdftk error: {}\n'.format(stderr))
 #         sys.exit(1)
 #     return stdout
+
+# https://stackoverflow.com/questions/35538851/
+def update_checkbox_values(page, fields):
+    for j in range(0, len(page['/Annots'])):
+        writer_annot = page['/Annots'][j].getObject()
+        for field in fields:
+            if writer_annot.get('/T') == field:
+                writer_annot.update({
+                    NameObject("/V"): NameObject(fields[field]),
+                    NameObject("/AS"): NameObject(fields[field])
+                })
 
 def fully_qualified_field_name(field):
     names = [field['/T']]
