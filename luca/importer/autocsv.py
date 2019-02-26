@@ -16,8 +16,15 @@ amount_match = re.compile(r'\(?([+-]?)\$?(\d[\d,]*\.\d\d)\)?$').match
 def importer(csvfile):
     """Parse a generic CSV containing transaction data."""
 
-    dialect = csv.Sniffer().sniff(csvfile.read())
+    sample = csvfile.read()
+
+    if csv.Sniffer().has_header(sample):
+        balances = []
+        transactions = _parse_headered_file(sample.splitlines())
+        return balances, transactions
+
     csvfile.seek(0)
+    dialect = csv.Sniffer().sniff(sample)
     reader = csv.reader(csvfile, dialect)
 
     balances = []
@@ -31,6 +38,39 @@ def importer(csvfile):
                 csvfile.name, e, row, file=sys.stderr))
 
     return balances, transactions
+
+def _parse_headered_file(csvfile):
+    reader = csv.DictReader(csvfile)
+    names = reader.fieldnames
+
+    account_field = _first(names, ['Card', 'Account'])
+    date_field = _first(names, ['Transaction Date', 'Date'])
+    description_field = _first(names, ['Description'])
+    credit_field = _first(names, ['Amount', 'Credit'])
+    debit_field = _first(names, ['Debit'], error=False)
+
+    for row in reader:
+        t = Transaction()
+
+        t.account = row[account_field]
+        t.date = datetime.strptime(row[date_field], '%m/%d/%Y').date()
+        t.description = row[description_field]
+        if row[credit_field]:
+            t.amount = Decimal(row[credit_field])
+        elif debit_field:
+            t.amount = - Decimal(row[debit_field])
+        else:
+            t.amount = Decimal(0)
+        yield t
+
+def _first(fieldnames, candidates, error=True):
+    for name in candidates:
+        if name in fieldnames:
+            return name
+    if not error:
+        return None
+    raise ValueError('cannot find any of the names {} in the field names {}'
+                     .format(candidates, fieldnames))
 
 def _parse(row, balances, transactions):
     # TODO: better way to detect header line
