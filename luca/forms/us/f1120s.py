@@ -17,6 +17,99 @@ versions = u'2012', u'2013', u'2014'
 
 
 def defaults(form):
+    if form.form_version < u'2018':
+        return defaults_pre_2018(form)
+
+    f = form
+
+    f.beginning_date = ''
+    f.ending_date = ''
+    f.ending_year = ''
+    f.ein = ''
+    f.name = ''
+    f.street = ''
+    f.city_state_zip = ''
+
+    f.lineA = f.lineB = ''
+    f.lineC = False
+    f.lineE = ''
+    f.lineF = zero
+    f.lineG = False
+    f.lineH = '12345'
+    f.lineI = 1
+
+    f.line1a = f.line1b = f.line2 = f.line4 = f.line5 = zero
+    for n in range(7, 20):
+        f['line', n] = zero
+    f.line22a = f.line22b = f.line23a = f.line23b = f.line23c = zero
+    f.line24 = zero
+    f.line27_credited = zero
+
+    f.signer_title = ''
+    f.discuss = False
+
+    f.B = Form()
+    f.B.line1 = 'a'
+    f.B.line2_activity = ''
+    f.B.line2_product_or_service = ''
+    f.B.line3 = False
+    # 4a and 4b tables go here if we ever implement them
+    f.B.line4a = []
+    f.B.line4b = []
+    f.B.line5ai = 0
+    f.B.line5aii = 0
+    f.B.line5bi = 0
+    f.B.line5bii = 0
+    f.B.line6 = False
+    f.B.line7 = False
+    f.B.line8 = zero
+    f.B.line9 = False
+    f.B.line10 = True
+    f.B.line11 = True
+    f.B.line12 = False
+    f.B.line13 = False
+    f.B.line14a = False
+    f.B.line14b = None
+    f.B.line15 = False
+
+    f.K = Form()
+    f.K.line2 = zero
+    f.K.line3a = f.K.line3b = zero
+    f.K.line4 = f.K.line5a = f.K.line5b = f.K.line6 = f.K.line7 = zero
+    f.K.line8a = f.K.line8b = f.K.line8c = f.K.line9 = f.K.line10 = zero
+    f.K.line10_type = ''
+    f.K.line11 = f.K.line12a = f.K.line12b = f.K.line12c = f.K.line12d = zero
+    f.K.line12c_type = ''
+    f.K.line12d_type = ''
+    f.K.line13a = f.K.line13b = f.K.line13c = f.K.line13d = zero
+    f.K.line13e = f.K.line13f = f.K.line13g = zero
+    f.K.line13d_type = ''
+    f.K.line13e_type = ''
+    f.K.line13g_type = ''
+    for i in range(ord('a'), ord('m') + 1):
+        f.K['line14', chr(i)] = zero
+    f.K.line14n_accounting = 'a'
+    for i in range(ord('a'), ord('f') + 1):
+        f.K['line15', chr(i)] = zero
+    for i in range(ord('a'), ord('e') + 1):
+        f.K['line16', chr(i)] = zero
+    f.K.line17a = f.K.line17b = f.K.line17c = zero
+
+    f.M2 = Form()
+    f.M2.line1a = zero
+    f.M2.line3a = zero
+    f.M2.line5a = zero
+    f.M2.line7a = zero
+
+    f.M2.line1b = zero
+    f.M2.line3b = zero
+    f.M2.line5b = zero
+    f.M2.line7b = zero
+
+    f.M2.line1c = zero
+    f.M2.line7c = zero
+
+def defaults_pre_2018(form):
     f = form
 
     f.beginning_date = ''
@@ -104,7 +197,6 @@ def defaults(form):
     f.M2.line1c = zero
     f.M2.line7c = zero
 
-
 def compute(form):
     f = form
     validate.year(int(f.form_version))
@@ -178,7 +270,6 @@ def fill_out(form, pdf):
     pdf[5] = f.street
     pdf[6] = f.city_state_zip
     pdf[7] = f.lineA
-    # pdf[8] = f.lineB
 
     pdf[8] = f.ein
     pdf[9] = f.lineE
@@ -202,11 +293,16 @@ def fill_out(form, pdf):
     split(f.line26)
     split(f.line27_credited)
     split(f.line27)
+
+    pdf.pattern = 'ABC[0].f1_{}[0]'
+
+    pdf[8] = f.lineB  # same name as line D
+
     pdf.pattern = 'topmostSubform[0].Page1[0].{}'
 
     pdf['c1_01_0_[0]'] = 'Yes' if f.lineC else 'Off'
-    pdf['c1_02_0_[0]'] = 'Yes' if f.lineG else 'Off'
-    pdf['c1_02_0_[1]'] = 'Off' if f.lineG else 'No'
+    pdf['c1_2[0]'] = '1' if f.lineG else 'Off'
+    pdf['c1_2[1]'] = 'Off' if f.lineG else '2'
 
     for i in range(1, 5+1):
         checked = str(i) in f.lineH
@@ -235,165 +331,90 @@ def fill_out(form, pdf):
     pdf['c2_05[1]'] = 'Off' if (f.B.line5ai or f.B.line5aii) else '2'
     pdf['c2_06[0]'] = '1' if (f.B.line5bi or f.B.line5bii) else 'Off'
     pdf['c2_06[1]'] = 'Off' if (f.B.line5bi or f.B.line5bii) else '2'
-    pdf['c2_07[0]'] = '1' if f.B.line6 else 'Off'
-    pdf['c2_07[1]'] = 'Off' if f.B.line6 else '2'
-    pdf['c2_11[0]'] = '1' if f.B.line7 else 'Off'
-    pdf['p2-t22[0]'] = zstr(f.B.line8)
-    pdf['p2-t23[0]'] = zstr(f.B.line9)
-    pdf['c2_100_0_[0]'] = '1' if f.B.line10 else 'Off'
-    pdf['c2_101_0_[0]'] = '1' if f.B.line11 else 'Off'
-    pdf['c2_101_0_[1]'] = 'Off' if f.B.line11 else '2'
-    pdf['p2-t22[1]'] = zstr(f.B.line11)
-    pdf['c2_13_0_[0]'] = '1' if f.B.line12 else 'Off'
-    pdf['c2_13_0_[1]'] = 'Off' if f.B.line12 else '2'
-    if f.form_version == u'2012':
-        pdf['c2_80_0_[0]'] = '1' if f.B.line13a else 'Off'
-        pdf['c2_80_0_[1]'] = 'Off' if f.B.line13a else '2'
-    elif f.form_version == u'2016':
-        pdf['c2_300[0]'] = '1' if f.B.line13a else 'Off'
-        pdf['c2_300[1]'] = 'Off' if f.B.line13a else '2'
-    else:
-        pdf['c2_13a_0_[0]'] = '1' if f.B.line13a else 'Off'
-        pdf['c2_13a_0_[1]'] = 'Off' if f.B.line13a else '2'
-    pdf['c2_07_0_[0]'] = '1' if f.B.line13b else 'Off'
-    pdf['c2_07_0_[1]'] = 'Off' if f.B.line13b else '2'
 
-    if f.form_version == u'2010':
-        pdf.pattern = '.p2-t{}[0]'
+    def truefalse(value, field, yes_suffix='[0]', no_suffix='[1]'):
+        pdf[field + yes_suffix] = '1' if value else 'Off'
+        pdf[field + no_suffix] = 'Off' if value else '2'
 
-        split(f.K.line1, 24)
-        split(f.K.line4, 34)
-        split(f.K.line11, 55)
-        split(f.K.line16c, 125)
-        split(f.K.line16d, 127)
-        split(f.K.line17a, 131)
-        split(f.K.line18, 137)
+    truefalse(f.B.line6, 'c2_06')
+    truefalse(f.B.line7, 'c2_07')
+    truefalse(f.B.line9, 'c2_09')
+    truefalse(f.B.line10, 'c2_10')
+    truefalse(f.B.line11, 'c2_11')
 
-        pdf.pattern = '.p4-t{}[0]'
+    pdf.pattern = 'topmostSubform[0].Page3[0].schb[0].{}'
 
-        pdf[87] = zstr(f.M2.line1a)
-        pdf[90] = zstr(f.M2.line2a)
-        pdf[91] = zstr(f.M2.line3a)
-        pdf[93] = zstr(f.M2.line4a)
-        pdf[94] = zstr(f.M2.line5a)
-        pdf[96] = zstr(f.M2.line6a)
-        pdf[99] = zstr(f.M2.line7a)
-        pdf[102] = zstr(f.M2.line8a)
+    truefalse(f.B.line12, 'c3_1')
+    truefalse(f.B.line13, 'c3_2')
+    truefalse(f.B.line14a, 'c3_3')
+    truefalse(f.B.line14b, 'c3_4')
+    truefalse(f.B.line15, 'c3_5')
 
-    else:
-        pdf.pattern = '.p3-t{}[0]'
+    pdf.pattern = 'f3_{}[0]'
 
-        split(f.K.line1, 100)
-        split(f.K.line2, 102)
+    split(f.K.line1, 3)
+    split(f.K.line2)
 
-        split(f.K.line3a, 104)
-        split(f.K.line3b, 106)
+    split(f.K.line3a)
+    split(f.K.line3b)
 
-        split(f.K.line3c, 108)
-        split(f.K.line4, 110)
-        split(f.K.line5a, 112)
+    split(f.K.line3c)
+    split(f.K.line4)
+    split(f.K.line5a)
 
-        split(f.K.line5b, 114)
+    split(f.K.line5b)
 
-        split(f.K.line6, 116)
-        split(f.K.line7, 118)
-        split(f.K.line8a, 120)
+    split(f.K.line6)
+    split(f.K.line7)
+    split(f.K.line8a)
 
-        split(f.K.line8b, 122)
-        split(f.K.line8c, 124)
+    split(f.K.line8b)
+    split(f.K.line8c)
 
-        split(f.K.line9, 126)
-        pdf[128] = zstr(f.K.line10_type)
-        split(f.K.line10, 129)
-        split(f.K.line11, 131)
-        split(f.K.line12a, 133)
-        split(f.K.line12b, 135)
-        pdf[137] = zstr(f.K.line12c_type)
-        split(f.K.line12c, 138)
-        pdf[140] = zstr(f.K.line12d_type)
-        split(f.K.line12d, 141, j=145)
-        split(f.K.line13a, 146)
-        split(f.K.line13b, 148)
-        split(f.K.line13c, 150)
-        pdf[152] = zstr(f.K.line13d_type)
-        split(f.K.line13d, 153)
-        pdf[155] = zstr(f.K.line13e_type)
-        split(f.K.line13e, 156)
-        split(f.K.line13f, 158)
-        pdf[160] = zstr(f.K.line13g_type)
-        split(f.K.line13g, 161)
+    split(f.K.line9)
+    pdf[31] = zstr(f.K.line10_type)
+    split(f.K.line10, 32)
 
-        pdf[163] = zstr(f.K.line14a)
-        split(f.K.line14b, 164)
-        split(f.K.line14c, 166)
-        split(f.K.line14d, 168)
-        split(f.K.line14e, 170)
-        split(f.K.line14f, 172)
-        split(f.K.line14g, 174)
-        split(f.K.line14h, 176)
-        split(f.K.line14i, 178)
-        split(f.K.line14j, 180)
-        split(f.K.line14k, 182)
-        split(f.K.line14l, 184)
-        split(f.K.line14m, 186)
+    split(f.K.line11)
+    split(f.K.line12a)
+    split(f.K.line12b)
+    # several fields skipped that I don't need
 
-        split(f.K.line15a, 188)
-        split(f.K.line15b, 190)
-        split(f.K.line15c, 192)
-        split(f.K.line15d, 194)
-        split(f.K.line15e, 196)
-        split(f.K.line15f, 198)
+    pdf.pattern = 'f4_{}[0]'
 
-        split(f.K.line16a, 200)
-        split(f.K.line16b, 202)
-        split(f.K.line16c, 204) # penalties, fines; half of meals
-        split(f.K.line16d, 206)
-        split(f.K.line16e, 208)
+    split(f.K.line16c, 17) # half of meals
+    split(f.K.line18, 29)
 
-        pdf.pattern = '{}'
+    # TODO: Schedule L
+    # TODO: Schedule M-1
 
-        if f.K.line14l:
-            pdf['c3_01_0_[0]'] = 'A' if f.K.line14n_accounting == 'a' else 'Off'
-            pdf['c3_01_0_[1]'] = 'B' if f.K.line14n_accounting == 'b' else 'Off'
+    pdf.pattern = 'f5_{}[0]'
 
-        pdf.pattern = 'p4-t{}[0]'
+    pdf[19] = zstr(f.M2.line1a)
+    pdf[20] = zstr(f.M2.line1b)
+    pdf[21] = zstr(f.M2.line1c)
 
-        split(f.K.line17a, 100)
-        split(f.K.line17b, 102)
-        split(f.K.line17c, 104)
+    pdf[23] = zstr(f.M2.line2a)
 
-        split(f.K.line18, 106)
+    pdf[24] = zstr(f.M2.line3a)
+    #pdf[121] = zstr(f.M2.line3b)
 
-        # TODO: Schedule L
-        # TODO: Schedule M-1
+    pdf[26] = zstr(f.M2.line4a)
 
-        pdf.pattern = 'p5-t{:03}[0]'
+    pdf[27] = zstr(f.M2.line5a)
+    #pdf[124] = zstr(f.M2.line5b)
 
-        pdf[116] = zstr(f.M2.line1a)
-        pdf[117] = zstr(f.M2.line1b)
-        pdf[118] = zstr(f.M2.line1c)
+    pdf[29] = zstr(f.M2.line6a)
+    pdf[30] = zstr(f.M2.line6b)
+    pdf[31] = zstr(f.M2.line6c)
 
-        pdf[119] = zstr(f.M2.line2a)
+    pdf[33] = zstr(f.M2.line7a)
+    pdf[34] = zstr(f.M2.line7b)
+    pdf[35] = zstr(f.M2.line7c)
 
-        pdf[120] = zstr(f.M2.line3a)
-        pdf[121] = zstr(f.M2.line3b)
-
-        pdf[122] = zstr(f.M2.line4a)
-
-        pdf[123] = zstr(f.M2.line5a)
-        pdf[124] = zstr(f.M2.line5b)
-
-        pdf[125] = zstr(f.M2.line6a)
-        pdf[126] = zstr(f.M2.line6b)
-        pdf[127] = zstr(f.M2.line6c)
-
-        pdf[128] = zstr(f.M2.line7a)
-        pdf[129] = zstr(f.M2.line7b)
-        pdf[130] = zstr(f.M2.line7c)
-
-        pdf[131] = zstr(f.M2.line8a)
-        pdf[132] = zstr(f.M2.line8b)
-        pdf[133] = zstr(f.M2.line8c)
+    pdf[37] = zstr(f.M2.line8a)
+    pdf[38] = zstr(f.M2.line8b)
+    pdf[29] = zstr(f.M2.line8c)
 
 def fill_out_pre_2018(form, pdf):
     f = form
