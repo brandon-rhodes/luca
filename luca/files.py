@@ -1,6 +1,6 @@
 """Routines to access a luca file tree."""
 
-import ConfigParser
+# import ConfigParser
 import os
 from datetime import datetime
 from .ofx import institutions, parse
@@ -53,7 +53,7 @@ def ofx_create(filename, data):
         filename = before + date + letter + after
         pathname = os.path.join(ofxdir(), filename)
         try:
-            fd = os.open(pathname, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0666)
+            fd = os.open(pathname, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o666)
         except OSError:
             letter = chr(ord(letter or 'a') + 1)
         else:
@@ -64,7 +64,7 @@ def ofx_create(filename, data):
         # Make the file read-only now that it contains data.
         mask = os.umask(0)
         os.umask(mask)
-        os.fchmod(fd, 0444 & ~mask)
+        os.fchmod(fd, 0o444 & ~mask)
 
 def ofx_open(filename, mode='rb'):
     return open(os.path.join(ofxdir(), filename), mode)

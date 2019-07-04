@@ -1,7 +1,7 @@
 """Build an OFX XML request."""
 
 import re
-import urllib2
+# import urllib2
 
 from .schema import (ElementMaker, build_sonrq, build_acctreq,
                      build_stmttrnrq, build_ccstmtrq, build_invstmttrnrq)
@@ -47,16 +47,16 @@ def _download(institution, username, password, messages):
     try:
         u = urllib2.urlopen(r)
     except urllib2.HTTPError as e:
-        print '-----------'
+        print('-----------')
         for key, value in r.header_items():
-            print '{}: {}'.format(key, value)
-        print
-        print r.get_data()
-        print '-----------'
-        print e
-        print e.headers
-        print e.read()
-        print '-----------'
+            print('{}: {}'.format(key, value))
+        print()
+        print(r.get_data())
+        print('-----------')
+        print(e)
+        print(e.headers)
+        print(e.read())
+        print('-----------')
         exit(1)
 
     try:

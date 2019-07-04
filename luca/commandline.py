@@ -40,7 +40,7 @@ def main():
     force_styling = None if args['-C'] else True if args['-c'] else False
     terminal=blessings.Terminal(force_styling=force_styling)
     for line in _main(args, terminal):
-        print line
+        print(line)
 
 
 def _main(args, terminal):
@@ -62,8 +62,8 @@ def _main(args, terminal):
 
         form_seq = luca.forms.actions.list_forms()
         for module_name, title, versions in sorted(form_seq):
-            print t.green('{:<{}}').format(module_name, indent - 1),
-            print t.blue(fill(title)[14:])
+            print(t.green('{:<{}}').format(module_name, indent - 1), end=' ')
+            print(t.blue(fill(title)[14:]))
 
     elif args['form']:
         luca.forms.actions.print_defaults(args['<name>'], args['<version>'])
@@ -87,7 +87,7 @@ def old_download_command(args):
     if args.a:  # or if no account list exists yet, then:
         data = io.download_accounts(login.fi, login.username, login.password)
         files.ofx_create(nickname + '-accounts-DATE.xml', data)
-        print 'Read', len(data), 'bytes'
+        print('Read', len(data), 'bytes')
         if args.a:
             return
     account_list = files.get_most_recent_accounts(login)

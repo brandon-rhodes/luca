@@ -9,7 +9,7 @@ start_of_day = -1
 end_of_day = 1
 one_day = timedelta(days=1)
 
-_checking_beginning_re = re.compile(ur"""
+_checking_beginning_re = re.compile(r"""
     \s+
     (\d\d)/(\d\d)\s+       # "Posting Date"
     (ID\ \d\d\d\d\ .*)     # (Account name)
@@ -17,14 +17,14 @@ _checking_beginning_re = re.compile(ur"""
     (\d+\.\d\d)$           # "NEW BALANCE"
     """, re.VERBOSE)
 
-_checking_ending_re = re.compile(ur"""
+_checking_ending_re = re.compile(r"""
     \s+
     (\d\d)/(\d\d)\s+       # "Posting Date"
     Ending\ Balance\s+
     (\d+\.\d\d)$           # "NEW BALANCE"
     """, re.VERBOSE)
 
-_checking_transaction_re = re.compile(ur"""
+_checking_transaction_re = re.compile(r"""
     \s+
     (\d\d)/(\d\d)\s+       # "Posting Date"
     (?:(\d\d)/(\d\d)\s+)?  # "Effective Date"
@@ -114,7 +114,7 @@ def import_dccu_checking_pdf(text):
     return balances, transactions
 
 
-_visa_balances_re = re.compile(ur"""
+_visa_balances_re = re.compile(r"""
     \s*
     Previous\ Balance
     \s+
@@ -125,7 +125,7 @@ _visa_balances_re = re.compile(ur"""
     \$(?P<new_balance>[\d,]+\.\d\d)$
     """, re.VERBOSE)
 
-_visa_transaction_re = re.compile(ur"""
+_visa_transaction_re = re.compile(r"""
     \s*
     (\d+\s+)?                  # "Reference Number"
     (\d\d)/(\d\d)\s+           # "Trans Date"

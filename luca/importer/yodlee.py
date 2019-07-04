@@ -7,8 +7,8 @@ Open question:
 """
 import csv
 import os
-from ConfigParser import RawConfigParser
-from cStringIO import StringIO
+# from ConfigParser import RawConfigParser
+from io import StringIO
 
 indent = '   '
 standard_heading = (
@@ -58,17 +58,17 @@ def parse(content):
         account_name = ' '.join(row['Account Name'].split())
 
         for comment in comments:
-            print ';', comment.strip()
-        print '{}/{}/{}'.format(year, month, day),
+            print(';', comment.strip())
+        print('{}/{}/{}'.format(year, month, day), end=' ')
         if row['Status'] == 'posted':
-            print '*',
+            print('*', end=' ')
         else:
             raise ValueError('unrecognized Status %r' % row['Status'])
-        print '{}'.format(description)
-        print indent, '{:40}  {:>14}'.format(
-            row['Category'], '$' + row['Amount'])
-        print indent, account_name
-        print
+        print('{}'.format(description))
+        print(indent, '{:40}  {:>14}'.format(
+            row['Category'], '$' + row['Amount']))
+        print(indent, account_name)
+        print()
 
 
 def split_dates(rows):

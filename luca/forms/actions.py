@@ -5,13 +5,13 @@ import os
 import re
 import subprocess
 import sys
-from StringIO import StringIO
+from io import StringIO
 from collections import defaultdict
 from subprocess import Popen, PIPE
 
 import fdfgen
 import requests
-from pyPdf import PdfFileWriter, PdfFileReader
+# from pyPdf import PdfFileWriter, PdfFileReader
 from reportlab.pdfgen.canvas import Canvas
 
 from luca.forms import formlib
@@ -47,7 +47,7 @@ def print_defaults(form_name, form_version):
         print ('Please specify a particular version of this form'
                ' with a command like:')
         for version in form_module.versions:
-            print '   luca form {} {}'.format(form_name, version)
+            print('   luca form {} {}'.format(form_name, version))
         return
 
     form = formlib.Form()
@@ -57,7 +57,7 @@ def print_defaults(form_name, form_version):
     if hasattr(form_module, 'defaults'):
         form_module.defaults(form)
 
-    print formlib.dump_json(form).encode('utf-8').strip()
+    print(formlib.dump_json(form).encode('utf-8').strip())
 
 
 def complete(paths, should_produce_pdfs):
@@ -65,7 +65,7 @@ def complete(paths, should_produce_pdfs):
     tuples = []
 
     for json_path in paths:
-        print json_path,
+        print(json_path, end=' ')
         sys.stdout.flush()
         form_module, form = complete_form(json_path)
 
@@ -78,9 +78,9 @@ def complete(paths, should_produce_pdfs):
         try:
             pdf_path = save_pdf(json_path, form_module, form)
         except IOError as e:
-            print '->', 'PDF rendering failed:', str(e)
+            print('->', 'PDF rendering failed:', str(e))
             continue
-        print '->', pdf_path
+        print('->', pdf_path)
 
     if len(paths) < 2:
         return
@@ -92,7 +92,7 @@ def complete(paths, should_produce_pdfs):
         form  # necessary to establish scoping for the following eval
         actual = eval('form.' + name)
         if actual != value:
-            print json_path, name, '=', actual, 'but should be', dstr(value)
+            print(json_path, name, '=', actual, 'but should be', dstr(value))
         # TODO: add --verbose and print in that case too
 
     for json_path, form_module, form, in tuples:
@@ -100,7 +100,7 @@ def complete(paths, should_produce_pdfs):
         if form_check is not None:
             form_check(form, forms, eq)
 
-    print 'Ran', n[0], 'check{}'.format('' if n[0] == 1 else 's')
+    print('Ran', n[0], 'check{}'.format('' if n[0] == 1 else 's'))
 
 
 def complete_form(json_path):
@@ -167,7 +167,7 @@ def download_pdf(pdfpath):
         url = 'http://luca-forms.s3.amazonaws.com/' + pdfpath
         response = requests.get(url)
         if not response.ok:
-            print 'Error: could not download form from', url
+            print('Error: could not download form from', url)
             return
         data = requests.get(url).content
         with open(fullpath, 'w') as f:

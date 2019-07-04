@@ -5,7 +5,7 @@ import csv
 import os
 import re
 import sys
-from StringIO import StringIO
+from io import StringIO
 from collections import defaultdict
 from copy import copy
 from decimal import Decimal

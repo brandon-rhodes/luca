@@ -58,7 +58,7 @@ def analyze_tree(tree, category):
     elif isinstance(tree, dict):
         if len(tree) != 1:
             raise ValueError('len(dict) != 1')
-        rule, subtree = tree.items()[0]
+        rule, subtree = list(tree.items())[0]
         r = analyze_rule(rule)
         if isinstance(r, AST):
             test = r
@@ -102,9 +102,6 @@ def analyze_rule(rule):
             return eparse('t.date >= %r and t.date <= %r' % (a, b))
 
     if isinstance(rule, str):
-        rule = rule.decode('ascii')
-
-    if isinstance(rule, unicode):
         if rule.startswith(u'/') and rule.endswith(u'/'):
             return eparse('search(%r, t.full_text)' % rule[1:-1])
         elif rule.startswith(u'~/') and rule.endswith(u'/'):
@@ -135,7 +132,7 @@ def analyze_rule(rule):
                         't.date <= datetime.date(t.date.year, %r, %r)'
                         % (month1, day1, month2, day2))
 
-    if isinstance(rule, unicode):
+    if isinstance(rule, str):
         n = int(rule) if rule.isdigit() else None
     else:
         n = rule if isinstance(rule, int) else None
