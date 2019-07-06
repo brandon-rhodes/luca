@@ -18,7 +18,7 @@ def importer(csvfile):
 
     sample = csvfile.read()
 
-    if csv.Sniffer().has_header(sample):
+    if True: #csv.Sniffer().has_header(sample):
         balances = []
         transactions = _parse_headered_file(sample.splitlines())
         return balances, transactions
@@ -43,11 +43,12 @@ def _parse_headered_file(csvfile):
     reader = csv.DictReader(csvfile)
     names = reader.fieldnames
 
-    account_field = _first(names, ['Card', 'Account'])
+    account_field = _first(names, ['Card', 'Account', 'Account Name'])
     date_field = _first(names, ['Transaction Date', 'Date'])
-    description_field = _first(names, ['Description'])
+    description_field = _first(names, ['Original Description', 'Description'])
     credit_field = _first(names, ['Amount', 'Credit'])
     debit_field = _first(names, ['Debit'], error=False)
+    polarity_field = _first(names, ['Transaction Type'], error=False)
 
     for row in reader:
         t = Transaction()
@@ -61,6 +62,8 @@ def _parse_headered_file(csvfile):
             t.amount = - Decimal(row[debit_field])
         else:
             t.amount = Decimal(0)
+        if polarity_field and row[polarity_field].lower().startswith('debit'):
+            t.amount *= -1
         yield t
 
 def _first(fieldnames, candidates, error=True):
