@@ -38,9 +38,10 @@ class Transaction(object):
 
 
     def set_full_text(self):
-        self.full_text = '{}  {}  {:,}{}'.format(
-            self.date.strftime('%d/%m'),
+        self.full_text = '{}  {}  {}  {:,}{}'.format(
+            self.date.strftime('%Y-%m-%d'),
             self.description,
+            self.account,
             abs(self.amount),
             '-' if self.amount < 0 else '')
 
