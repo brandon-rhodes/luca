@@ -44,11 +44,11 @@ def print_defaults(form_name, form_version):
                 form_module_name))
 
     if form_version is None or form_version not in form_module.versions:
-        print ('Please specify a particular version of this form'
-               ' with a command like:')
+        message = ['Please specify a particular version of this form'
+                   ' with a command like:']
         for version in form_module.versions:
-            print '   luca form {} {}'.format(form_name, version)
-        return
+            message.append('\n   luca form {} {}'.format(form_name, version))
+        sys.exit(''.join(message))
 
     form = formlib.Form()
     form.form_name = form_name
