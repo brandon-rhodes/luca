@@ -43,9 +43,17 @@ def print_defaults(form_name, form_version):
         raise ValueError('cannot find a Luca form named {!r}'.format(
                 form_module_name))
 
-    if form_version is None or form_version not in form_module.versions:
+    message = None
+
+    if form_version is None:
         message = ['Please specify a particular version of this form'
                    ' with a command like:']
+    elif form_version not in form_module.versions:
+        message = ['Sorry, but luca does not support that form for the year'
+                   ' {!r}.\nHere are the years luca supports that form:'
+                   .format(form_version)]
+
+    if message:
         for version in form_module.versions:
             message.append('\n   luca form {} {}'.format(form_name, version))
         sys.exit(''.join(message))
