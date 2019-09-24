@@ -4,7 +4,7 @@ Usage:
   luca forms
   luca form <name> [<version>]
   luca complete [-j] <tax-filing.json>...
-  luca tally [-bcCdt] <rules.yaml> <statement-path>...
+  luca tally [-bcCdt] [-s key] <rules.yaml> <statement-path>...
   luca (-h | --help)
 
 Options:
@@ -13,6 +13,7 @@ Options:
   -C    Remove ANSI color codes from output, even if on a tty
   -d    Output raw CSV data instead of formatting results for the screen
   -j    Only update JSON files; do not produce new PDF printouts
+  -s x  Sort by 'amount' or by 'date' (the default).
   -t    Show the transactions that have been sorted into every category
 
 """
@@ -75,7 +76,7 @@ def _main(args, terminal):
         from luca.tally import run_yaml_file
         lines = run_yaml_file(
             terminal, args['<rules.yaml>'], args['<statement-path>'],
-            args['-b'], args['-d'], args['-t'])
+            args['-b'], args['-d'], args['-t'], args['-s'])
         for line in lines:
             yield line
 

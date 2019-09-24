@@ -63,7 +63,8 @@ def group_transactions_by_category(transactions):
 
 
 def run_yaml_file(terminal, path, statement_paths,
-                  show_balances, show_data, show_transactions):
+                  show_balances, show_data, show_transactions,
+                  sort_by='date'):
 
     t = terminal
     screen_width = int(os.environ.get('COLUMNS', '0')) or t.width or 80
@@ -182,6 +183,11 @@ def run_yaml_file(terminal, path, statement_paths,
         transaction_list = catdict.get(category, None)
         if not transaction_list:
             continue
+
+        if sort_by == 'amount':
+            transaction_list.sort(key=lambda t: -t.amount)
+        elif sort_by == 'date':
+            transaction_list.sort(key=lambda t: t.date)
 
         add('')
 
