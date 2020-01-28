@@ -256,13 +256,11 @@ def fill_out(form, pdf):
 
     def split(value, i=None, j=None):
         if i is None:
-            i = last_split[0] + 2
+            i = last_split[0] + 1
         last_split[0] = i
-        if j is None:
-            j = i + 1
-        pdf[i], pdf[j] = zzstr(value)
+        pdf[i] = zstr(value)
 
-    pdf.pattern = '.f1_{}[0]'
+    pdf.pattern = '.f1_{:02}[0]'
 
     pdf[1] = f.beginning_date
     pdf[2] = f.ending_date
@@ -271,11 +269,12 @@ def fill_out(form, pdf):
     pdf[4] = f.name
     pdf[5] = f.street
     pdf[6] = f.city_state_zip
-    pdf[7] = f.lineA
 
-    pdf[8] = f.ein
-    pdf[9] = f.lineE
-    split(f.lineF, 10)
+    pdf[7] = f.lineA
+    pdf[8] = f.lineB
+    pdf[9] = f.ein
+    pdf[10] = f.lineE
+    split(f.lineF, 11)
 
     pdf[12] = str(f.lineI)
     split(f.line1a, 13)
@@ -296,39 +295,39 @@ def fill_out(form, pdf):
     split(f.line27_credited)
     split(f.line27)
 
-    pdf.pattern = 'ABC[0].f1_{}[0]'
+    pdf.pattern = 'ABC[0].'
 
-    pdf[8] = f.lineB  # same name as line D
+    pdf['f1_08[0]'] = f.lineB  # same name as line D
+    pdf['c1_1[0]'] = '1' if f.lineC else 'Off'
 
     pdf.pattern = 'topmostSubform[0].Page1[0].{}'
 
-    pdf['c1_01_0_[0]'] = 'Yes' if f.lineC else 'Off'
     pdf['c1_2[0]'] = '1' if f.lineG else 'Off'
     pdf['c1_2[1]'] = 'Off' if f.lineG else '2'
 
     for i in range(1, 5+1):
         checked = str(i) in f.lineH
-        pdf['c1_0{}_0_[0]'.format(i + 2)] = 'Yes' if checked else 'Off'
+        pdf['c1_{}[0]'.format(i + 2)] = '1' if checked else 'Off'
 
-    pdf['p1_t85[0]'] = f.signer_title  # note the underscore!
-    pdf['c1_9_0_[0]'] = 'Yes' if f.discuss else 'Off'
-    pdf['c1_9_0_[1]'] = 'Off' if f.discuss else 'No'
+    pdf['f1_49[0]'] = f.signer_title
+    pdf['c1_10[0]'] = 'Yes' if f.discuss else 'Off'
+    pdf['c1_10[1]'] = 'Off' if f.discuss else 'No'
 
     pdf.pattern = 'topmostSubform[0].Page2[0].{}'
 
-    pdf['c2_01_0_[0]'] = '1' if f.B.line1 == 'a' else 'Off'
-    pdf['c2_01_0_[1]'] = '2' if f.B.line1 == 'b' else 'Off'
+    pdf['c2_1[0]'] = '1' if f.B.line1 == 'a' else 'Off'
+    pdf['c2_1[1]'] = '2' if f.B.line1 == 'b' else 'Off'
     if f.B.line1 not in ('a', 'b'):
-        pdf['c2_01_0_[2]'] = '3'
-        pdf['f2_1[0]'] = f.B.line1
-    pdf['f2_2[0]'] = f.B.line2_activity
-    pdf['f2_3[0]'] = f.B.line2_product_or_service
-    pdf['c2_02[0]'] = '1' if f.B.line3 else 'Off'
-    pdf['c2_02[1]'] = 'Off' if f.B.line3 else '2'
-    pdf['c2_03[0]'] = '1' if f.B.line4a else 'Off'
-    pdf['c2_03[1]'] = 'Off' if f.B.line4a else '2'
-    pdf['c2_04[0]'] = '1' if f.B.line4b else 'Off'
-    pdf['c2_04[1]'] = 'Off' if f.B.line4b else '2'
+        pdf['c2_1[2]'] = '3'
+        pdf['f2_01[0]'] = f.B.line1
+    pdf['f2_02[0]'] = f.B.line2_activity
+    pdf['f2_03[0]'] = f.B.line2_product_or_service
+    pdf['c2_2[0]'] = '1' if f.B.line3 else 'Off'
+    pdf['c2_2[1]'] = 'Off' if f.B.line3 else '2'
+    pdf['c2_3[0]'] = '1' if f.B.line4a else 'Off'
+    pdf['c2_3[1]'] = 'Off' if f.B.line4a else '2'
+    pdf['c2_4[0]'] = '1' if f.B.line4b else 'Off'
+    pdf['c2_4[1]'] = 'Off' if f.B.line4b else '2'
     pdf['c2_05[0]'] = '1' if (f.B.line5ai or f.B.line5aii) else 'Off'
     pdf['c2_05[1]'] = 'Off' if (f.B.line5ai or f.B.line5aii) else '2'
     pdf['c2_06[0]'] = '1' if (f.B.line5bi or f.B.line5bii) else 'Off'
@@ -344,7 +343,7 @@ def fill_out(form, pdf):
     truefalse(f.B.line10, 'c2_10')
     truefalse(f.B.line11, 'c2_11')
 
-    pdf.pattern = 'topmostSubform[0].Page3[0].schb[0].{}'
+    pdf.pattern = 'topmostSubform[0].Page3[0].{}'
 
     truefalse(f.B.line12, 'c3_1')
     truefalse(f.B.line13, 'c3_2')
@@ -352,7 +351,7 @@ def fill_out(form, pdf):
     truefalse(f.B.line14b, 'c3_4')
     truefalse(f.B.line15, 'c3_5')
 
-    pdf.pattern = 'f3_{}[0]'
+    pdf.pattern = 'f3_{:02}[0]'
 
     split(f.K.line1, 3)
     split(f.K.line2)
@@ -375,22 +374,22 @@ def fill_out(form, pdf):
 
     split(f.K.line9)
     pdf[31] = zstr(f.K.line10_type)
-    split(f.K.line10, 32)
+    split(f.K.line10, 18)
 
     split(f.K.line11)
     split(f.K.line12a)
     split(f.K.line12b)
     # several fields skipped that I don't need
 
-    pdf.pattern = 'f4_{}[0]'
+    pdf.pattern = 'Page4[0].f4_{:02}[0]'
 
-    split(f.K.line16c, 17) # half of meals
-    split(f.K.line18, 29)
+    split(f.K.line16c, 9) # half of meals
+    split(f.K.line18, 15)
 
     # TODO: Schedule L
     # TODO: Schedule M-1
 
-    pdf.pattern = 'f5_{}[0]'
+    pdf.pattern = 'f5_{:02}[0]'
 
     pdf[19] = zstr(f.M2.line1a)
     pdf[20] = zstr(f.M2.line1b)
@@ -398,25 +397,25 @@ def fill_out(form, pdf):
 
     pdf[23] = zstr(f.M2.line2a)
 
-    pdf[24] = zstr(f.M2.line3a)
+    pdf[27] = zstr(f.M2.line3a)
     #pdf[121] = zstr(f.M2.line3b)
 
-    pdf[26] = zstr(f.M2.line4a)
+    pdf[31] = zstr(f.M2.line4a)
 
-    pdf[27] = zstr(f.M2.line5a)
+    pdf[35] = zstr(f.M2.line5a)
     #pdf[124] = zstr(f.M2.line5b)
 
-    pdf[29] = zstr(f.M2.line6a)
-    pdf[30] = zstr(f.M2.line6b)
-    pdf[31] = zstr(f.M2.line6c)
+    pdf[39] = zstr(f.M2.line6a)
+    pdf[40] = zstr(f.M2.line6b)
+    pdf[41] = zstr(f.M2.line6c)
 
-    pdf[33] = zstr(f.M2.line7a)
-    pdf[34] = zstr(f.M2.line7b)
-    pdf[35] = zstr(f.M2.line7c)
+    pdf[43] = zstr(f.M2.line7a)
+    pdf[44] = zstr(f.M2.line7b)
+    pdf[45] = zstr(f.M2.line7c)
 
-    pdf[37] = zstr(f.M2.line8a)
-    pdf[38] = zstr(f.M2.line8b)
-    pdf[29] = zstr(f.M2.line8c)
+    pdf[47] = zstr(f.M2.line8a)
+    pdf[48] = zstr(f.M2.line8b)
+    pdf[49] = zstr(f.M2.line8c)
 
 def fill_out_2018(form, pdf):
     f = form
