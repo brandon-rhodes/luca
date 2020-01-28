@@ -64,7 +64,7 @@ def defaults(form):
     f.B.line7 = False
     f.B.line8 = zero
     f.B.line9 = False
-    f.B.line10 = True
+    f.B.line10 = True if form.form_version < u'2018' else False
     f.B.line11 = True
     f.B.line12 = False
     f.B.line13 = False
