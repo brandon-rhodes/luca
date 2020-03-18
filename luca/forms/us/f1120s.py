@@ -295,7 +295,7 @@ def fill_out(form, pdf):
     split(f.line27_credited)
     split(f.line27)
 
-    pdf.pattern = 'ABC[0].'
+    pdf.pattern = 'topmostSubform[0].Page1[0].ABC[0].{}'
 
     pdf['f1_08[0]'] = f.lineB  # same name as line D
     pdf['c1_1[0]'] = '1' if f.lineC else 'Off'
