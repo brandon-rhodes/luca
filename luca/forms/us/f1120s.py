@@ -38,11 +38,14 @@ def defaults(form):
     f.lineI = 1
 
     f.line1a = f.line1b = f.line2 = f.line4 = f.line5 = zero
-    for n in range(7, 20):
+    for n in range(7, 21):
         f['line', n] = zero
-    f.line22a = f.line22b = f.line23a = f.line23b = f.line23c = zero
-    f.line24 = zero
-    f.line27_credited = zero
+    for a in 'abc':
+        setattr(f, 'line23' + a, zero)
+    for a in 'abcdz':
+        setattr(f, 'line24' + a, zero)
+    f.line25 = zero
+    f.line28_credited = zero
 
     f.signer_title = ''
     f.discuss = False
@@ -70,6 +73,7 @@ def defaults(form):
     f.B.line14a = False
     f.B.line14b = None
     f.B.line15 = False
+    f.B.line16 = False
 
     f.K = Form()
     f.K.line2 = zero
@@ -300,22 +304,22 @@ def compute(form):
     f.line3 = f.line1c - f.line2
     f.line6 = f.line3 + f.line4 + f.line5
 
-    f.line20 = sum(f['line', n] for n in range(7, 20))
-    f.line21 = f.line6 - f.line20
+    f.line21 = sum(f['line', n] for n in range(7, 21))
+    f.line22 = f.line6 - f.line21
 
-    f.line22c = f.line22a + f.line22b
-    f.line23d = f.line23a + f.line23b + f.line23c
-    owed = f.line22c + f.line24 - f.line23d
+    f.line23c = f.line23a + f.line23b
+    f.line24z = f.line24a + f.line24b + f.line24c + f.line24d
+    owed = f.line23c + f.line25 + f.line24z
     if owed >= 0:
-        f.line25 = owed
-        f.line26 = zero
+        f.line26 = owed
         f.line27 = zero
+        f.line28 = zero
     else:
-        f.line25 = zero
-        f.line26 = -owed
-        f.line27 = -owed - f.line27_credited
+        f.line26 = zero
+        f.line27 = -owed
+        f.line28 = -owed - f.line28_credited
 
-    f.K.line1 = f.line21
+    f.K.line1 = f.line22
     f.K.line3c = f.K.line3a - f.K.line3b
     f.K.line18 = (
         f.K.line1 + f.K.line2 + f.K.line3c + f.K.line4
@@ -325,8 +329,8 @@ def compute(form):
         - f.K.line12d - f.K.line14l
         )
 
-    f.M2.line2a = abs(f.line21) if f.line21 > 0 else zero
-    f.M2.line4a = abs(f.line21) if f.line21 < 0 else zero
+    f.M2.line2a = abs(f.line22) if f.line22 > 0 else zero
+    f.M2.line4a = abs(f.line22) if f.line22 < 0 else zero
     f.M2.line6a = (f.M2.line1a + f.M2.line2a + f.M2.line3a
                    - f.M2.line4a - f.M2.line5a)
     f.M2.line8a = f.M2.line6a - f.M2.line7a
@@ -389,7 +393,181 @@ def fill_out(form, pdf):
         return fill_out_pre_2018(form, pdf)
     elif form.form_version <= u'2020':
         return fill_out_2019_2020(form, pdf)
+    elif form.form_version <= u'2022':
+        return fill_out_2021_2022(form, pdf)
 
+    f = form
+    pdf.load('us.f1120s--{}.pdf'.format(f.form_version))
+
+    last_split = [0]
+
+    def split(value, i=None, j=None):
+        if i is None:
+            i = last_split[0] + 1
+        last_split[0] = i
+        pdf[i] = zstr(value)
+
+    pdf.pattern = '.f1_{}[0]'
+
+    pdf[1] = f.beginning_date
+    pdf[2] = f.ending_date
+    pdf[3] = f.ending_year
+
+    pdf[4] = f.name
+    pdf[5] = f.street
+    pdf[6] = f.city_state_zip
+
+    pdf[7] = f.lineA
+    pdf[8] = f.lineB
+    pdf[9] = f.ein
+    pdf[10] = f.lineE
+    split(f.lineF, 11)
+
+    pdf[12] = str(f.lineI)
+    split(f.line1a, 13)
+    split(f.line1b)
+    split(f.line1c)
+    for i in range(2, 22+1):
+        split(f['line', i])
+    split(f.line23a)
+    split(f.line23b)
+    split(f.line23c)
+    split(f.line24a)
+    split(f.line24b)
+    split(f.line24c)
+    split(f.line24d)
+    split(f.line24z)
+    split(f.line25)
+    split(f.line26)
+    split(f.line27)
+    split(f.line28_credited)
+    split(f.line28)
+
+    pdf.pattern = 'topmostSubform[0].Page1[0].ABC[0].{}'
+
+    pdf['f1_08[0]'] = f.lineB  # same name as line D
+    pdf['c1_1[0]'] = '1' if f.lineC else 'Off'
+
+    pdf.pattern = 'topmostSubform[0].Page1[0].{}'
+
+    pdf['c1_2[0]'] = '1' if f.lineG else 'Off'
+    pdf['c1_2[1]'] = 'Off' if f.lineG else '2'
+
+    for i in range(1, 5+1):
+        checked = str(i) in f.lineH
+        pdf['c1_{}[0]'.format(i + 2)] = '1' if checked else 'Off'
+
+    pdf['f1_50[0]'] = f.signer_title
+    pdf['c1_10[0]'] = 'Yes' if f.discuss else 'Off'
+    pdf['c1_10[1]'] = 'Off' if f.discuss else 'No'
+
+    pdf.pattern = 'topmostSubform[0].Page2[0].{}'
+
+    pdf['c2_1[0]'] = '1' if f.B.line1 == 'a' else 'Off'
+    pdf['c2_1[1]'] = '2' if f.B.line1 == 'b' else 'Off'
+    if f.B.line1 not in ('a', 'b'):
+        pdf['c2_1[2]'] = '3'
+        pdf['f2_01[0]'] = f.B.line1
+    pdf['f2_2[0]'] = f.B.line2_activity
+    pdf['f2_3[0]'] = f.B.line2_product_or_service
+    pdf['c2_2[0]'] = '1' if f.B.line3 else 'Off'
+    pdf['c2_2[1]'] = 'Off' if f.B.line3 else '2'
+    pdf['c2_3[0]'] = '1' if f.B.line4a else 'Off'
+    pdf['c2_3[1]'] = 'Off' if f.B.line4a else '2'
+    pdf['c2_4[0]'] = '1' if f.B.line4b else 'Off'
+    pdf['c2_4[1]'] = 'Off' if f.B.line4b else '2'
+    pdf['c2_5[0]'] = '1' if (f.B.line5ai or f.B.line5aii) else 'Off'
+    pdf['c2_5[1]'] = 'Off' if (f.B.line5ai or f.B.line5aii) else '2'
+    pdf['c2_6[0]'] = '1' if (f.B.line5bi or f.B.line5bii) else 'Off'
+    pdf['c2_6[1]'] = 'Off' if (f.B.line5bi or f.B.line5bii) else '2'
+
+    def truefalse(value, field, yes_suffix='[0]', no_suffix='[1]'):
+        pdf[field + yes_suffix] = '1' if value else 'Off'
+        pdf[field + no_suffix] = 'Off' if value else '2'
+
+    truefalse(f.B.line6, 'c2_6')
+    truefalse(f.B.line7, 'c2_7')
+    truefalse(f.B.line9, 'c2_9')
+    truefalse(f.B.line10, 'c2_10')
+    truefalse(f.B.line11, 'c2_11')
+
+    pdf.pattern = 'topmostSubform[0].Page3[0].{}'
+
+    truefalse(f.B.line12, 'c3_1')
+    truefalse(f.B.line13, 'c3_2')
+    truefalse(f.B.line14a, 'c3_3')
+    truefalse(f.B.line14b, 'c3_4')
+    truefalse(f.B.line15, 'c3_5')
+    truefalse(f.B.line16, 'c3_6')
+
+    pdf.pattern = 'f3_{}[0]'
+
+    split(f.K.line1, 3)
+    split(f.K.line2)
+
+    split(f.K.line3a)
+    split(f.K.line3b)
+
+    split(f.K.line3c)
+    split(f.K.line4)
+    split(f.K.line5a)
+
+    split(f.K.line5b)
+
+    split(f.K.line6)
+    split(f.K.line7)
+    split(f.K.line8a)
+
+    split(f.K.line8b)
+    split(f.K.line8c)
+
+    split(f.K.line9)
+    pdf[31] = zstr(f.K.line10_type)
+    split(f.K.line10, 18)
+
+    split(f.K.line11)
+    split(f.K.line12a)
+    split(f.K.line12b)
+    # several fields skipped that I don't need
+
+    pdf.pattern = 'Page3[0].f3_{}[0]'
+    split(f.K.line16c, 44) # nondeductable expenses: half of meals
+
+    pdf.pattern = 'Page4[0].f4_{}[0]'
+    split(f.K.line18, 4)
+
+    # TODO: Schedule L
+    # TODO: Schedule M-1
+
+    pdf.pattern = 'f5_{:02}[0]'
+
+    pdf[19] = zstr(f.M2.line1a)
+    pdf[20] = zstr(f.M2.line1b)
+    pdf[21] = zstr(f.M2.line1c)
+
+    pdf[23] = zstr(f.M2.line2a)
+
+    pdf[27] = zstr(f.M2.line3a)
+    #pdf[121] = zstr(f.M2.line3b)
+
+    pdf[31] = zstr(f.M2.line4a)
+
+    pdf[35] = zstr(f.M2.line5a)
+    #pdf[124] = zstr(f.M2.line5b)
+
+    pdf[39] = zstr(f.M2.line6a)
+    pdf[40] = zstr(f.M2.line6b)
+    pdf[41] = zstr(f.M2.line6c)
+
+    pdf[43] = zstr(f.M2.line7a)
+    pdf[44] = zstr(f.M2.line7b)
+    pdf[45] = zstr(f.M2.line7c)
+
+    pdf[47] = zstr(f.M2.line8a)
+    pdf[48] = zstr(f.M2.line8b)
+    pdf[49] = zstr(f.M2.line8c)
+
+def fill_out_2021_2022(form, pdf):
     f = form
     pdf.load('us.f1120s--{}.pdf'.format(f.form_version))
 
