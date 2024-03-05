@@ -15,8 +15,100 @@ versions = u'2012', u'2013', u'2014'
 #
 # versions = versions + (u'2010',)
 
-
 def defaults(form):
+    if form.form_version < u'2023':
+        return defaults_pre_2023(form)
+
+    f = form
+
+    f.beginning_date = ''
+    f.ending_date = ''
+    f.ending_year = ''
+    f.ein = ''
+    f.name = ''
+    f.street = ''
+    f.city_state_zip = ''
+
+    f.lineA = f.lineB = ''
+    f.lineC = False
+    f.lineE = ''
+    f.lineF = zero
+    f.lineG = False
+    f.lineH = '12345'
+    f.lineI = 1
+
+    f.line1a = f.line1b = f.line2 = f.line4 = f.line5 = zero
+    for n in range(7, 20):
+        f['line', n] = zero
+    f.line22a = f.line22b = f.line23a = f.line23b = f.line23c = zero
+    f.line24 = zero
+    f.line27_credited = zero
+
+    f.signer_title = ''
+    f.discuss = False
+
+    f.B = Form()
+    f.B.line1 = 'a'
+    f.B.line2_activity = ''
+    f.B.line2_product_or_service = ''
+    f.B.line3 = False
+    # 4a and 4b tables go here if we ever implement them
+    f.B.line4a = []
+    f.B.line4b = []
+    f.B.line5ai = 0
+    f.B.line5aii = 0
+    f.B.line5bi = 0
+    f.B.line5bii = 0
+    f.B.line6 = False
+    f.B.line7 = False
+    f.B.line8 = zero
+    f.B.line9 = False
+    f.B.line10 = True if form.form_version < u'2018' else False
+    f.B.line11 = True
+    f.B.line12 = False
+    f.B.line13 = False
+    f.B.line14a = False
+    f.B.line14b = None
+    f.B.line15 = False
+
+    f.K = Form()
+    f.K.line2 = zero
+    f.K.line3a = f.K.line3b = zero
+    f.K.line4 = f.K.line5a = f.K.line5b = f.K.line6 = f.K.line7 = zero
+    f.K.line8a = f.K.line8b = f.K.line8c = f.K.line9 = f.K.line10 = zero
+    f.K.line10_type = ''
+    f.K.line11 = f.K.line12a = f.K.line12b = f.K.line12c = f.K.line12d = zero
+    f.K.line12c_type = ''
+    f.K.line12d_type = ''
+    f.K.line13a = f.K.line13b = f.K.line13c = f.K.line13d = zero
+    f.K.line13e = f.K.line13f = f.K.line13g = zero
+    f.K.line13d_type = ''
+    f.K.line13e_type = ''
+    f.K.line13g_type = ''
+    for i in range(ord('a'), ord('m') + 1):
+        f.K['line14', chr(i)] = zero
+    f.K.line14n_accounting = 'a'
+    for i in range(ord('a'), ord('f') + 1):
+        f.K['line15', chr(i)] = zero
+    for i in range(ord('a'), ord('e') + 1):
+        f.K['line16', chr(i)] = zero
+    f.K.line17a = f.K.line17b = f.K.line17c = zero
+
+    f.M2 = Form()
+    f.M2.line1a = zero
+    f.M2.line3a = zero
+    f.M2.line5a = zero
+    f.M2.line7a = zero
+
+    f.M2.line1b = zero
+    f.M2.line3b = zero
+    f.M2.line5b = zero
+    f.M2.line7b = zero
+
+    f.M2.line1c = zero
+    f.M2.line7c = zero
+
+def defaults_pre_2023(form):
     if form.form_version < u'2018':
         return defaults_pre_2018(form)
 
@@ -198,6 +290,9 @@ def defaults_pre_2018(form):
     f.M2.line7c = zero
 
 def compute(form):
+    if form.form_version < u'2023':
+        return compute_pre_2023(form)
+
     f = form
     validate.year(int(f.form_version))
 
@@ -242,6 +337,50 @@ def compute(form):
     f.M2.line6c = f.M2.line1c
     f.M2.line8c = f.M2.line6c - f.M2.line7c
 
+def compute_pre_2023(form):
+    f = form
+    validate.year(int(f.form_version))
+
+    f.line1c = f.line1a - f.line1b
+    f.line3 = f.line1c - f.line2
+    f.line6 = f.line3 + f.line4 + f.line5
+
+    f.line20 = sum(f['line', n] for n in range(7, 20))
+    f.line21 = f.line6 - f.line20
+
+    f.line22c = f.line22a + f.line22b
+    f.line23d = f.line23a + f.line23b + f.line23c
+    owed = f.line22c + f.line24 - f.line23d
+    if owed >= 0:
+        f.line25 = owed
+        f.line26 = zero
+        f.line27 = zero
+    else:
+        f.line25 = zero
+        f.line26 = -owed
+        f.line27 = -owed - f.line27_credited
+
+    f.K.line1 = f.line21
+    f.K.line3c = f.K.line3a - f.K.line3b
+    f.K.line18 = (
+        f.K.line1 + f.K.line2 + f.K.line3c + f.K.line4
+        + f.K.line5a + f.K.line6 + f.K.line7 + f.K.line8a
+        + f.K.line9 + f.K.line10
+        - f.K.line11 - f.K.line12a - f.K.line12b - f.K.line12c
+        - f.K.line12d - f.K.line14l
+        )
+
+    f.M2.line2a = abs(f.line21) if f.line21 > 0 else zero
+    f.M2.line4a = abs(f.line21) if f.line21 < 0 else zero
+    f.M2.line6a = (f.M2.line1a + f.M2.line2a + f.M2.line3a
+                   - f.M2.line4a - f.M2.line5a)
+    f.M2.line8a = f.M2.line6a - f.M2.line7a
+
+    f.M2.line6b = f.M2.line1b + f.M2.line3b - f.M2.line5b
+    f.M2.line8b = f.M2.line6b - f.M2.line7b
+
+    f.M2.line6c = f.M2.line1c
+    f.M2.line8c = f.M2.line6c - f.M2.line7c
 
 def fill_out(form, pdf):
     if form.form_version == u'2018':
