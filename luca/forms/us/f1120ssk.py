@@ -68,7 +68,6 @@ def fill_out(form, pdf):
 
     n = 6
     for letter in 'ABCDEFG':
-        print(letter, n)
         pdf[n] = f[letter]
         n += 1
         if letter == 'D':
