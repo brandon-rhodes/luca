@@ -176,7 +176,7 @@ def download_pdf(pdfpath):
         response = requests.get(url)
         if not response.ok:
             print 'Error: could not download form from', url
-            return
+            exit(1)
         data = requests.get(url).content
         with open(fullpath, 'w') as f:
             f.write(data)

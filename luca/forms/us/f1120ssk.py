@@ -1,13 +1,11 @@
 from luca.forms.formlib import Form
 from luca.kit import zero, zstr
 
-
 title = ("Form 1120S Schedule K-1: Shareholder's Share of Income, Deductions,"
          " Credits, etc.")
 
 versions = u'2010', u'2012', u'2013', u'2014'
 first_nine_lines = '1 2 3 4 5a 5b 6 7 8a 8b 9'.split()
-
 
 def defaults(form):
     f = form
@@ -16,11 +14,21 @@ def defaults(form):
     f.beginning_date = ''
     f.ending_date = ''
     f.ending_year = ''
+
+    # Pre-2024.
     f.A = f.B = f.C = f.D = f.E = ''
     f.F = 100
 
+    # Post-2024.  Should really be a way to choose this stanza or the
+    # one above, based on year.
+    f.A = f.B = f.C = f.D_beginning = f.D_end = ''
+    f.E = f.F1 = f.F2_TIN = f.F2_Name = f.F3 = f.G = ''
+    f.H_beginning = f.H_end = f.I_beginning = f.I_end = ''
+
     for number in first_nine_lines:
         f['line', number] = zero
+
+    f['line8c'] = zero  # 2024
 
     def empty_line():
         e = Form()
@@ -39,6 +47,10 @@ def compute(form):
 
 def fill_out(form, pdf):
     f = form
+    if f.form_version in (u'2024'):
+        return fill_out_2024(form, pdf)
+    if f.form_version in (u'2021', u'2022', u'2023'):
+        return fill_out_2021(form, pdf)
     if f.form_version in (u'2020'):
         return fill_out_2020(form, pdf)
     if f.form_version in (u'2018', u'2019'):
@@ -48,6 +60,61 @@ def fill_out(form, pdf):
     if f.form_version < u'2017':
         return old_fill_out(form, pdf)
 
+def fill_out_2024(form, pdf):
+    f = form
+    pdf.load('us.f1120ssk--{}.pdf'.format(f.form_version))
+    pdf.pages = 1,
+
+    # TODO: these two codes might no longer be correct
+
+    pdf['c1_01_0_[0]'] = 'Yes' if f.final else 'Off'
+    pdf['c1_02_0_[0]'] = 'Yes' if f.amended else 'Off'
+
+    # TODO: specific dates instead of calendar year
+
+    # pdf.pattern = 'p1-t{}[0]'
+
+    # pdf[1] = f.beginning_date
+    # pdf[2] = f.ending_date
+    # pdf[3] = f.ending_year
+
+    pdf.pattern = 'f1_{:02d}[0]'
+
+    n = 6
+    for letter in ('A', 'B', 'C', 'D_beginning', 'D_end',
+                   'E', 'F1', 'F2_TIN', 'F2_Name', 'F3', 'G',
+                   'H_beginning', 'H_end', 'I_beginning', 'I_end'):
+        pdf[n] = f[letter]
+        n += 1
+
+    first_lines = '1 2 3 4 5a 5b 6 7 8a 8b 8c 9'.split()
+
+    for number in first_lines:
+        pdf[n] = zstr(f['line', number])
+        n += 1
+
+    def write_lines(line_number, line_count):
+        ni = n
+        lines = f['line', line_number]
+        for line in lines:
+            pdf[ni] = line.code
+            ni += 1
+            pdf[ni] = zstr(line.amount)
+            ni += 1
+        return n + 2 * line_count
+
+    n = write_lines(10, 5)
+    pdf[n] = zstr(f['line11'])
+    n += 1
+    n = write_lines(12, 8)
+    n = write_lines(13, 5)
+    #n = write_lines(14, 1) # TODO: special checkbox
+    n = write_lines(15, 5)
+    n = write_lines(16, 5)
+    n = write_lines(17, 10)
+
+def fill_out_2021(form, pdf):
+    f = form
     pdf.load('us.f1120ssk--{}.pdf'.format(f.form_version))
     pdf.pages = 1,
 
