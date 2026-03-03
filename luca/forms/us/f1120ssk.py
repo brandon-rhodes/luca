@@ -47,7 +47,7 @@ def compute(form):
 
 def fill_out(form, pdf):
     f = form
-    if f.form_version in (u'2024'):
+    if f.form_version in (u'2024', u'2025'):
         return fill_out_2024(form, pdf)
     if f.form_version in (u'2021', u'2022', u'2023'):
         return fill_out_2021(form, pdf)
