@@ -1,5 +1,4 @@
 ansi2html
 pytest
 sphinx
-tox
 -e .
